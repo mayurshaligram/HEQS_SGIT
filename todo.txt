@@ -3,3 +3,25 @@
 3. pay to default Vendor
 2. Item link
     run action code unit something 
+
+      trigger OnClosePage();
+    var
+        IVrec: Record "Sales Header";
+        ICrec: Record "Sales Header";
+        temptext: Text[20];
+    begin
+        Message(rec.CurrentCompany);
+        if (rec.CurrentCompany = 'Priceworth Pty Ltd') then begin
+            IVrec.ChangeCompany('Test Company');
+            temptext := rec."No.";
+            IVrec.SetCurrentKey("External Document No."); 
+            IVrec.SetRange("External Document No.", tempText);
+            if (IVRec.findset) then
+                    repeat
+                        ICRec.get(IVrec."Document type", IVrec."No.");
+                        ICRec.Status := rec.Status;
+                        ICRec."Retail Sales Pending" := (rec.Status = rec.Status::Open);
+                        ICREC.Modify();
+                    until (IVrec.next() = 0)
+        end;
+    end;
