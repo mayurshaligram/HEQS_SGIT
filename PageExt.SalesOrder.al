@@ -48,6 +48,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 ICRec: Record "Sales Header";
                 SLrec: Record "Sales Line";
                 ISLrec: Record "Sales Line";
+                ISOsrec: Record "Sales Header";
             begin
                 // Send PO
                 if rec.CurrentCompany <> 'Test Company' then begin
@@ -66,6 +67,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     if not (SORecord.findset) then
                         if ApprovalsMgmt.PrePostApprovalCheckPurch(processRec) then
                             ICInOutboxMgt.SendPurchDoc(processRec, false);
+                    SORecord.ChangeCompany('Test Company');
+                    SORecord.SetCurrentKey("External Document No.");
+                    SORecord.SetRange("External Document No.", tempText);
                     if (SORecord.findset) then
                         repeat
                             ICrec.ChangeCompany('Test Company');
@@ -82,31 +86,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                             ICREC.Modify();
                         until (SORecord.next() = 0);
                     // ISL updata
-
-                    SLrec.SetCurrentKey("Document No.");
-                    SLrec.SetRange("Document No.", rec."No.");
-                    ISLrec.ChangeCompany('Test Company');
-                    if (SLrec.findset) then
-                        repeat
-                            if SLrec.Type = SLrec.Type::Item then begin
-                                ISLrec.init();
-                                // ######################################
-                                // BUG
-                                // #####################################
-                                ISLrec."Document No." := SLrec."No.";
-                                ISLrec.Type := SLrec.Type::Item;
-                                ISLrec."Line No." := SLrec."Line No.";
-                                ISLrec."No." := SLrec."No.";
-                                ISLrec."Description" := SLrec."Description";
-                                ISLrec.Quantity := SLrec.Quantity;
-                                ISLrec."Location Code" := SLrec."Location Code";
-                                ISLrec."Unit of Measure" := SLrec."Unit of Measure";
-                                ISLrec."Bin Code" := SLrec."Bin Code";
-                                ISLrec."Unit of Measure Code" := 'PCS';
-                                Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
-                                ISLrec.Insert();
-                            end;
-                        until (SLrec.Next() = 0);
                 end;
             end;
         }
@@ -148,6 +127,103 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         //     //     rec.Modify();
         //     // end;
         // end;
+    end;
+
+    trigger OnClosePage();
+    var
+        tempText: Text[20];
+        hasPO: Boolean;
+        POrecord: Record "Purchase Header";
+        SORecord: Record "Sales Header";
+        icrec: Record "sales Header";
+        ISLrec: Record "Sales Line";
+        SLrec: Record "Sales Line";
+    begin
+        if rec.CurrentCompany <> 'Test Company' then begin
+            tempText := rec."No.";
+            tempText[2] := 'P';
+            // Action 1 PO Update
+            if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
+                POupdate(POrecord);
+                Message('Your PO has been update.');
+            end
+            else begin
+                POrecord.Init();
+                POrecord."Document Type" := rec."Document Type";
+                POrecord."No." := tempText;
+                POrecord.Insert();
+                rec.POupdate(POrecord);
+            end;
+
+            // Action 2 SO
+            SORecord.ChangeCompany('Test Company');
+            SORecord.SetCurrentKey("External Document No.");
+            SORecord.SetRange("External Document No.", tempText);
+            if (SORecord.findset) then
+                repeat
+                    ICrec.ChangeCompany('Test Company');
+                    ICRec.get(SORecord."Document type", SORecord."No.");
+                    ICrec.Status := rec.status;
+                    ICrec."Ship-to Name" := rec."Ship-to Name";
+                    ICrec."Ship-to Address" := rec."Ship-to Address";
+                    ICrec.Ship := rec.ship;
+                    ICrec."Work Description" := rec."Work Description";
+                    rec.CALCFIELDS("Work Description");
+                    ICrec."Work Description" := rec."Work Description";
+                    ICrec."Retail Sales Pending" := rec."Retail Sales Pending";
+                    // Message('ICREC %1', icrec."No.");
+                    // Message('%1, %2', rec.Status, ICRec.Status);
+                    ICRec.Status := rec.Status;
+                    // Message('%1,assign %2 ', rec.Status, ICRec.Status);
+                    ICREC.Modify();
+                    // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
+                    tempText := rec."No.";
+                    tempText[2] := 'P';
+                    SLrec.SetCurrentKey("Document No.");
+                    SLrec.SetRange("Document No.", rec."No.");
+                    ISLrec.ChangeCompany('Test Company');
+                    if (SLrec.findset) then
+                        repeat
+                            if SLrec.Type = SLrec.Type::Item then begin
+                                if ISLrec.Get(SLrec."Document Type", ICREC."No.", SLrec."Line No.") then begin
+                                    // UPdata
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Document Type" := SLrec."Document Type";
+                                    ISLrec."Document No." := ICREC."No.";
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."Line No." := SLrec."Line No.";
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Description" := SLrec."Description";
+                                    ISLrec.Quantity := SLrec.Quantity;
+                                    ISLrec."Location Code" := SLrec."Location Code";
+                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                    ISLrec."Bin Code" := SLrec."Bin Code";
+                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.Modify()
+                                end
+                                else begin
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Document Type" := SLrec."Document Type";
+                                    ISLrec."Document No." := ICREC."No.";
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."Line No." := SLrec."Line No.";
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Description" := SLrec."Description";
+                                    ISLrec.Quantity := SLrec.Quantity;
+                                    ISLrec."Location Code" := SLrec."Location Code";
+                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                    ISLrec."Bin Code" := SLrec."Bin Code";
+                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.Insert();
+                                end;
+                            end;
+                        until (SLrec.Next() = 0);
+                until (SORecord.next() = 0);
+        end;
     end;
 
     local procedure updataISOFromRSO();

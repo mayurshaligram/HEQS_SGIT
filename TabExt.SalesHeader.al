@@ -8,7 +8,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Editable = false;
         }
     }
-
     trigger OnInsert();
     var
         POrecord: Record "Purchase Header";
@@ -37,6 +36,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         POrecord: Record "Purchase Header";
         SORecord: Record "Sales Header";
         icrec: Record "sales Header";
+        ISLrec: Record "Sales Line";
+        SLrec: Record "Sales Line";
     begin
         if rec.CurrentCompany <> 'Test Company' then begin
             tempText := rec."No.";
@@ -75,7 +76,52 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     ICRec.Status := rec.Status;
                     // Message('%1,assign %2 ', rec.Status, ICRec.Status);
                     ICREC.Modify();
-                // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
+                    // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
+                    tempText := rec."No.";
+                    tempText[2] := 'P';
+                    SLrec.SetCurrentKey("Document No.");
+                    SLrec.SetRange("Document No.", rec."No.");
+                    ISLrec.ChangeCompany('Test Company');
+                    if (SLrec.findset) then
+                        repeat
+                            if SLrec.Type = SLrec.Type::Item then begin
+                                if ISLrec.Get(SLrec."Document Type", ICREC."No.", SLrec."Line No.") then begin
+                                    // UPdata
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Document Type" := SLrec."Document Type";
+                                    ISLrec."Document No." := ICREC."No.";
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."Line No." := SLrec."Line No.";
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Description" := SLrec."Description";
+                                    ISLrec.Quantity := SLrec.Quantity;
+                                    ISLrec."Location Code" := SLrec."Location Code";
+                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                    ISLrec."Bin Code" := SLrec."Bin Code";
+                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.Modify()
+                                end
+                                else begin
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Document Type" := SLrec."Document Type";
+                                    ISLrec."Document No." := ICREC."No.";
+                                    ISLrec.Type := SLrec.Type::Item;
+                                    ISLrec."Line No." := SLrec."Line No.";
+                                    ISLrec."No." := SLrec."No.";
+                                    ISLrec."Description" := SLrec."Description";
+                                    ISLrec.Quantity := SLrec.Quantity;
+                                    ISLrec."Location Code" := SLrec."Location Code";
+                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                    ISLrec."Bin Code" := SLrec."Bin Code";
+                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.Insert();
+                                end;
+                            end;
+                        until (SLrec.Next() = 0);
                 until (SORecord.next() = 0);
         end;
     end;
