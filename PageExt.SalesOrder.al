@@ -65,8 +65,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", tempText);
                     if not (SORecord.findset) then
-                        if ApprovalsMgmt.PrePostApprovalCheckPurch(processRec) then
-                            ICInOutboxMgt.SendPurchDoc(processRec, false);
+                        message('should create the SO in the inventory.');
+                    if ApprovalsMgmt.PrePostApprovalCheckPurch(processRec) then
+                        ICInOutboxMgt.SendPurchDoc(processRec, false);
                     SORecord.ChangeCompany('Test Company');
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", tempText);
@@ -139,12 +140,12 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         ISLrec: Record "Sales Line";
         SLrec: Record "Sales Line";
     begin
-        if rec.CurrentCompany <> 'Test Company' then begin
+        if (rec.CurrentCompany <> 'Test Company') and (rec."No." <> '') then begin
             tempText := rec."No.";
             tempText[2] := 'P';
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
-                POupdate(POrecord);
+                rec.POupdate(POrecord);
                 Message('Your PO has been update.');
             end
             else begin
