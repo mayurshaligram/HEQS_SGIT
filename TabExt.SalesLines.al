@@ -40,9 +40,97 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         PLrec: Record "Purchase Line";
         ISLrec: Record "Sales Line";
         ISOrec: Record "Sales Header";
+        ToSalesLine: Record "Sales Line";
         temp: text[20];
+        // BOM related var
+        FromBOMComp: Record "BOM Component";
     begin
         if (rec.CurrentCompany <> 'Test Company') and (rec.Type = rec.Type::Item) then begin
+            // need to check the associated line
+
+            FromBOMComp.Reset();
+            FromBOMComp.SetRange("Parent Item No.", "No.");
+            FromBOMComp.FindSet;
+            // iterate the set
+            repeat
+                // find the associated salesline
+                ToSalesLine.Reset();
+                ToSalesLine.SetRange("Document Type", rec."Document Type");
+                ToSalesLine.SetRange("Document No.", rec."Document No.");
+                ToSalesLine.SetRange("No.", FromBOMComp."No.");
+                Message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
+                ToSalesLine.FindSet;
+                repeat
+                    // updata the associated salesline value
+                    ToSalesLine."Document Type" := rec."Document Type";
+                    ToSalesLine."Document No." := rec."Document No.";
+                    ToSalesLine."Location Code" := "Location Code";
+                    ToSalesLine.Quantity := Quantity;
+                    ToSalesLine.Modify();
+                    Message('%1, %2, %3', ToSalesLine."Document Type", ToSalesLine."Document No.", ToSalesLine.Description);
+                    //////// PO update
+                    temp := tosalesline."Document No.";
+                    temp[2] := 'P';
+                    if PLrec.Get(tosalesline."Document Type", temp, tosalesline."Line No.") then begin
+                        Message('Get the Plec!%1, %2, %3', PLrec."Document Type", PLrec."Document No.", PLrec."Line No.");
+                        PLrec."Document Type" := ToSalesLine."Document type";
+                        Plrec."Document No." := temp;
+                        PLrec."Line No." := ToSalesLine."Line No.";
+                        Plrec."Location Code" := ToSalesLine."Location Code";
+                        PLrec.Quantity := ToSalesLine.Quantity;
+                        PLrec."No." := Tosalesline."No.";
+                        Plrec.Description := Tosalesline.Description;
+                        PLrec.Type := Plrec.Type::Item;
+                        PLrec.Modify();
+                    end else begin
+                        PLrec.init();
+                        PLrec."Document Type" := ToSalesLine."Document type";
+                        Plrec."Document No." := temp;
+                        PLrec."Line No." := ToSalesLine."Line No.";
+                        Plrec."Location Code" := ToSalesLine."Location Code";
+                        PLrec.Quantity := ToSalesLine.Quantity;
+                        PLrec."No." := Tosalesline."No.";
+                        Plrec.Description := Tosalesline.Description;
+                        PLrec.type := Plrec.type::Item;
+                        PLrec.Insert();
+                    end;
+
+                    // ISO line
+                    ISLrec.ChangeCompany('Test Company');
+                    ISOrec.ChangeCompany('Test Company');
+                    ISLrec."Document Type" := tosalesline."Document Type";
+                    ISLrec."Line No." := tosalesline."Line No.";
+                    ISOrec.SetCurrentKey("External Document No.");
+                    ISORec.SetRange("External Document No.", temp);
+                    if (ISORec.findset) then
+                        repeat
+                            if ISLrec.get(ToSalesLine."Document Type", ISOrec."No.", ToSalesLine."Line No.") then begin
+                                ISLrec."Document No." := ISOrec."No.";
+                                ISLrec."No." := tosalesline."No.";
+                                ISLrec.Type := tosalesline.Type::Item;
+                                ISLrec."Description" := tosalesline."Description";
+                                ISLrec.Quantity := tosalesline.Quantity;
+                                ISLrec."Location Code" := tosalesline."Location Code";
+                                ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
+                                ISLrec."Bin Code" := tosalesline."Bin Code";
+                                ISLrec."Unit of Measure Code" := 'PCS';
+                                ISLrec.Modify();
+                            end else begin
+                                ISLrec."Document No." := ISOrec."No.";
+                                ISLrec."No." := tosalesline."No.";
+                                ISLrec.Type := tosalesline.Type::Item;
+                                ISLrec."Description" := tosalesline."Description";
+                                ISLrec.Quantity := tosalesline.Quantity;
+                                ISLrec."Location Code" := tosalesline."Location Code";
+                                ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
+                                ISLrec."Bin Code" := tosalesline."Bin Code";
+                                ISLrec."Unit of Measure Code" := 'PCS';
+                                ISLrec.Insert();
+                            end;
+                        until (ISORec.next() = 0);
+                // sync vertical data
+                until ToSalesLine.Next = 0;
+            until FromBOMComp.Next = 0;
             temp := rec."Document No.";
             temp[2] := 'P';
             PLrec.Get(rec."Document Type", temp, rec."Line No.");
@@ -106,9 +194,6 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         end;
     end;
 
-    var
-        DocumentTotals: Codeunit "Document Totals";
-
     procedure ExplodeBOM()
     var
         HideDialog: Boolean;
@@ -149,6 +234,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         ToSalesLine := SalesLine;
         NextLineNo := "Line No.";
         InsertLinesBetween := false;
+        Message('Message from ExplodeBOMComplines.');
         if ToSalesLine.Find('>') then
             if ToSalesLine."Attached to Line No." = "Line No." then begin
                 ToSalesLine.SetRange("Attached to Line No.", "Line No.");
@@ -251,6 +337,5 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         if TransferExtendedText.SalesCheckIfAnyExtText(ToSalesLine, false) then
             TransferExtendedText.InsertSalesExtText(ToSalesLine);
     end;
-
 }
 
