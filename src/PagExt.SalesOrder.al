@@ -106,28 +106,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         }
     }
 
-    trigger OnOpenPage();
-    var
-        Rrec: Record "Sales Header";
-        temptext: Text[20];
-    begin
-        // if rec.CurrentCompany = 'Test Company' then begin
-        //     // if rec."External Document No." <> '' then begin
-        //     //     temptext := rec."External Document No.";
-        //     //     temptext[2] := 'S';
-        //     //     Rrec.ChangeCompany('Priceworth Pty Ltd');
-        //     //     Rrec.get(rec."Document Type", temptext);
-        //     //     rec.Status := Rrec.status;
-        //     //     rec."Ship-to Name" := rrec."Ship-to Name";
-        //     //     rec."Ship-to Address" := rrec."Ship-to Address";
-        //     //     rec.Ship := rrec.ship;
-        //     //     rrec.CalcFields("Work Description");
-        //     //     rec."Work Description" := rrec."Work Description";
-        //     //     rec.Modify();
-        //     // end;
-        // end;
-    end;
-
     trigger OnClosePage();
     var
         tempText: Text[20];
@@ -199,6 +177,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
                                     Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec."BOM Item" := SLrec."BOM Item";
                                     ISLrec.Modify()
                                 end
                                 else begin
@@ -216,6 +195,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
                                     Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec."BOM Item" := Slrec."BOM Item";
                                     ISLrec.Insert();
                                 end;
                             end;

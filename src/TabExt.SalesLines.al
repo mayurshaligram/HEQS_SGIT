@@ -14,8 +14,9 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         ISLrec: Record "Sales Line";
         ISOrec: Record "Sales Header";
         BOMSL: Record "Sales Line";
-        temp: text[20];
         PLprice: Record "Purchase Price";
+        SO: Record "Sales Header";
+        temp: text[20];
     begin
         if (rec.CurrentCompany = 'Test Company') then
             ExplodeBOM();
@@ -29,11 +30,15 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             PLrec."Document No." := temp;
             PLrec."Line No." := rec."Line No.";
             PLrec.Type := PLrec.Type::Item;
-            PLprice."Item No." := "No.";
-            if PLprice.Find() then begin
-                Message('%1 item No', "No.");
-                PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
-            end;
+            PLprice.Reset();
+            PLprice.SetRange("Item No.", "No.");
+            if PLprice.FindSet then
+                repeat
+                    Message('%1 Plprice item No', PLprice."Item No.");
+                    PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
+                until plprice.Next() = 0;
+            Message('%1', PLrec."Direct Unit Cost");
+            PLrec."BOM Item" := "BOM Item";
             PLrec.Insert();
             // ISO line
             ISLrec.ChangeCompany('Test Company');
@@ -46,6 +51,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                 repeat
                     ISLrec."Document No." := ISOrec."No.";
                     ISLrec.Type := ISLrec.Type::Item;
+                    ISLrec."BOM Item" := "BOM Item";
                     //message('%1 %2', ISLrec."Document Type", ISLrec.Type);
                     ISLrec.Insert();
                 until (ISORec.next() = 0);
@@ -61,6 +67,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         temp: text[20];
         // BOM related var
         FromBOMComp: Record "BOM Component";
+        Plprice: Record "Purchase price";
     begin
         if (rec.CurrentCompany = 'Test Company') and (rec.Type = rec.Type::Item) then begin
             // need to check the associated line
@@ -118,20 +125,12 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                             ToSalesLine."Document Type" := rec."Document Type";
                             ToSalesLine."Document No." := rec."Document No.";
                             ToSalesLine."Location Code" := "Location Code";
-                            // ToSalesLine.Validate(Quantity,
-                            //       Round(
-                            //         "Quantity (Base)" * FromBOMComp."Quantity per" *
-                            //         UOMMgt.GetResQtyPerUnitOfMeasure(
-                            //           Resource, ToSalesLine."Unit of Measure Code") / ToSalesLine."Qty. per Unit of Measure",
-                            //         UOMMgt.QtyRndPrecision));
                             ToSalesLine.Quantity := Quantity * FromBOMComp."Quantity per";
                             ToSalesLine.Modify();
-                            //message('%1, %2, %3', ToSalesLine."Document Type", ToSalesLine."Document No.", ToSalesLine.Description);
                             //////// PO update
                             temp := tosalesline."Document No.";
                             temp[2] := 'P';
                             if PLrec.Get(tosalesline."Document Type", temp, tosalesline."Line No.") then begin
-                                //message('Get the Plec!%1, %2, %3', PLrec."Document Type", PLrec."Document No.", PLrec."Line No.");
                                 PLrec."Document Type" := ToSalesLine."Document type";
                                 Plrec."Document No." := temp;
                                 PLrec."Line No." := ToSalesLine."Line No.";
@@ -140,6 +139,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                 PLrec."No." := Tosalesline."No.";
                                 Plrec.Description := Tosalesline.Description;
                                 PLrec.Type := Plrec.Type::Item;
+                                Plrec."BOM Item" := true;
                                 PLrec.Modify();
                             end else begin
                                 PLrec.init();
@@ -151,6 +151,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                 PLrec."No." := Tosalesline."No.";
                                 Plrec.Description := Tosalesline.Description;
                                 PLrec.type := Plrec.type::Item;
+                                Plrec."BOM Item" := true;
                                 PLrec.Insert();
                             end;
 
@@ -173,6 +174,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                         ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
                                         ISLrec."Bin Code" := tosalesline."Bin Code";
                                         ISLrec."Unit of Measure Code" := 'PCS';
+                                        ISLrec."BOM Item" := true;
                                         ISLrec.Modify();
                                     end else begin
                                         ISLrec."Document No." := ISOrec."No.";
@@ -184,6 +186,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                         ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
                                         ISLrec."Bin Code" := tosalesline."Bin Code";
                                         ISLrec."Unit of Measure Code" := 'PCS';
+                                        ISLrec."BOM Item" := true;
                                         ISLrec.Insert();
                                     end;
                                 until (ISORec.next() = 0);
@@ -203,6 +206,17 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             PLrec."Unit Price (LCY)" := rec."Unit Price";
             PLrec."Buy-from Vendor No." := 'V00040';
             PLrec."Unit of Measure Code" := 'PCS';
+            PLrec."BOM Item" := "BOM Item";
+            PLprice.Reset();
+            PLprice.SetRange("Item No.", "No.");
+            if PLrec."BOM Item" = false then begin
+                if PLprice.FindSet then
+                    repeat
+                        Message('%1 Plprice item No', PLprice."Item No.");
+                        PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
+                    until plprice.Next() = 0;
+                PLrec.UpdateAmounts();
+            end;
             PLrec.Modify();
             // ISO line
             ISLrec.ChangeCompany('Test Company');
@@ -222,6 +236,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     ISLrec."Unit of Measure" := rec."Unit of Measure";
                     ISLrec."Bin Code" := rec."Bin Code";
                     ISLrec."Unit of Measure Code" := 'PCS';
+                    ISLrec."BOM Item" := "BOM Item";
                     ISLrec.Modify();
                 until (ISORec.next() = 0);
 
@@ -253,19 +268,6 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         end;
     end;
 
-    procedure ExplodeBOM()
-    var
-        HideDialog: Boolean;
-        IsHandled: Boolean;
-    begin
-        //message('ExplodeBOM!');
-        // CODEUNIT.Run(CODEUNIT::"Sales-Explode BOM", Rec);
-        ExplodeBOMCompLines(rec);
-        // DocumentTotals.SalesDocTotalsNotUpToDate();
-    end;
-
-
-
     var
         Text003: Label 'There is not enough space to explode the BOM.';
         ToSalesLine: Record "Sales Line";
@@ -281,6 +283,17 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         NextLineNo: Integer;
         NoOfBOMComp: Integer;
         Selection: Integer;
+
+    procedure ExplodeBOM()
+    var
+        HideDialog: Boolean;
+        IsHandled: Boolean;
+    begin
+        //message('ExplodeBOM!');
+        // CODEUNIT.Run(CODEUNIT::"Sales-Explode BOM", Rec);
+        ExplodeBOMCompLines(rec);
+        // DocumentTotals.SalesDocTotalsNotUpToDate();
+    end;
 
     local procedure ExplodeBOMCompLines(SalesLine: Record "Sales Line")
     var
