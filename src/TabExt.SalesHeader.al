@@ -1,24 +1,12 @@
 tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
     trigger OnInsert();
-    var
-        POrecord: Record "Purchase Header";
-        tempText: Text[20];
     begin
-        rec."No." := insstr(rec."No.", '0S', 1);
-        tempText := rec."No.";
-        tempText[2] := 'P';
-        if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
-            POupdate(POrecord);
-            Message('Your PO has been update.');
-        end
-        else begin
-            POrecord.Init();
-            POrecord."Document Type" := rec."Document Type";
-            POrecord."No." := tempText;
-            POrecord.Insert();
-            rec.POupdate(POrecord);
-        end;
+        // Change SO.NO based on Company
+        Rec."No." := InsStr(Rec."No.", '0S', 1);
+        // Auto Create PO for Retail
+        if Rec.CurrentCompany <> 'Test Company' then
+            CreatePO();
     end;
 
     trigger OnAfterModify();
@@ -31,20 +19,23 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         ISLrec: Record "Sales Line";
         SLrec: Record "Sales Line";
     begin
+        Message('Modified');
         if rec.CurrentCompany <> 'Test Company' then begin
             tempText := rec."No.";
             tempText[2] := 'P';
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
-                POupdate(POrecord);
+                UpdatePO(POrecord);
                 Message('Your PO has been update.');
             end
             else begin
                 POrecord.Init();
                 POrecord."Document Type" := rec."Document Type";
                 POrecord."No." := tempText;
+                Rec.CALCFIELDS("Work Description");
+                PORecord."Work Description" := Rec."Work Description";
                 POrecord.Insert();
-                rec.POupdate(POrecord);
+                rec.UpdatePO(POrecord);
             end;
 
             // Action 2 SO
@@ -195,66 +186,44 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         Exit(mytext);
     end;
 
-    procedure POupdate(POrecord: Record "Purchase Header");
-    begin
-        POrecord."Document Type" := POrecord."Document Type"::Order;
-        POrecord."Buy-from Vendor No." := 'V00040';
-        POrecord."Buy-from Vendor Name" := 'HEQSINTERNATIONAL';
-        POrecord."Sell-to Customer No." := 'C00040';
-        Porecord."Document Date" := 20180612D;
-        POrecord."Location Code" := rec."Location Code";
-        porecord.Amount := rec.Amount;
-        Porecord."Status" := rec."Status";
-        porecord."WorkDescription" := returnBeautifulText();
-        POrecord."Ship-to Address" := rec."Ship-to Address";
-        POrecord."Ship-to Contact" := rec."Ship-to Contact";
-        porecord."Currency Code" := rec."Currency Code";
-        porecord."Ship-to Name" := rec."Ship-to Name";
-        POrecord."Ship-to Address" := rec."Ship-to Address";
-        porecord."Send IC Document" := true;
-        POrecord."Posting Date" := rec."Posting Date";
-        POrecord."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
-        POrecord.Modify();
-    end;
-
-    procedure POinsert();
+    local procedure CreatePO();
     var
-        POrecord: Record "Purchase Header";
+        ToPORecord: Record "Purchase Header";
+        TempText: Text[20];
     begin
-        Porecord.Init;
-        POrecord."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
-        POrecord."Vendor Invoice No." := 'VA0000013';
-        POrecord."Document Type" := POrecord."Document Type"::Order;
-        POrecord."No." := rec."No.";
-        POrecord."No."[2] := 'P';
-        POrecord."Buy-from Vendor No." := 'V00040';
-        POrecord."Buy-from Vendor Name" := 'HEQSINTERNATIONAL';
-        POrecord."Send IC Document" := true;
-        Porecord."Document Date" := 20180612D;
-        POrecord."Location Code" := rec."Location Code";
-        porecord.Amount := rec.Amount;
-        Porecord."Status" := POrecord."Status"::Released;
-        porecord."Sell-to Customer No." := rec."Sell-to Customer No.";
-        porecord."WorkDescription" := returnBeautifulText();
-        POrecord.Insert;
+        TempText := Rec."No.";
+        TempText[2] := 'P';
+        if ToPORecord.Get(ToPORecord."Document Type"::Order, TempText) then begin
+            Error('The PO %1 Already Exist.', ToPORecord."No.");
+        end
+        else begin
+            ToPORecord.Init();
+            ToPORecord."Document Type" := Rec."Document Type";
+            ToPORecord."No." := TempText;
+            ToPORecord.Insert();
+            Rec.UpdatePO(ToPORecord);
+        end;
     end;
 
-    procedure SOupdate(SOrecord: Record "Sales Header");
+    procedure UpdatePO(ToPORecord: Record "Purchase Header");
     begin
-        SOrecord."Document Type" := sorecord."Document Type"::Order;
-        sorecord."Sell-to Customer No." := 'C00040';
-        sorecord."Document Date" := 20180612D;
-        sorecord."Location Code" := rec."Location Code";
-        sorecord.Amount := rec.Amount;
-        sorecord."Status" := rec."Status";
-        sorecord."Work Description" := rec."Work Description";
-        sorecord."Ship-to Address" := rec."Ship-to Address";
-        sorecord."Ship-to Contact" := rec."Ship-to Contact";
-        sorecord."Currency Code" := rec."Currency Code";
-        sorecord."Ship-to Name" := rec."Ship-to Name";
-        sorecord."Ship-to Address" := rec."Ship-to Address";
-        sorecord."Send IC Document" := true;
-        sorecord."Posting Date" := rec."Posting Date";
-        sorecord.Modify();
+        // Fix Setting
+        ToPORecord."Buy-from Vendor No." := 'V00040';
+        ToPORecord."Buy-from Vendor Name" := 'HEQSINTERNATIONAL';
+        // Update Based on SO
+        ToPORecord."Location Code" := Rec."Location Code";
+        ToPORecord.Amount := Rec.Amount;
+        ToPORecord."Status" := Rec."Status";
+        Rec.CALCFIELDS("Work Description");
+        ToPORecord."Work Description" := Rec."Work Description";
+        ToPORecord."Ship-to Address" := Rec."Ship-to Address";
+        ToPORecord."Ship-to Contact" := Rec."Ship-to Contact";
+        ToPORecord."Currency Code" := Rec."Currency Code";
+        ToPORecord."Ship-to Name" := Rec."Ship-to Name";
+        ToPORecord."Ship-to Address" := Rec."Ship-to Address";
+        ToPORecord."Send IC Document" := true;
+        ToPORecord."Posting Date" := Rec."Posting Date";
+        ToPORecord."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
+        ToPORecord.Modify();
     end;
 }

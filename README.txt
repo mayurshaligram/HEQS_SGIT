@@ -1,6 +1,6 @@
 Flow:
 
-      Page              Action                 Table                     Extension
+      Page              Action                 Table                              Extension
 
 Open Sales Order 
         |

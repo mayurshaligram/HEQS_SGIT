@@ -29,7 +29,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                         POrec."Document Type" := rec."Document Type";
                         POrec."No." := tempText;
                         POrec.Insert();
-                        rec.POupdate(POrec);
+                        rec.UpdatePO(POrec);
                     end;
                 end;
                 // Ac
@@ -121,7 +121,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             tempText[2] := 'P';
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
-                rec.POupdate(POrecord);
+                rec.UpdatePO(POrecord);
                 Message('Your PO has been update.');
             end
             else begin
@@ -129,7 +129,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 POrecord."Document Type" := rec."Document Type";
                 POrecord."No." := tempText;
                 POrecord.Insert();
-                rec.POupdate(POrecord);
+                rec.UpdatePO(POrecord);
             end;
 
             // Action 2 SO
@@ -208,4 +208,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
     begin
         Message('updataISOFromRSO');
     end;
+
+    trigger OnOpenPage();
+    begin
+        if (Rec.CurrentCompany = 'Test Company') and (Rec."External Document No." <> '') then
+            CurrPage.Editable(false);
+    end;
+
 }

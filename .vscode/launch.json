@@ -13,7 +13,7 @@
 			"launchBrowser": true,
 			"enableLongRunningSqlStatements": true,
 			"enableSqlInformationDebugger": true,
-			// "schemaUpdateMode": "Recreate"
+			"schemaUpdateMode": "Recreate"
 		}
 	]
 }
