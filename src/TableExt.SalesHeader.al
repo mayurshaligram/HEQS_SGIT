@@ -11,27 +11,28 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
     trigger OnAfterModify();
     var
-        tempText: Text[20];
+        TempText: Text[20];
         hasPO: Boolean;
         POrecord: Record "Purchase Header";
         SORecord: Record "Sales Header";
         icrec: Record "sales Header";
         ISLrec: Record "Sales Line";
         SLrec: Record "Sales Line";
+        Whship: Record "Warehouse Request";
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
     begin
-        Message('Modified');
         if rec.CurrentCompany <> 'Test Company' then begin
-            tempText := rec."No.";
-            tempText[2] := 'P';
+            TempText := rec."No.";
+            TempText[2] := 'P';
             // Action 1 PO Update
-            if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
+            if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
                 UpdatePO(POrecord);
                 Message('Your PO has been update.');
             end
             else begin
                 POrecord.Init();
                 POrecord."Document Type" := rec."Document Type";
-                POrecord."No." := tempText;
+                POrecord."No." := TempText;
                 Rec.CALCFIELDS("Work Description");
                 PORecord."Work Description" := Rec."Work Description";
                 POrecord.Insert();
@@ -41,26 +42,43 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             // Action 2 SO
             SORecord.ChangeCompany('Test Company');
             SORecord.SetCurrentKey("External Document No.");
-            SORecord.SetRange("External Document No.", tempText);
+            SORecord.SetRange("External Document No.", TempText);
             if (SORecord.findset) then
                 repeat
+                    // Whship.ChangeCompany('Test Company');
+                    // Whship."Source Document" := Whship."Source Document"::"Sales Order";
+                    // Whship."Source No." := SORecord."No.";
+                    // Whship."External Document No." := SORecord."External Document No.";
+                    // Whship."Destination Type" := Whship."Destination Type"::Customer;
+                    // Whship."Destination No." := SORecord."Sell-to Customer No.";
+                    // Whship."Shipping Advice" := Whship."Shipping Advice"::Partial;
+                    // Whship."Location Code" := 'SMITHFIELD';
+                    // Whship."Source Type" := 37;
+                    // Whship."Source Subtype" := 1;
+                    // Whship.Type := Whship.Type::Outbound;
+                    // Whship."Document Status" := Whship."Document Status"::Released;
+                    // Whship."Shipment Date" := System.Today();
+                    // Message('%1', Whship.CurrentCompany);
+                    // Whship.Insert();
                     ICrec.ChangeCompany('Test Company');
+                    ICrec.ChangeCompany('Test Company');
+                    // ICRec."Sell-to Customer Name"
                     ICRec.get(SORecord."Document type", SORecord."No.");
-                    ICrec.Status := rec.status;
+
                     ICrec."Ship-to Name" := rec."Ship-to Name";
                     ICrec."Ship-to Address" := rec."Ship-to Address";
                     ICrec.Ship := rec.ship;
                     ICrec."Work Description" := rec."Work Description";
                     rec.CALCFIELDS("Work Description");
                     ICrec."Work Description" := rec."Work Description";
+                    ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
                     // Message('ICREC %1', icrec."No.");
                     // Message('%1, %2', rec.Status, ICRec.Status);
-                    ICRec.Status := rec.Status;
                     // Message('%1,assign %2 ', rec.Status, ICRec.Status);
                     ICREC.Modify();
                     // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
-                    tempText := rec."No.";
-                    tempText[2] := 'P';
+                    TempText := rec."No.";
+                    TempText[2] := 'P';
                     SLrec.SetCurrentKey("Document No.");
                     SLrec.SetRange("Document No.", rec."No.");
                     ISLrec.ChangeCompany('Test Company');
@@ -79,10 +97,12 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                                     ISLrec."Description" := SLrec."Description";
                                     ISLrec.Quantity := SLrec.Quantity;
                                     ISLrec."Location Code" := SLrec."Location Code";
+                                    ISLrec."Unit Price" := SLrec."Unit Price";
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
                                     Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.UpdateAmounts();
                                     ISLrec.Modify()
                                 end
                                 else begin
@@ -99,18 +119,24 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
+                                    ISLrec."Unit Price" := SLrec."Unit Price";
                                     Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    ISLrec.UpdateAmounts();
                                     ISLrec.Insert();
                                 end;
                             end;
                         until (SLrec.Next() = 0);
+                // if rec.status = rec.Status::Released then
+                //     if ICrec.status <> rec.Status then
+                //         ReleaseSalesDoc.PerformManualRelease(ICrec);
                 until (SORecord.next() = 0);
+
         end;
     end;
 
     trigger OnAfterDelete();
     var
-        tempText: Text[20];
+        TempText: Text[20];
         hasPO: Boolean;
         POrecord: Record "Purchase Header";
         SORecord: Record "Sales Header";
@@ -118,10 +144,10 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     begin
         if rec.CurrentCompany <> 'Test Company' then begin
             Message('onafterdelete');
-            tempText := rec."No.";
-            tempText[2] := 'P';
+            TempText := rec."No.";
+            TempText[2] := 'P';
             // Action 1 PO 
-            if POrecord.Get(Porecord."Document Type"::Order, tempText) then begin
+            if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
                 POrecord.Delete();
                 Message('Your PO has been deleted.');
             end;
@@ -129,7 +155,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             // Action 2 SO
             SORecord.ChangeCompany('Test Company');
             SORecord.SetCurrentKey("External Document No.");
-            SORecord.SetRange("External Document No.", tempText);
+            SORecord.SetRange("External Document No.", TempText);
             if (SORecord.findset) then
                 repeat
                     ICrec.ChangeCompany('Test Company');
@@ -142,7 +168,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     procedure loadlines();
     var
         sline: Record "Sales Line";
-        temptext: Text[20];
+        Temptext: Text[20];
         pline: Record "Purchase Line";
         pGetFlag: Boolean;
     begin
@@ -152,11 +178,11 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         sline.SetRange("Line No.", 1, 10000);
         if (sline.findset) then
             repeat
-                temptext := sline."Document No.";
-                temptext[2] := 'P';
-                pGetFlag := pline.GET(sline."Document Type", temptext, sline."Line No.");
+                Temptext := sline."Document No.";
+                Temptext[2] := 'P';
+                pGetFlag := pline.GET(sline."Document Type", Temptext, sline."Line No.");
                 pline."Document Type" := sline."Document Type";
-                pline."Document No." := temptext;
+                pline."Document No." := Temptext;
                 pline."Line No." := sline."Line No.";
                 pline.Type := sline.Type;
                 pline."No." := sline."No.";

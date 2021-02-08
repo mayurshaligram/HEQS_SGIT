@@ -1,6 +1,6 @@
 pageextension 50102 "workdescription" extends "Purchase Order"
 {
-    Editable = false;
+    // Editable = false;
     layout
     {
         addlast(General)
