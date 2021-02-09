@@ -2,9 +2,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
     trigger OnInsert();
     begin
-        // Change SO.NO based on Company
         Rec."No." := InsStr(Rec."No.", '0S', 1);
-        // Auto Create PO for Retail
         if Rec.CurrentCompany <> 'Test Company' then
             CreatePO();
     end;
@@ -26,7 +24,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             TempText[2] := 'P';
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
-                UpdatePO(POrecord);
+                UpdatePurchaseHeader(POrecord);
                 Message('Your PO has been update.');
             end
             else begin
@@ -36,7 +34,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                 Rec.CALCFIELDS("Work Description");
                 PORecord."Work Description" := Rec."Work Description";
                 POrecord.Insert();
-                rec.UpdatePO(POrecord);
+                rec.UpdatePurchaseHeader(POrecord);
             end;
 
             // Action 2 SO
@@ -227,29 +225,30 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             ToPORecord."Document Type" := Rec."Document Type";
             ToPORecord."No." := TempText;
             ToPORecord.Insert();
-            Rec.UpdatePO(ToPORecord);
+            Rec.UpdatePurchaseHeader(ToPORecord);
         end;
     end;
 
-    procedure UpdatePO(ToPORecord: Record "Purchase Header");
+    procedure UpdatePurchaseHeader(PurchaseHeader: Record "Purchase Header");
     begin
         // Fix Setting
-        ToPORecord."Buy-from Vendor No." := 'V00040';
-        ToPORecord."Buy-from Vendor Name" := 'HEQSINTERNATIONAL';
+        PurchaseHeader."Buy-from Vendor No." := 'V00040';
+        PurchaseHeader."Buy-from Vendor Name" := 'HEQSINTERNATIONAL';
         // Update Based on SO
-        ToPORecord."Location Code" := Rec."Location Code";
-        ToPORecord.Amount := Rec.Amount;
-        ToPORecord."Status" := Rec."Status";
+        PurchaseHeader."Document Date" := Rec."Document Date";
+        PurchaseHeader."Location Code" := Rec."Location Code";
+        PurchaseHeader.Amount := Rec.Amount;
         Rec.CALCFIELDS("Work Description");
-        ToPORecord."Work Description" := Rec."Work Description";
-        ToPORecord."Ship-to Address" := Rec."Ship-to Address";
-        ToPORecord."Ship-to Contact" := Rec."Ship-to Contact";
-        ToPORecord."Currency Code" := Rec."Currency Code";
-        ToPORecord."Ship-to Name" := Rec."Ship-to Name";
-        ToPORecord."Ship-to Address" := Rec."Ship-to Address";
-        ToPORecord."Send IC Document" := true;
-        ToPORecord."Posting Date" := Rec."Posting Date";
-        ToPORecord."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
-        ToPORecord.Modify();
+        PurchaseHeader."Work Description" := Rec."Work Description";
+        PurchaseHeader."Ship-to Address" := Rec."Ship-to Address";
+        PurchaseHeader."Ship-to Contact" := Rec."Ship-to Contact";
+        PurchaseHeader."Currency Code" := Rec."Currency Code";
+        PurchaseHeader."Ship-to Name" := Rec."Ship-to Name";
+        PurchaseHeader."Ship-to Address" := Rec."Ship-to Address";
+        PurchaseHeader."Send IC Document" := true;
+        PurchaseHeader."Posting Date" := Rec."Posting Date";
+        PurchaseHeader."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
+        PurchaseHeader."Status" := Rec."Status";
+        PurchaseHeader.Modify();
     end;
 }

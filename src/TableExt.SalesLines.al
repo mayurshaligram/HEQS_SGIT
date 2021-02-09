@@ -5,7 +5,6 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         field(201; "BOM Item"; Boolean)
         {
             Editable = false;
-
         }
     }
     trigger OnAfterInsert();

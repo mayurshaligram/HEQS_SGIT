@@ -1,6 +1,6 @@
-pageextension 50102 "workdescription" extends "Purchase Order"
+pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
 {
-    // Editable = false;
+    Editable = false;
     layout
     {
         addlast(General)
@@ -15,7 +15,6 @@ pageextension 50102 "workdescription" extends "Purchase Order"
                     Importance = Additional;
                     MultiLine = true;
                     ShowCaption = false;
-                    ToolTip = 'Word Desc.';
                 }
             }
         }
