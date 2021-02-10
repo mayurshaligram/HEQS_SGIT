@@ -21,7 +21,7 @@ pageextension 50112 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                                 WarehouseActivityLine.Modify();
                             until WarehouseActivityLine.Next() = 0;
                     until WarehouseShipmentLine.Next() = 0;
-                message('Here is after create Pick');
+                // message('Here is after create Pick');
             end;
         }
     }

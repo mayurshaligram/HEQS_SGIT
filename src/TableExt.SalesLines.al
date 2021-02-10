@@ -6,6 +6,9 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         {
             Editable = false;
         }
+        field(202; "Package Tracking ID"; Code[20])
+        {
+        }
     }
     trigger OnAfterInsert();
     var
@@ -17,6 +20,10 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         SO: Record "Sales Header";
         temp: text[20];
     begin
+        if rec."Location Code" = '' then begin
+            rec."Location Code" := 'SMITHFIELD';
+            rec.Modify()
+        end;
         if (rec.CurrentCompany = 'Test Company') then
             ExplodeBOM();
         if (rec.CurrentCompany <> 'Test Company') and (rec.Type = rec.Type::Item) then begin
@@ -33,10 +40,10 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             PLprice.SetRange("Item No.", "No.");
             if PLprice.FindSet then
                 repeat
-                    Message('%1 Plprice item No', PLprice."Item No.");
+                    // message('%1 Plprice item No', PLprice."Item No.");
                     PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
                 until plprice.Next() = 0;
-            Message('%1', PLrec."Direct Unit Cost");
+            // message('%1', PLrec."Direct Unit Cost");
             PLrec."BOM Item" := "BOM Item";
             PLrec.Insert();
             // ISO line
@@ -51,7 +58,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     ISLrec."Document No." := ISOrec."No.";
                     ISLrec.Type := ISLrec.Type::Item;
                     ISLrec."BOM Item" := "BOM Item";
-                    //message('%1 %2', ISLrec."Document Type", ISLrec.Type);
+                    //// message('%1 %2', ISLrec."Document Type", ISLrec.Type);
                     ISLrec.Insert();
                 until (ISORec.next() = 0);
         end;
@@ -82,7 +89,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     ToSalesLine.SetRange("Document No.", rec."Document No.");
                     ToSalesLine.SetRange("No.", FromBOMComp."No.");
                     ToSalesLine.SetRange("BOM Item", true);
-                    //message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
+                    //// message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
                     if ToSalesLine.FindSet then
                         repeat
                             // updata the associated salesline value
@@ -117,7 +124,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     ToSalesLine.SetRange("Document No.", rec."Document No.");
                     ToSalesLine.SetRange("No.", FromBOMComp."No.");
                     ToSalesLine.SetRange("BOM Item", true);
-                    //message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
+                    //// message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
                     if ToSalesLine.FindSet then
                         repeat
                             // updata the associated salesline value
@@ -211,7 +218,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             if PLrec."BOM Item" = false then begin
                 if PLprice.FindSet then
                     repeat
-                        Message('%1 Plprice item No', PLprice."Item No.");
+                        // message('%1 Plprice item No', PLprice."Item No.");
                         PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
                     until plprice.Next() = 0;
                 PLrec.UpdateAmounts();
@@ -288,7 +295,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         HideDialog: Boolean;
         IsHandled: Boolean;
     begin
-        //message('ExplodeBOM!');
+        //// message('ExplodeBOM!');
         // CODEUNIT.Run(CODEUNIT::"Sales-Explode BOM", Rec);
         ExplodeBOMCompLines(rec);
         // DocumentTotals.SalesDocTotalsNotUpToDate();
@@ -305,7 +312,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         ToSalesLine := SalesLine;
         NextLineNo := "Line No.";
         InsertLinesBetween := false;
-        //message('Message from ExplodeBOMComplines.');
+        //// message('// message from ExplodeBOMComplines.');
         if ToSalesLine.Find('>') then
             if ToSalesLine."Attached to Line No." = "Line No." then begin
                 ToSalesLine.SetRange("Attached to Line No.", "Line No.");

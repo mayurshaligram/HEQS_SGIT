@@ -14,6 +14,33 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
                     CurrPage.Update();
                 end;
             }
+            field("Sorting Field One"; Rec."Sorting Field 1")
+            {
+                ApplicationArea = Warehouse;
+                ToolTip = 'Specifies the method by which the lines are sorted on the warehouse header, such as Item or Document.';
+                trigger OnValidate()
+                begin
+                    CurrPage.Update();
+                end;
+            }
+            field("Sorting Field Two"; Rec."Sorting Field 2")
+            {
+                ApplicationArea = Warehouse;
+                ToolTip = 'Specifies the method by which the lines are sorted on the warehouse header, such as Item or Document.';
+                trigger OnValidate()
+                begin
+                    CurrPage.Update();
+                end;
+            }
+            field("Sorting Field Three"; Rec."Sorting Field 3")
+            {
+                ApplicationArea = Warehouse;
+                ToolTip = 'Specifies the method by which the lines are sorted on the warehouse header, such as Item or Document.';
+                trigger OnValidate()
+                begin
+                    CurrPage.Update();
+                end;
+            }
         }
 
     }
@@ -34,7 +61,7 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
                 var
                 begin
                     ExportCustLedgerEntries(Rec);
-                    // Message('From the Excel Button');
+                    // // message('From the Excel Button');
                 end;
             }
         }
@@ -46,18 +73,29 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
         WarehousePickLbl: Label 'Warehouse Pick';
         ExcelFileName: Label 'WarehousePick_%1_%2';
         WarehouseActivityLine: Record "Warehouse Activity Line";
+        counter: Dictionary of [Code[20], Integer];
     begin
+        WarehouseActivityLine.SetRange("No.", WarehousePick."No.");
+        if WarehouseActivityLine.FindSet() then
+            repeat
+                if counter.ContainsKey(WarehouseActivityLine."Item No.") then
+                    counter.Set(WarehouseActivityLine."Item No.", counter.Get(WarehouseActivityLine."Item No.") + WarehouseActivityLine.Quantity)
+                else
+                    counter.add(WarehouseActivityLine."Item No.", 1);
+            until WarehouseActivityLine.Next() = 0;
         TempExcelBuffer.Reset();
         TempExcelBuffer.DeleteAll();
         TempExcelBuffer.NewRow();
         TempExcelBuffer.AddColumn('Picking List', false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
+        WarehouseActivityLine.Reset();
         WarehouseActivityLine.SetRange("No.", WarehousePick."No.");
         WarehouseActivityLine.SetCurrentKey("Pick-up Item", "Zone Code", "Bin Code", "Item No.");
         WarehouseActivityLine.SetAscending("Pick-up Item", false);
         TempExcelBuffer.NewRow();
         TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Source Document"), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
-        TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Source Subline No."), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
+        TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Source No."), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
         TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Pick-up Item"), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
+        TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Total Pick-up Item"), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
         TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Destination Type"), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
         TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Destination No."), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
         TempExcelBuffer.AddColumn(WarehouseActivityLine.FieldCaption("Due Date"), false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
@@ -75,8 +113,9 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
             repeat
                 TempExcelBuffer.NewRow();
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Source Document", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
-                TempExcelBuffer.AddColumn(WarehouseActivityLine."Source Subline No.", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
+                TempExcelBuffer.AddColumn(WarehouseActivityLine."Source No.", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Pick-up Item", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
+                TempExcelBuffer.AddColumn(counter.Get(WarehouseActivityLine."Item No.") / 2, false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Destination Type", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Destination No.", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Due Date", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
@@ -91,6 +130,7 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Unit of Measure Code", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
                 TempExcelBuffer.AddColumn(WarehouseActivityLine."Qty. Handled", false, '', false, false, false, '', TempExcelBuffer."Cell Type"::Text);
             until WarehouseActivityLine.Next() = 0;
+
         TempExcelBuffer.CreateNewBook(WarehousePickLbl);
         TempExcelBuffer.WriteSheet(WarehousePickLbl, CompanyName, UserId);
         TempExcelBuffer.CloseBook();

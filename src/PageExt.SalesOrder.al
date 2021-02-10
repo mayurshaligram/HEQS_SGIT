@@ -7,8 +7,16 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             trigger OnBeforeAction();
             var
                 PurchaseHeader: Record "Purchase Header";
+                ErrorMessage: Label 'Please releasethe current Sales Order(%1) in Sales Order(%2) at Company(%3)';
+                SalesOrder: Text;
                 TempText: Text;
             begin
+                if Rec.CurrentCompany = 'Test Company' then
+                    if Rec."External Document No." <> '' then begin
+                        SalesOrder := Rec."External Document No.";
+                        SalesOrder[2] := 'S';
+                        Error(ErrorMessage, Rec."No.", SalesOrder, Rec."Sell-to Customer Name");
+                    end;
                 if Rec.CurrentCompany <> 'Test Company' then begin
                     TempText := Rec."No.";
                     TempText[2] := 'P';
@@ -18,7 +26,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                         PurchaseHeader."No." := TempText;
                         PurchaseHeader.Insert();
                         Rec.UpdatePurchaseHeader(PurchaseHeader);
-                        Message('Purchase Order %1 in %2 has created', PurchaseHeader."No.", PurchaseHeader.CurrentCompany);
+                        // message('Purchase Order %1 in %2 has created', PurchaseHeader."No.", PurchaseHeader.CurrentCompany);
                     end;
                 end;
             end;
@@ -47,9 +55,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", TempText);
                     if not (SORecord.findset) then
-                        message('should create the SO in the inventory.');
+                        // message('should create the SO in the inventory.');
                     if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
-                        ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
+                            ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
                     SORecord.ChangeCompany('Test Company');
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", TempText);
@@ -65,14 +73,14 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                             Whship."Shipping Advice" := Whship."Shipping Advice"::Partial;
                             Whship.Insert();
                             ICrec.ChangeCompany('Test Company');
-                            // Message('%1, %2',SORecord."Document type", SORecord."No.");
+                            // // message('%1, %2',SORecord."Document type", SORecord."No.");
                             ICRec.get(SORecord."Document type", SORecord."No.");
-                            // Message('ICREC %1', ICRec."No.");
-                            // Message('%1, %2', Rec.Status, ICRec.Status);
+                            // // message('ICREC %1', ICRec."No.");
+                            // // message('%1, %2', Rec.Status, ICRec.Status);
                             if Rec.Status = Rec.Status::Released then
                                 if ICRec.Status <> Rec.Status then
                                     ReleaseSalesDoc.PerformManualRelease(ICrec);
-                            Message('ICrec no %1, status %2', ICRec."No.", icrec.Status);
+                            // message('ICrec no %1, status %2', ICRec."No.", icrec.Status);
                             ICrec."Work Description" := Rec."Work Description";
                             Rec.CALCFIELDS("Work Description");
                             ICrec."Work Description" := Rec."Work Description";
@@ -116,11 +124,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                         SalesLine.Modify();
                     until SalesLine.Next() = 0;
                 TempInteger := 37;
-                message('OnBeforeActionCreating');
+                // message('OnBeforeActionCreating');
                 ReleaseSalesDoc.PerformManualRelease(Rec);
                 Rec.Modify();
                 if WarehouseRequest.get(WarehouseRequest.Type::Outbound, 'SMITHFIELD', TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
-                    Message('Please take a look how it is the 5763');
+                    // message('Please take a look how it is the 5763');
                     WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
                     WarehouseRequest."Source No." := Rec."No.";
                     WarehouseRequest."Source Subtype" := 1;
@@ -152,7 +160,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
                     Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
                     WarehouseRequest.Insert();
-                    Message('WR insert');
+                    // message('WR insert');
                 end;
 
             end;
@@ -196,7 +204,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
                 Rec.UpdatePurchaseHeader(POrecord);
-                Message('Your PO has been update.');
+                // message('Your PO has been update.');
             end
             else begin
                 POrecord.Init();
@@ -223,12 +231,12 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     ICrec."Work Description" := Rec."Work Description";
                     Rec.CALCFIELDS("Work Description");
                     ICrec."Work Description" := Rec."Work Description";
-                    // Message('ICREC %1', icrec."No.");
-                    // Message('%1, %2', Rec.Status, ICRec.Status);
+                    // // message('ICREC %1', icrec."No.");
+                    // // message('%1, %2', Rec.Status, ICRec.Status);
                     ICRec.Status := Rec.Status;
-                    // Message('%1,assign %2 ', Rec.Status, ICRec.Status);
+                    // // message('%1,assign %2 ', Rec.Status, ICRec.Status);
                     ICREC.Modify();
-                    // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
+                    // // message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
                     TempText := Rec."No.";
                     TempText[2] := 'P';
                     SLrec.SetCurrentKey("Document No.");
@@ -252,7 +260,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
-                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := SLrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
                                     ISLrec.UpdateAmounts();
@@ -272,7 +280,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
-                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := Slrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
                                     ISLrec.UpdateAmounts();
@@ -284,55 +292,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         end;
     end;
 
-    local procedure updataISOFromRSO();
+    trigger OnAfterGetRecord();
     begin
-        Message('updataISOFromRSO');
+        if (Rec.CurrentCompany = 'Test Company') and (Rec."External Document No." <> '') then
+            Currpage.Editable(false);
     end;
-
-    // trigger OnOpenPage();
-    // var
-    //     WarehouseRequest: Record "Warehouse Request";
-    //     TempInteger: Integer;
-    // begin
-    //     Rec.RecreateSalesLines('Sell-to Customer');
-    //     TempInteger := 37;
-    //     message('OnBeforeActionCreating');
-    //     if WarehouseRequest.get(WarehouseRequest.Type::Outbound, 'SMITHFIELD', TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
-    //         Message('Please take a look how it is the 5763');
-    //         WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
-    //         WarehouseRequest."Source No." := Rec."No.";
-    //         WarehouseRequest."Source Subtype" := 1;
-    //         WarehouseRequest."External Document No." := Rec."External Document No.";
-    //         WarehouseRequest."Destination Type" := WarehouseRequest."Destination Type"::Customer;
-    //         WarehouseRequest."Destination No." := Rec."Sell-to Customer No.";
-    //         WarehouseRequest."Shipping Advice" := WarehouseRequest."Shipping Advice"::Partial;
-    //         WarehouseRequest."Shipment Date" := Rec."Document Date";
-    //         WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
-    //         WarehouseRequest."Source Type" := 37;
-    //         WarehouseRequest."Location Code" := 'SMITHFIELD';
-    //         WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
-    //         Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
-    //         WarehouseRequest.Modify();
-    //     end
-    //     else begin
-    //         WarehouseRequest.Init();
-    //         WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
-    //         WarehouseRequest."Source No." := Rec."No.";
-    //         WarehouseRequest."Source Subtype" := 1;
-    //         WarehouseRequest."External Document No." := Rec."External Document No.";
-    //         WarehouseRequest."Destination Type" := WarehouseRequest."Destination Type"::Customer;
-    //         WarehouseRequest."Destination No." := Rec."Sell-to Customer No.";
-    //         WarehouseRequest."Shipping Advice" := WarehouseRequest."Shipping Advice"::Partial;
-    //         WarehouseRequest."Shipment Date" := Rec."Document Date";
-    //         WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
-    //         WarehouseRequest."Source Type" := 37;
-    //         WarehouseRequest."Location Code" := 'SMITHFIELD';
-    //         WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
-    //         Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
-    //         WarehouseRequest.Insert();
-    //         Message('WR insert');
-    //     end;
-
-    // end;
-
 }

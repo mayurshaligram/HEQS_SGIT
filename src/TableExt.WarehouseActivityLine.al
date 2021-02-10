@@ -8,17 +8,9 @@ tableextension 50112 "Warehouse Activity Line_Ext" extends "Warehouse Activity L
         {
             Editable = false;
         }
+        field(202; "Total Pick-up Item"; Integer)
+        {
+            Editable = false;
+        }
     }
-    trigger OnInsert();
-    var
-        WarehouseShipmentLine: Record "Warehouse Shipment Line";
-    begin
-        Message('On insert activity');
-        WarehouseShipmentLine.SetRange("Item No.", "Item No.");
-        if WarehouseShipmentLine.FindSet() then begin
-            Rec."Pick-up Item" := WarehouseShipmentLine."Pick-up Item";
-            Modify();
-            Message('After modify');
-        end;
-    end;
 }

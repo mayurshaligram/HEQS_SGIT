@@ -25,7 +25,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             // Action 1 PO Update
             if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
                 UpdatePurchaseHeader(POrecord);
-                Message('Your PO has been update.');
+                // message('Your PO has been update.');
             end
             else begin
                 POrecord.Init();
@@ -56,7 +56,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     // Whship.Type := Whship.Type::Outbound;
                     // Whship."Document Status" := Whship."Document Status"::Released;
                     // Whship."Shipment Date" := System.Today();
-                    // Message('%1', Whship.CurrentCompany);
+                    // // message('%1', Whship.CurrentCompany);
                     // Whship.Insert();
                     ICrec.ChangeCompany('Test Company');
                     ICrec.ChangeCompany('Test Company');
@@ -70,11 +70,11 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     rec.CALCFIELDS("Work Description");
                     ICrec."Work Description" := rec."Work Description";
                     ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
-                    // Message('ICREC %1', icrec."No.");
-                    // Message('%1, %2', rec.Status, ICRec.Status);
-                    // Message('%1,assign %2 ', rec.Status, ICRec.Status);
+                    // // message('ICREC %1', icrec."No.");
+                    // // message('%1, %2', rec.Status, ICRec.Status);
+                    // // message('%1,assign %2 ', rec.Status, ICRec.Status);
                     ICREC.Modify();
-                    // Message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
+                    // // message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
                     TempText := rec."No.";
                     TempText[2] := 'P';
                     SLrec.SetCurrentKey("Document No.");
@@ -99,7 +99,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
-                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec.UpdateAmounts();
                                     ISLrec.Modify()
                                 end
@@ -118,7 +118,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                                     ISLrec."Bin Code" := SLrec."Bin Code";
                                     ISLrec."Unit of Measure Code" := 'PCS';
                                     ISLrec."Unit Price" := SLrec."Unit Price";
-                                    Message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec.UpdateAmounts();
                                     ISLrec.Insert();
                                 end;
@@ -141,13 +141,13 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         icrec: Record "sales Header";
     begin
         if rec.CurrentCompany <> 'Test Company' then begin
-            Message('onafterdelete');
+            // message('onafterdelete');
             TempText := rec."No.";
             TempText[2] := 'P';
             // Action 1 PO 
             if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
                 POrecord.Delete();
-                Message('Your PO has been deleted.');
+                // message('Your PO has been deleted.');
             end;
 
             // Action 2 SO
