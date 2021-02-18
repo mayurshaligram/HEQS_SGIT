@@ -1,6 +1,5 @@
 pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
 {
-    Editable = false;
     layout
     {
         addlast(General)
@@ -35,5 +34,11 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
     trigger OnAfterGetRecord()
     begin
         WorkDescription := GetWorkDescription;
+    end;
+
+    trigger OnAfterGetCurrRecord();
+    begin
+        if Rec.CurrentCompany <> 'Test Company' then
+            Currpage.Editable(false);
     end;
 }
