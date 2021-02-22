@@ -23,7 +23,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             TempText := rec."No.";
             TempText[2] := 'P';
             // Action 1 PO Update
-            if POrecord.Get(Porecord."Document Type"::Order, TempText) then begin
+            if POrecord.Get(Rec."Document Type", TempText) then begin
                 UpdatePurchaseHeader(POrecord);
                 // message('Your PO has been update.');
             end
@@ -59,7 +59,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     // // message('%1', Whship.CurrentCompany);
                     // Whship.Insert();
                     ICrec.ChangeCompany('Test Company');
-                    ICrec.ChangeCompany('Test Company');
                     // ICRec."Sell-to Customer Name"
                     ICRec.get(SORecord."Document type", SORecord."No.");
 
@@ -70,11 +69,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     rec.CALCFIELDS("Work Description");
                     ICrec."Work Description" := rec."Work Description";
                     ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
-                    // // message('ICREC %1', icrec."No.");
-                    // // message('%1, %2', rec.Status, ICRec.Status);
-                    // // message('%1,assign %2 ', rec.Status, ICRec.Status);
+                    ICrec.Status := rec.Status;
                     ICREC.Modify();
-                    // // message('Modify %1 the no %2', ICRec.Status, ICrec."No.");
                     TempText := rec."No.";
                     TempText[2] := 'P';
                     SLrec.SetCurrentKey("Document No.");

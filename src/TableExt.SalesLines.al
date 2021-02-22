@@ -18,6 +18,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         BOMSL: Record "Sales Line";
         PLprice: Record "Purchase Price";
         SO: Record "Sales Header";
+        FromBOMComp: Record "BOM Component";
         temp: text[20];
     begin
         if rec."Location Code" = '' then begin
@@ -43,9 +44,71 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     // message('%1 Plprice item No', PLprice."Item No.");
                     PLrec."Direct Unit Cost" := PLprice."Direct Unit Cost";
                 until plprice.Next() = 0;
-            // message('%1', PLrec."Direct Unit Cost");
+
             PLrec."BOM Item" := "BOM Item";
+            // FromBOMComp.SetRange("Parent Item No.", "No.");
+            // if FromBOMComp.FindSet then
+            //     // iterate the set
+            //     repeat
+            //         // find the associated salesline
+            //         ToSalesLine.Reset();
+            //         ToSalesLine.SetRange("Document Type", rec."Document Type");
+            //         ToSalesLine.SetRange("Document No.", rec."Document No.");
+            //         ToSalesLine.SetRange("No.", FromBOMComp."No.");
+            //         ToSalesLine.SetRange("BOM Item", true);
+            //         //// message('%1, %2', FromBOMComp.Type, FromBOMComp.Description);
+            //         if ToSalesLine.FindSet then
+            //             repeat
+            //                 // updata the associated salesline value
+            //                 ToSalesLine."Document Type" := rec."Document Type";
+            //                 ToSalesLine."Document No." := rec."Document No.";
+            //                 ToSalesLine."Location Code" := "Location Code";
+            //                 ToSalesLine.Quantity := Quantity * FromBOMComp."Quantity per";
+            //                 ToSalesLine.Modify();
+            //                 //////// PO update
+            //                 temp := tosalesline."Document No.";
+            //                 temp[2] := 'P';
+            //                 if PLrec.Get(tosalesline."Document Type", temp, tosalesline."Line No.") then begin
+            //                     PLrec."Document Type" := ToSalesLine."Document type";
+            //                     Plrec."Document No." := temp;
+            //                     PLrec."Line No." := ToSalesLine."Line No.";
+            //                     Plrec."Location Code" := ToSalesLine."Location Code";
+            //                     PLrec.Quantity := ToSalesLine.Quantity;
+            //                     PLrec."No." := Tosalesline."No.";
+            //                     Plrec.Description := Tosalesline.Description;
+            //                     PLrec.Type := Plrec.Type::Item;
+            //                     Plrec."BOM Item" := true;
+            //                     PLrec.Modify();
+            //                 end else begin
+            //                     PLrec.init();
+            //                     PLrec."Document Type" := ToSalesLine."Document type";
+            //                     Plrec."Document No." := temp;
+            //                     PLrec."Line No." := ToSalesLine."Line No.";
+            //                     Plrec."Location Code" := ToSalesLine."Location Code";
+            //                     PLrec.Quantity := ToSalesLine.Quantity;
+            //                     PLrec."No." := Tosalesline."No.";
+            //                     Plrec.Description := Tosalesline.Description;
+            //                     PLrec.type := Plrec.type::Item;
+            //                     Plrec."BOM Item" := true;
+            //                     PLrec.Insert();
+            //                 end;
+            //             until ToSalesLine.Next = 0;
+            //     until FromBOMComp.Next = 0;
+            PLrec."No." := rec."No.";
+            PLrec.Type := rec.Type;
+            PLrec."Description" := rec."Description";
+            PLrec.Quantity := rec.Quantity;
+            PLrec."Location Code" := rec."Location Code";
+            PLrec."Unit of Measure" := rec."Unit of Measure";
+            PLrec."Bin Code" := rec."Bin Code";
+            PLrec."Unit Price (LCY)" := rec."Unit Price";
+            PLrec."Buy-from Vendor No." := 'V00040';
+            PLrec."Unit of Measure Code" := 'PCS';
+            PLrec."BOM Item" := "BOM Item";
+            PLprice.Reset();
+            PLprice.SetRange("Item No.", "No.");
             PLrec.Insert();
+            message('%1', PLrec."Direct Unit Cost");
             // ISO line
             ISLrec.ChangeCompany('Test Company');
             ISOrec.ChangeCompany('Test Company');
