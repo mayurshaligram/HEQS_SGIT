@@ -137,5 +137,11 @@ pageextension 50111 "Warehouse Pick_Ext" extends "Warehouse Pick"
         TempExcelBuffer.SetFriendlyFilename(StrSubstNo(ExcelFileName, CurrentDateTime, UserId));
         TempExcelBuffer.OpenExcel();
     end;
+
+    [ServiceEnabled]
+    procedure PingPong(): Text
+    begin
+        exit('Pong');
+    end;
 }
 

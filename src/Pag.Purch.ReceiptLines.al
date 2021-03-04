@@ -306,15 +306,19 @@ page 50122 "Purch Order Lines"
 
     local procedure LookupOKOnPush()
     var
+        // NextLine Provider
+        ItemChargeAssgntPurch3: Record "Item Charge Assignment (Purch)";
         LocalFromPurchRcpLine: Record "Purch. Rcpt. Line";
         ItemChargeAssgntPurch2: Record "Item Charge Assignment (Purch)";
         NextLine: Integer;
     begin
+        ItemChargeAssgntPurch3.Reset();
+        if ItemChargeAssgntPurch3.FindLast() then;
         FromPurchRcptLine.Copy(Rec);
         CurrPage.SetSelectionFilter(FromPurchRcptLine);
         if FromPurchRcptLine.FindFirst then begin
             ItemChargeAssgntPurch."Unit Cost" := UnitCost;
-            NextLine := ItemChargeAssgntPurch."Line No.";
+            NextLine := ItemChargeAssgntPurch3."Line No." + 10000;
             ItemChargeAssgntPurch2.SetRange("Document Type", ItemChargeAssgntPurch."Document Type");
             ItemChargeAssgntPurch2.SetRange("Document No.", Rec."Document No.");
             ItemChargeAssgntPurch2.SetRange("Document Line No.", ItemChargeAssgntPurch."Document Line No.");

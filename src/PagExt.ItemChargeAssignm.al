@@ -1,9 +1,36 @@
 pageextension 50123 "ItemChargeAssign(Purch)_Ext" extends "Item Charge Assignment (Purch)"
 {
-
-
+    Editable = true;
+    // layout
+    // {
+    //     modify("Qty. to Assign")
+    //     {
+    //         trigger OnAfterValidate()
+    //         begin
+    //             Message('OnAfterValidate');
+    //         end;
+    //     }
+    // }
     actions
     {
+        modify(SuggestItemChargeAssignment)
+        {
+            trigger OnAfterAction()
+            var
+                PurchaseLine2: Record "Purchase Line";
+                ItemChargeAssign: Record "Item Charge Assignment (Purch)";
+            begin
+                PurchaseLine2.Reset();
+                PurchaseLine2.Get(Rec."Document Type", Rec."Document No.", Rec."Document Line No.");
+                ItemChargeAssign.Reset();
+                ItemChargeAssign.CopyFilters(Rec);
+                if ItemChargeAssign.FindSet() then
+                    repeat
+                        ItemChargeAssign."Amount to Assign" := ItemChargeAssign."Qty. to Assign" * PurchaseLine2."Unit Cost";
+                        ItemChargeAssign.Modify()
+                    until ItemChargeAssign.Next() = 0;
+            end;
+        }
         addafter(GetReceiptLines)
         {
             action(GetReleasedPurchaseLines)
@@ -51,4 +78,19 @@ pageextension 50123 "ItemChargeAssign(Purch)_Ext" extends "Item Charge Assignmen
         }
 
     }
+    // trigger OnClosePage()
+    // var
+    //     PurchaseLine2: Record "Purchase Line";
+    //     ItemChargeAssign: Record "Item Charge Assignment (Purch)";
+    // begin
+    //     PurchaseLine2.Reset();
+    //     PurchaseLine2.Get(Rec."Document Type", Rec."Document No.", Rec."Document Line No.");
+    //     ItemChargeAssign.Reset();
+    //     ItemChargeAssign.CopyFilters(Rec);
+    //     if ItemChargeAssign.FindSet() then
+    //         repeat
+    //             ItemChargeAssign."Amount to Assign" := ItemChargeAssign."Qty. to Assign" * PurchaseLine2."Unit Cost";
+    //             ItemChargeAssign.Modify()
+    //         until ItemChargeAssign.Next() = 0;
+    // end;
 }

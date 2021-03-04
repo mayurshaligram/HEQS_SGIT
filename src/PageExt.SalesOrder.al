@@ -26,7 +26,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                         PurchaseHeader."No." := TempText;
                         PurchaseHeader.Insert();
                         Rec.UpdatePurchaseHeader(PurchaseHeader);
-                        // message('Purchase Order %1 in %2 has created', PurchaseHeader."No.", PurchaseHeader.CurrentCompany);
                     end;
                 end;
             end;
@@ -55,8 +54,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", TempText);
                     if not (SORecord.findset) then
-                        // message('should create the SO in the inventory.');
-                    if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
+                        if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
                             ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
                     SORecord.ChangeCompany('Test Company');
                     SORecord.SetCurrentKey("External Document No.");

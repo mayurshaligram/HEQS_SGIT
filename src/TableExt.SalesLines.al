@@ -108,7 +108,6 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             PLprice.Reset();
             PLprice.SetRange("Item No.", "No.");
             PLrec.Insert();
-            message('%1', PLrec."Direct Unit Cost");
             // ISO line
             ISLrec.ChangeCompany('Test Company');
             ISOrec.ChangeCompany('Test Company');
