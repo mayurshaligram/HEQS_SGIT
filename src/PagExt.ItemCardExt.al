@@ -14,6 +14,6 @@ pageextension 50125 "Item Card_Ext" extends "Item Card"
 
     // trigger OnOpenPage()
     // begin
-    //     Bool := (Rec.CurrentCompany = 'Test Company')
+    //     Bool := (Rec.CurrentCompany = 'HEQS International Pty Ltd')
     // end;
 }

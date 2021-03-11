@@ -2,15 +2,15 @@ tableextension 50102 "Item_Ext" extends "Item"
 {
     trigger OnBeforeInsert()
     begin
-        if Rec.CurrentCompany <> 'Test Company' then
-            Error('Please only edit items in Test Company');
+        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+            Error('Please only edit items in HEQS International Pty Ltd');
     end;
 
     // trigger OnBeforeModify()
     // var
     //     Temp: Text;
     // begin
-    //     if Rec.CurrentCompany <> 'Test Company' then
+    //     if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
     //         if (xRec."Unit Price" <> Rec."Unit Price") or (xRec."Unit Cost" <> Rec."Unit Cost") then
     //             Temp := '1'
     //         else
@@ -19,8 +19,8 @@ tableextension 50102 "Item_Ext" extends "Item"
 
     trigger OnBeforeDelete()
     begin
-        if Rec.CurrentCompany <> 'Test Company' then
-            Error('Please only edit items in Test Company');
+        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+            Error('Please only edit items in HEQS International Pty Ltd');
     end;
 
     trigger OnAfterInsert()
@@ -29,11 +29,11 @@ tableextension 50102 "Item_Ext" extends "Item"
         RetailItemRecord: Record Item;
         OtherCompanyRecord: Record Company;
     begin
-        if Rec.CurrentCompany = 'Test Company' then begin
+        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
             if OtherCompanyRecord.Find('-') then
                 repeat
-                    if ('Test Company' <> OtherCompanyRecord.Name) then begin
+                    if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
                         RetailItemRecord := Rec;
                         RetailItemRecord.Insert();
@@ -50,11 +50,11 @@ tableextension 50102 "Item_Ext" extends "Item"
     //     TempCost: Integer;
     //     TempPrice: Integer;
     // begin
-    //     if Rec.CurrentCompany = 'Test Company' then begin
+    //     if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
     //         OtherCompanyRecord.Reset();
     //         if OtherCompanyRecord.Find('-') then
     //             repeat
-    //                 if ('Test Company' <> OtherCompanyRecord.Name) then begin
+    //                 if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
     //                     RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
     //                     RetailItemRecord.Get(Rec."No.");
     //                     TempCost := RetailItemRecord."Unit Cost";
@@ -74,11 +74,11 @@ tableextension 50102 "Item_Ext" extends "Item"
         RetailItemRecord: Record Item;
         OtherCompanyRecord: Record Company;
     begin
-        if Rec.CurrentCompany = 'Test Company' then begin
+        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
             if OtherCompanyRecord.Find('-') then
                 repeat
-                    if ('Test Company' <> OtherCompanyRecord.Name) then begin
+                    if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
                         RetailItemRecord.Get(Rec."No.");
                         RetailItemRecord := Rec;
