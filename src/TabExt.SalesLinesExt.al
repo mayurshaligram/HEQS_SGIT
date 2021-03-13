@@ -215,7 +215,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                         ISLrec."Location Code" := tosalesline."Location Code";
                                         ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
                                         ISLrec."Bin Code" := tosalesline."Bin Code";
-                                        ISLrec."Unit of Measure Code" := 'PCS';
+                                        ISLrec."Unit of Measure Code" := ToSalesLine."Unit of Measure";
                                         ISLrec."BOM Item" := true;
                                         ISLrec.Modify();
                                     end else begin
@@ -227,7 +227,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                                         ISLrec."Location Code" := tosalesline."Location Code";
                                         ISLrec."Unit of Measure" := tosalesline."Unit of Measure";
                                         ISLrec."Bin Code" := tosalesline."Bin Code";
-                                        ISLrec."Unit of Measure Code" := 'PCS';
+                                        ISLrec."Unit of Measure Code" := ToSalesLine."Unit of Measure";
                                         ISLrec."BOM Item" := true;
                                         ISLrec.Insert();
                                     end;
@@ -250,7 +250,6 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
             Plrec."VAT Prod. Posting Group" := Rec."VAT Prod. Posting Group";
             // Plrec."Gen. Prod. Posting Group" := Rec."Gen. Prod. Posting Group";
             // PLrec."Buy-from Vendor No." := 'FUR ';
-            // PLrec."Unit of Measure Code" := 'PCS';
             PLrec."BOM Item" := "BOM Item";
             PLprice.Reset();
             PLprice.SetRange("Item No.", "No.");
@@ -280,7 +279,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
                     ISLrec."Location Code" := rec."Location Code";
                     ISLrec."Unit of Measure" := rec."Unit of Measure";
                     ISLrec."Bin Code" := rec."Bin Code";
-                    ISLrec."Unit of Measure Code" := 'PCS';
+                    ISLrec."Unit of Measure Code" := Rec."Unit of Measure Code";
                     ISLrec."BOM Item" := "BOM Item";
                     ISLrec.Modify();
                 until (ISORec.next() = 0);

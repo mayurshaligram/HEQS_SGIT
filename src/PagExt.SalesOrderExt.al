@@ -137,14 +137,15 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 SalesLine.SetRange("Document No.", Rec."No.");
                 if SalesLine.FindSet() then
                     repeat
-                        SalesLine."Location Code" := Rec."Location Code";
+                        SalesLine."Location Code" := 'NSW';
                         SalesLine.Modify();
                     until SalesLine.Next() = 0;
                 TempInteger := 37;
                 // message('OnBeforeActionCreating');
-                ReleaseSalesDoc.PerformManualRelease(Rec);
+                // ReleaseSalesDoc.PerformManualRelease(Rec);
+                Rec.Status := Rec.Status::Released;
                 Rec.Modify();
-                if WarehouseRequest.get(WarehouseRequest.Type::Outbound, Rec."Location Code", TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
+                if WarehouseRequest.get(WarehouseRequest.Type::Outbound, SalesLine."Location Code", TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
                     // message('Please take a look how it is the 5763');
                     WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
                     WarehouseRequest."Source No." := Rec."No.";
@@ -156,7 +157,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     WarehouseRequest."Shipment Date" := Rec."Document Date";
                     WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
                     WarehouseRequest."Source Type" := 37;
-                    WarehouseRequest."Location Code" := Rec."Location Code";
+                    WarehouseRequest."Location Code" := SalesLine."Location Code";
                     WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
                     Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
                     WarehouseRequest.Modify();
@@ -173,7 +174,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     WarehouseRequest."Shipment Date" := Rec."Document Date";
                     WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
                     WarehouseRequest."Source Type" := 37;
-                    WarehouseRequest."Location Code" := Rec."Location Code";
+                    WarehouseRequest."Location Code" := SalesLine."Location Code";
                     WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
                     Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
                     WarehouseRequest.Insert();
@@ -262,7 +263,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Location Code" := SLrec."Location Code";
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
-                                    // ISLrec."Unit of Measure Code" := 'PCS';
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := SLrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
@@ -282,7 +282,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     ISLrec."Location Code" := SLrec."Location Code";
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
-                                    // ISLrec."Unit of Measure Code" := 'PCS';
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := Slrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";

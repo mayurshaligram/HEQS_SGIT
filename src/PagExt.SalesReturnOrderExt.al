@@ -174,7 +174,7 @@ pageextension 50122 "Sales Return Order_Ext" extends "Sales Return Order"
                                     ISLrec."Location Code" := SLrec."Location Code";
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
-                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    ISLrec."Unit of Measure Code" := ISLrec."Unit of Measure";
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := SLrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
@@ -194,7 +194,7 @@ pageextension 50122 "Sales Return Order_Ext" extends "Sales Return Order"
                                     ISLrec."Location Code" := SLrec."Location Code";
                                     ISLrec."Unit of Measure" := SLrec."Unit of Measure";
                                     ISLrec."Bin Code" := SLrec."Bin Code";
-                                    ISLrec."Unit of Measure Code" := 'PCS';
+                                    ISLrec."Unit of Measure Code" := SLrec."Unit of Measure";
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := Slrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
