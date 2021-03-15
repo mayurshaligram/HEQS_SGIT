@@ -202,7 +202,39 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     until WarehouseShipmentLine.Next() = 0;
             end;
         }
-        // modify()
+        // modify(Post)
+        // {
+        //     ApplicationArea = Basic, Suite;
+        //     Caption = 'P&ost';
+        //     // Ellipsis = true;
+        //     // Image = PostOrder;
+        //     Promoted = true;
+        //     PromotedCategory = Category6;
+        //     PromotedIsBig = true;
+        //     ShortCutKey = 'F9';
+        //     ToolTip = 'Finalize the document or journal by posting the amounts and quantities to the related accounts in your company books.';
+
+        //     trigger OnAfterAction()
+        //     var
+        //         SalesPostYesNo: Codeunit "Sales-Post (Yes/No)";
+        //         RetailSalesOrder: Record "Sales Header";
+        //         RetailPurchaseOrder: Record "Purchase Header";
+        //     begin
+        //         if Rec."External Document No." <> '' then begin
+        //             // OK := StartSession(SessionId, CodeUnit::"Cache Stress Test", CompanyName, CacheStressTestRec);
+        //             //
+        //             RetailPurchaseOrder.ChangeCompany(Rec."Sell-to Customer Name");
+        //             RetailPurchaseOrder.Get(Rec."Document Type", Rec."External Document No.");
+        //             //
+        //             RetailSalesOrder.ChangeCompany(Rec."Sell-to Customer Name");
+        //             RetailSalesOrder.Get(Rec."Document Type", RetailPurchaseOrder."Sales Order Ref");
+        //             //
+        //             CurrPage.SetRecord(RetailSalesOrder);
+        //             Message('Go to Retail And Post the Sales Order.');
+        //             SalesPostYesNo.Run(RetailSalesOrder);
+        //         end;
+        //     end;
+        // }
     }
     var
         InventoryName: Text;

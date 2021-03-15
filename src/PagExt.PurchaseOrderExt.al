@@ -18,6 +18,57 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
             }
         }
     }
+    actions
+    {
+        modify("Create &Whse. Receipt")
+        {
+            trigger OnBeforeAction();
+            var
+                PurchaseLine: Record "Purchase Line";
+                WarehouseRequest: Record "Warehouse Request";
+                TempInteger: Integer;
+                ReleaseSalesDoc: Codeunit "Release Sales Document";
+            begin
+                // Recreate The Purchase Line to Solve the BOM Carry Problem
+                Rec.Status := Rec.Status::Open;
+                Rec.Modify();
+                Rec.RecreatePurchLines(Rec."Buy-from Vendor Name");
+                Rec.Status := Rec.Status::Released;
+                Rec.Validate(Status, Rec.Status::Released);
+                Rec.Modify();
+                // What is the Difference Between the System One BOM and Customer BOM TODO
+
+                // No Warehouse Line Created
+                PurchaseLine.Reset();
+                PurchaseLine.SetRange("Document No.", Rec."No.");
+                if PurchaseLine.FindSet() then
+                    repeat
+                        PurchaseLine."Location Code" := 'NSW';
+                        PUrchaseLine.Modify();
+                    until PurchaseLine.Next() = 0;
+                // PurchaseLine Code is Zero
+                TempInteger := 39;
+                if WarehouseRequest.get(WarehouseRequest.Type::Inbound, PurchaseLine."Location Code", TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
+                    WarehouseRequest."Source Type" := 39;
+                    WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
+                    Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
+                    WarehouseRequest.Modify();
+                end
+                else begin
+                    WarehouseRequest.Init();
+                    WarehouseRequest.Type := WarehouseRequest.Type::Inbound;
+                    WarehouseRequest."Location Code" := PurchaseLine."Location Code";
+                    WarehouseRequest."Source Subtype" := TempInteger;
+                    WarehouseRequest."Source No." := Rec."No.";
+                    WarehouseRequest."Source Type" := 39;
+                    WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
+                    Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
+                    WarehouseRequest.Insert();
+                end;
+            end;
+            //    
+        }
+    }
     var
         WorkDescription: Text;
 

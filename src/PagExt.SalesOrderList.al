@@ -13,6 +13,46 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
             }
         }
     }
+    actions
+    {
+        addafter(Post)
+        {
+            action(sssssss)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'ssssssss';
+                Image = ReleaseDoc;
+                Promoted = true;
+                PromotedCategory = Category6;
+                PromotedOnly = true;
+
+                trigger OnAction();
+                var
+                    SalesLine: Record "Sales Line";
+                    WarehouseRequest: Record "Warehouse Request";
+                    TempInteger: Integer;
+                    ReleaseSalesDoc: Codeunit "Release Sales Document";
+                begin
+                    // Rec.Status := Rec.Status::Open;
+                    // Rec.Modify();
+                    // Rec.RecreateSalesLinesExt('Sell-to Customer');
+                    // SalesLine.SetRange("Document No.", Rec."No.");
+                    // if SalesLine.FindSet() then
+                    //     repeat
+                    //         SalesLine."Location Code" := 'NSW';
+                    //         SalesLine.Modify();
+                    //     until SalesLine.Next() = 0;
+                    // TempInteger := 37;
+                    // // message('OnBeforeActionCreating');
+                    // // ReleaseSalesDoc.PerformManualRelease(Rec);
+                    // Rec.Status := Rec.Status::Released;
+                    // Rec.Modify();
+                    Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext", Rec);
+                end;
+
+            }
+        }
+    }
     var
         isInventoryCompany: Boolean;
 
@@ -22,4 +62,6 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then
             isInventoryCompany := false;
     end;
+
+
 }
