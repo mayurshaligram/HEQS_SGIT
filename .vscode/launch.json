@@ -7,14 +7,14 @@
 			"type": "al",
 			"environmentType": "Sandbox",
 			"environmentName": "sandbox",
-			"server": "https://businesscentral.dynamics.com/sandbox",
+			"server": "https://businesscentral.dynamics.com/",
 			"startupObjectId": 9305,
 			"startupObjectType": "Page",
 			"breakOnError": true,
 			"launchBrowser": true,
 			"enableLongRunningSqlStatements": true,
 			"enableSqlInformationDebugger": true,
-			"schemaUpdateMode": "Recreate"
+			// "schemaUpdateMode": "Recreate"
 		}
 	]
 }

@@ -1,6 +1,8 @@
 tableextension 50110 "Warehouse Activity Header_Ext" extends "Warehouse Activity Header"
 {
-    Caption = 'Warehouse Activity Header_Ext';
+    // Need Description
+    // Number of field not in the system requirement review
+
     fields
     {
         field(21; "New Sorting Method"; Enum "Before Whse. Activity Sorting Method")

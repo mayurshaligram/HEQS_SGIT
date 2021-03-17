@@ -1,15 +1,18 @@
 tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
+    // field range 50100 - 50110
     fields
     {
-        field(201; Money; Boolean)
+        // Scheduling
+        field(50100; Money; Boolean)
         {
-            Caption = 'Whether Delivery Stuff Should Receive Money From Customer.';
+            Caption = 'Receive Money';
             Editable = false;
         }
-        field(500; "Automate Purch.Doc No."; Text[20])
+        // Flow
+        field(50101; "Automate Purch.Doc No."; Text[20])
         {
-            Caption = 'Purch.Order Ref Cust';
+            Caption = 'Automate Purch.Doc No.';
             Editable = false;
         }
     }
@@ -17,7 +20,13 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
     trigger OnInsert();
     begin
+        OnCreatePurchaseOrder();
         CreatePO();
+    end;
+
+    [IntegrationEvent(false, false)]
+    local procedure OnCreatePurchaseOrder();
+    begin
     end;
 
     trigger OnAfterModify();

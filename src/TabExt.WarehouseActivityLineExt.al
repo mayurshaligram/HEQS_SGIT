@@ -1,7 +1,7 @@
 tableextension 50112 "Warehouse Activity Line_Ext" extends "Warehouse Activity Line"
 {
-    Caption = 'Warehouse Activity Line_Ext';
-
+    // Need description
+    // Field number not in the system requirement range
     fields
     {
         field(201; "Pick-up Item"; Boolean)

@@ -298,6 +298,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := SLrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
+                                    ISLrec."Qty. to Ship" := SLrec."Qty. to Ship";
+                                    ISLrec."Quantity Shipped" := SLrec."Quantity Shipped";
+                                    ISLrec."Qty. to Invoice" := SLrec."Qty. to Invoice";
                                     // ISLrec.UpdateAmounts();
                                     ISLrec.Modify()
                                 end
@@ -317,6 +320,9 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                     // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
                                     ISLrec."BOM Item" := Slrec."BOM Item";
                                     ISLrec."Unit Price" := SLrec."Unit Price";
+                                    ISLrec."Qty. to Ship" := SLrec."Qty. to Ship";
+                                    ISLrec."Quantity Shipped" := SLrec."Quantity Shipped";
+                                    ISLrec."Qty. to Invoice" := SLrec."Qty. to Invoice";
                                     // ISLrec.UpdateAmounts();
                                     ISLrec.Insert();
                                 end;

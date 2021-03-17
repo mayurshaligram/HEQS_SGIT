@@ -32,6 +32,8 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                     WarehouseRequest: Record "Warehouse Request";
                     TempInteger: Integer;
                     ReleaseSalesDoc: Codeunit "Release Sales Document";
+                    InventorySalesOrder: Record "Sales Header";
+                    SessionId: Integer;
                 begin
                     // Rec.Status := Rec.Status::Open;
                     // Rec.Modify();
@@ -47,7 +49,16 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                     // // ReleaseSalesDoc.PerformManualRelease(Rec);
                     // Rec.Status := Rec.Status::Released;
                     // Rec.Modify();
-                    Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext", Rec);
+                    Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
+                    // Post Purchase Order Invoice
+                    // Post Intercompany Sales Order Invoice
+                    SessionId := 51;
+                    InventorySalesOrder.Reset();
+                    InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
+                    InventorySalesOrder.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+                    InventorySalesOrder.FindSet();
+                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                        'HEQS International Pty Ltd', InventorySalesOrder);
                 end;
 
             }
@@ -57,7 +68,11 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         isInventoryCompany: Boolean;
 
     trigger OnOpenPage();
+    var
+        CompanyRecord: Record "Company Information";
     begin
+        // CompanyRecord.Get(Rec.CurrentCompany);
+        // Message(CompanyRecord.Id);
         isInventoryCompany := true;
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then
             isInventoryCompany := false;

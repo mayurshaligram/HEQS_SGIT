@@ -1,3 +1,4 @@
+// For Used for Web Service providing information for Power Apps
 codeunit 50100 "MiscOperations"
 {
 

@@ -24,6 +24,7 @@ pageextension 50112 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                 RetailSalesOrder: Record "Sales Header";
                 RetailSalesOrderPage: Page "Sales Order";
                 SessionID: Integer;
+                Temp: Text;
                 OK: Boolean;
             begin
                 If Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
@@ -39,15 +40,22 @@ pageextension 50112 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                     RetailSalesOrder.Reset();
                     RetailSalesOrder.ChangeCompany(InventorySalesOrder."Sell-to Customer Name");
                     RetailSalesOrder.Get(RetailPurchaseOrder."Document Type", RetailPurchaseOrder."Sales Order Ref");
+                    RetailSalesOrder."External Document No." := InventorySalesOrder."No.";
+                    RetailSalesOrder.Modify();
                     //
                     Message('Posting Retail Company Sales Order.');
                     // What about just open the page
                     // RetailSalesOrderPage.SetRecord(RetailSalesOrder);
                     // RetailSalesOrderPage.Run();
+                    Temp := InventorySalesOrder."External Document No.";
+                    InventorySalesOrder."External Document No." := '';
+                    InventorySalesOrder.Modify();
                     SessionID := 50;
-                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesOrder."Sell-to Customer Name", RetailSalesOrder)
+                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesOrder."Sell-to Customer Name", RetailSalesOrder);
                     // StopSession(SessionId, 'Logoff cache stress test session');
                     // BackSession Didn't Work Try using Codeunit to Post Sales Header in Retail Company first.
+                    // InventorySalesOrder."External Document No." := Temp;
+                    // InventorySalesOrder.Modify();
                 end;
             end;
             // trigger OnAfterAction()

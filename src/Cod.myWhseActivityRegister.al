@@ -1,3 +1,4 @@
+// ??
 codeunit 50107 "myWhse.-Activity-Register"
 {
     Permissions = TableData "Registered Whse. Activity Hdr." = i,
