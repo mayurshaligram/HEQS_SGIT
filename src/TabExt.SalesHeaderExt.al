@@ -17,10 +17,15 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     }
 
 
-    trigger OnInsert();
-    // Insert and Link Purchase Header
+    // trigger OnInsert();
+    // // Insert and Link Purchase Header
+    // begin
+    //     CreatePurchaseOrder();
+    // end;
+
+    trigger OnAfterInsert();
     begin
-        CreatePurchaseOrder();
+        OnCreatePurchaseOrder(Rec);
     end;
 
     local procedure CreatePurchaseOrder();

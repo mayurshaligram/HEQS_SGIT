@@ -37,6 +37,7 @@ codeunit 50101 "Sales Truth Mgt"
                 ToPORecord.Insert();
                 SalesHeader.UpdatePurchaseHeader(ToPORecord);
                 SalesHeader."Automate Purch.Doc No." := ToPORecord."No.";
+                SalesHeader.Modify();
             end;
         end
     end;
