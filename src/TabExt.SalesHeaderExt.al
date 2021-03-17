@@ -1,31 +1,66 @@
 tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
-    // field range 50100 - 50110
     fields
     {
-        // Scheduling
         field(50100; Money; Boolean)
         {
             Caption = 'Receive Money';
+            Description = 'This field is to indicate the whether delivery person needs to receive money from client on site';
             Editable = false;
         }
-        // Flow
         field(50101; "Automate Purch.Doc No."; Text[20])
         {
             Caption = 'Automate Purch.Doc No.';
+            Description = 'This field is to show the No. of automated purchase order';
             Editable = false;
         }
     }
 
 
     trigger OnInsert();
+    // Insert and Link Purchase Header
     begin
-        OnCreatePurchaseOrder();
-        CreatePO();
+        CreatePurchaseOrder();
+    end;
+
+    local procedure CreatePurchaseOrder();
+    var
+        PurchPaySetup: Record "Purchases & Payables Setup";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+        NoSeriesCode: Code[20];
+        NoSeries: Record "No. Series";
+        NoSeriesLine: Record "No. Series Line";
+        ToPORecord: Record "Purchase Header";
+        Vendor: Record Vendor;
+    begin
+        InventoryName := 'HEQS International Pty Ltd';
+        if Rec.CurrentCompany <> InventoryName then begin
+            PurchPaySetup.Get('');
+            NoSeriesCode := PurchPaySetup."Order Nos.";
+            NoSeries.Get(NoSeriesCode);
+            NoSeriesLine.SetRange("Series Code", NoSeries.Code);
+
+            if NoSeriesLine.FindSet() = false then
+                Error('Please Create No series line');
+            begin
+                ToPORecord.Init();
+                ToPORecord."Document Type" := Rec."Document Type";
+                ToPORecord."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
+                ToPORecord."Sales Order Ref" := Rec."No.";
+                InventoryName := 'HEQS INTERNATIONAL PTY LTD';
+                Vendor."Search Name" := InventoryName;
+                Vendor.FindSet();
+                ToPORecord."Buy-from Vendor No." := Vendor."No.";
+                ToPORecord."Buy-from Vendor Name" := Vendor.Name;
+                ToPORecord.Insert();
+                UpdatePurchaseHeader(ToPORecord);
+                Rec."Automate Purch.Doc No." := ToPORecord."No.";
+            end;
+        end
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnCreatePurchaseOrder();
+    local procedure OnCreatePurchaseOrder(var SalesHeader: Record "Sales Header");
     begin
     end;
 
@@ -195,42 +230,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         Exit(mytext);
     end;
 
-    local procedure CreatePO();
-    var
-        PurchPaySetup: Record "Purchases & Payables Setup";
-        NoSeriesMgt: Codeunit NoSeriesManagement;
-        NoSeriesCode: Code[20];
-        NoSeries: Record "No. Series";
-        NoSeriesLine: Record "No. Series Line";
-        ToPORecord: Record "Purchase Header";
-        Vendor: Record Vendor;
-    begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if Rec.CurrentCompany <> InventoryName then begin
-            PurchPaySetup.Get('');
-            NoSeriesCode := PurchPaySetup."Order Nos.";
-            NoSeries.Get(NoSeriesCode);
-            NoSeriesLine.SetRange("Series Code", NoSeries.Code);
 
-            if NoSeriesLine.FindSet() = false then
-                Error('Please Create No series line');
-            begin
-                ToPORecord.Init();
-                // Message('The purchase Order %1', ToPORecord."No.");
-                ToPORecord."Document Type" := Rec."Document Type";
-                ToPORecord."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
-                ToPORecord."Sales Order Ref" := Rec."No.";
-                InventoryName := 'HEQS INTERNATIONAL PTY LTD';
-                Vendor."Search Name" := InventoryName;
-                Vendor.FindSet();
-                ToPORecord."Buy-from Vendor No." := Vendor."No.";
-                ToPORecord."Buy-from Vendor Name" := Vendor.Name;
-                ToPORecord.Insert();
-                UpdatePurchaseHeader(ToPORecord);
-                Rec."Automate Purch.Doc No." := ToPORecord."No.";
-            end;
-        end
-    end;
 
     procedure UpdatePurchaseHeader(PurchaseHeader: Record "Purchase Header");
     var
