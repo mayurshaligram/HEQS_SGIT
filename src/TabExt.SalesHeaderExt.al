@@ -16,52 +16,9 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         }
     }
 
-
-    // trigger OnInsert();
-    // // Insert and Link Purchase Header
-    // begin
-    //     CreatePurchaseOrder();
-    // end;
-
     trigger OnAfterInsert();
     begin
         OnCreatePurchaseOrder(Rec);
-    end;
-
-    local procedure CreatePurchaseOrder();
-    var
-        PurchPaySetup: Record "Purchases & Payables Setup";
-        NoSeriesMgt: Codeunit NoSeriesManagement;
-        NoSeriesCode: Code[20];
-        NoSeries: Record "No. Series";
-        NoSeriesLine: Record "No. Series Line";
-        ToPORecord: Record "Purchase Header";
-        Vendor: Record Vendor;
-    begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if Rec.CurrentCompany <> InventoryName then begin
-            PurchPaySetup.Get('');
-            NoSeriesCode := PurchPaySetup."Order Nos.";
-            NoSeries.Get(NoSeriesCode);
-            NoSeriesLine.SetRange("Series Code", NoSeries.Code);
-
-            if NoSeriesLine.FindSet() = false then
-                Error('Please Create No series line');
-            begin
-                ToPORecord.Init();
-                ToPORecord."Document Type" := Rec."Document Type";
-                ToPORecord."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
-                ToPORecord."Sales Order Ref" := Rec."No.";
-                InventoryName := 'HEQS INTERNATIONAL PTY LTD';
-                Vendor."Search Name" := InventoryName;
-                Vendor.FindSet();
-                ToPORecord."Buy-from Vendor No." := Vendor."No.";
-                ToPORecord."Buy-from Vendor Name" := Vendor.Name;
-                ToPORecord.Insert();
-                UpdatePurchaseHeader(ToPORecord);
-                Rec."Automate Purch.Doc No." := ToPORecord."No.";
-            end;
-        end
     end;
 
     [IntegrationEvent(false, false)]
