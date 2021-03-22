@@ -1,9 +1,11 @@
 tableextension 50102 "Item_Ext" extends "Item"
 {
-    trigger OnBeforeInsert()
+
+    trigger OnBeforeModify()
     begin
         if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
-            Error('Please only edit items in HEQS International Pty Ltd');
+            if Rec.Type <> Rec.Type::Service then
+                Error('Please only creat new service item in Retail, for other type item please go to HEQS International.');
     end;
 
     // trigger OnBeforeModify()

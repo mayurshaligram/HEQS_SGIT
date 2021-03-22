@@ -1,6 +1,5 @@
 pageextension 50124 "Purchase Lines Subform_Ext" extends "Purchase Order Subform"
 {
-    Caption = 'Purchase Order Subform_Ext';
     layout
     {
         modify("No.")

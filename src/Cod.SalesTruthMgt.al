@@ -5,7 +5,6 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
-    // OnAfterInsert Trigger
     [EventSubscriber(ObjectType::Table, 36, 'OnCreatePurchaseOrder', '', false, false)]
     local procedure CreatePurchaseOrder(var SalesHeader: Record "Sales Header");
     var
@@ -34,15 +33,169 @@ codeunit 50101 "Sales Truth Mgt"
                 TempText := 'HEQS INTERNATIONAL PTY LTD';
                 Vendor."Search Name" := TempText;
                 Vendor.FindSet();
-                PurchaseOrder."Buy-from Vendor No." := Vendor."No.";
-                PurchaseOrder."Buy-from Vendor Name" := Vendor.Name;
+                PurchaseOrder.Validate("Buy-from Vendor No.", Vendor."No.");
+                PurchaseOrder."Due Date" := System.Today();
+                PurchaseOrder."Currency Factor" := SalesHeader."Currency Factor";
                 PurchaseOrder.Insert();
                 SalesHeader.UpdatePurchaseHeader(PurchaseOrder);
                 SalesHeader."Automate Purch.Doc No." := PurchaseOrder."No.";
                 SalesHeader.Modify();
             end;
         end
+        else begin
+            UpdateICSalesOrder(SalesHeader);
+        end;
     end;
+
+    [EventSubscriber(ObjectType::Table, 37, 'onUpdatePurch_IC_BOM', '', false, false)]
+    local procedure UpdatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    begin
+        UpdateBOMSalesLine(SalesLine);
+        if SalesLine.CurrentCompany <> 'HEQS International Pty Ltd' then begin
+            UpdatePurchLine(SalesLine);
+            UpdateICSalesLine(SalesLine);
+        end;
+
+    end;
+
+    local procedure UpdateBOMSalesLine(var SalesLine: Record "Sales Line");
+    var
+        BOMComponent: Record "BOM Component";
+        BOMSalesLine: Record "Sales Line";
+    begin
+        BOMComponent.Reset();
+        BOMComponent.SetRange("Parent Item No.", SalesLine."No.");
+        if BOMComponent.FindSet() then
+            repeat
+                BOMSalesLine.Reset();
+                BOMSalesLine.SetRange("Document Type", SalesLine."Document Type");
+                BOMSalesLine.SetRange("Document No.", SalesLine."Document No.");
+                BOMSalesLine.SetRange("No.", BOMComponent."No.");
+                BOMSalesLine.SetRange("BOM Item", true);
+                if BOMSalesLine.FindSet() then
+                    repeat
+                        BOMSalesLine.Validate("Location Code", SalesLine."Location Code");
+                        BOMSalesLine.Validate(Quantity, SalesLine.Quantity * BOMComponent."Quantity per");
+                        BOMSalesLine.Modify();
+                    until BOMSalesLine.Next() = 0;
+            until BOMComponent.Next() = 0;
+    end;
+
+    local procedure UpdatePurchLine(var SalesLine: Record "Sales Line");
+    var
+        Item: Record Item;
+        SalesHeader: Record "Sales Header";
+        PurchaseLine: Record "Purchase Line";
+        TempSalesLine: Record "Sales Line";
+    begin
+        Item.Get(SalesLine."No.");
+        if Item.Type = Item.Type::Service then
+            exit;
+
+        SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
+
+        TempSalesLine.SetRange("Document Type", SalesLine."Document Type");
+        TempSalesLine.SetRange("Document No.", SalesLine."Document No.");
+
+        if TempSalesLine.FindSet() then
+            repeat
+                if PurchaseLine.Get(TempSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") = false then
+                    CreatePurchaseLine(TempSalesLine)
+                else begin
+                    PurchaseLine.Validate("No.", TempSalesLine."No.");
+                    PurchaseLine."BOM Item" := TempSalesLine."BOM Item";
+                    PurchaseLine.Validate(Quantity, TempSalesLine.Quantity);
+                    PurchaseLine.Validate("Location Code", TempSalesLine."Location Code");
+                    PurchaseLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
+                    PurchaseLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
+
+                    Item.Get(TempSalesLine."No.");
+                    PurchaseLine."Direct Unit Cost" := Item."Unit Cost";
+                    PurchaseLine.Modify();
+                end;
+            until TempSalesLine.Next() = 0;
+    end;
+
+    local procedure UpdateICSalesLine(var SalesLine: Record "Sales Line");
+    var
+        Item: Record Item;
+        SalesHeader: Record "Sales Header";
+        ICSalesHeader: Record "Sales Header";
+        TempSalesLine: Record "Sales Line";
+        ICSalesLine: Record "Sales Line";
+    begin
+        Item.Get(SalesLine."No.");
+        if Item.Type = Item.Type::Service then
+            exit;
+
+        SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
+
+        ICSalesHeader.ChangeCompany('HEQS International Pty Ltd');
+        ICSalesHeader.SetRange("External Document No.", SalesHeader."Automate Purch.Doc No.");
+        if ICSalesHeader.FindSet() = false then exit;
+
+        TempSalesLine.SetRange("Document Type", SalesLine."Document Type");
+        TempSalesLine.SetRange("Document No.", SalesLine."Document No.");
+
+        if TempSalesLine.FindSet() then begin
+            Item.Get(TempSalesLine."No.");
+            if Item.Type <> Item.Type::Service then
+                repeat
+                    ICSalesLine.ChangeCompany('HEQS International Pty Ltd');
+                    if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", TempSalesLine."Line No.") = false then
+                        CreateICSalesLine(TempSalesLine)
+                    else begin
+                        ICSalesLine.Validate("No.", TempSalesLine."No.");
+                        ICSalesLine."BOM Item" := TempSalesLine."BOM Item";
+                        ICSalesLine.Validate(Quantity, TempSalesLine.Quantity);
+                        ICSalesLine.Validate("Location Code", TempSalesLine."Location Code");
+                        ICSalesLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
+                        ICSalesLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
+                        ICSalesLine."Unit Price" := TempSalesLine."Unit Price";
+                        ICSalesLine.Modify();
+                    end;
+                until TempSalesLine.Next() = 0;
+        end;
+    end;
+
+
+
+    local procedure UpdateICSalesOrder(var ICSalesHeader: Record "Sales Header");
+    var
+        RetailSalesOrder: Record "Sales Header";
+        RetailSalesLine: Record "Sales Line";
+        ICSalesLine: Record "Sales Line";
+    begin
+        if ICSalesHeader."External Document No." = '' then
+            exit;
+
+        RetailSalesOrder.Reset();
+        RetailSalesOrder.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+        RetailSalesOrder.SetRange("Automate Purch.Doc No.", ICSalesHeader."External Document No.");
+        RetailSalesOrder.Find();
+
+        ICSalesHeader.Validate("Work Description", RetailSalesOrder."Work Description");
+        ICSalesHeader.Validate("Location Code", RetailSalesOrder."Location Code");
+        ICSalesHeader."Due Date" := RetailSalesOrder."Due Date";
+        ICSalesHeader.Status := RetailSalesOrder.Status::Released;
+        ICSalesHeader.Modify();
+
+        RetailSalesLine.Reset();
+        RetailSalesLine.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+        RetailSalesLine.SetRange("Document Type", RetailSalesOrder."Document Type");
+        RetailSalesLine.SetRange("Document No.", RetailSalesOrder."No.");
+        if RetailSalesLine.FindSet() then
+            repeat
+                ICSalesLine.Reset();
+                ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", RetailSalesLine."Line No.");
+                ICSalesLine.Validate("No.", RetailSalesLine."No.");
+                ICSalesLine.Validate("Location Code", RetailSalesLine."Location Code");
+                ICSalesLine.Validate(Quantity, RetailSalesLine.Quantity);
+                ICSalesLine.Validate("BOM Item", RetailSalesLine."BOM Item");
+                ICSalesLine.Modify();
+            until RetailSalesLine.Next() = 0;
+    end;
+
 
     [EventSubscriber(ObjectType::Table, 37, 'OnCreatePurch_IC_BOM', '', false, false)]
     local procedure CreatePurch_IC_BOM(var SalesLine: Record "Sales Line");
@@ -170,6 +323,7 @@ codeunit 50101 "Sales Truth Mgt"
                 if (ToSalesLine.Type = ToSalesLine.Type::Item) and (ToSalesLine.Reserve = ToSalesLine.Reserve::Always) then
                     ToSalesLine.AutoReserve();
 
+
                 CreatePurchaseLine(ToSalesLine);
                 CreateICSalesLine(ToSalesLine);
             until BOMComponent.Next = 0;
@@ -186,6 +340,9 @@ codeunit 50101 "Sales Truth Mgt"
         IsMainItem: Boolean;
 
     begin
+        Item.Get(SalesLine."No.");
+        If Item.Type = Item.Type::Service then
+            exit;
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
         Vendor.FindSet();
 
@@ -205,6 +362,7 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine.Validate("Buy-from Vendor No.", Vendor."No.");
         PurchaseLine."VAT Bus. Posting Group" := SalesLine."VAT Bus. Posting Group";
         PurchaseLine."VAT Prod. Posting Group" := PurchaseLine."VAT Prod. Posting Group";
+        PurchaseLine."Direct Unit Cost" := Item."Unit Cost";
         PurchaseLine.Insert();
         if (PurchaseLine."Direct Unit Cost" = 0) and (PurchaseLine."BOM Item" = false) then
             Error('Please Set Purchase Price for item %1', Item."No.");
@@ -215,7 +373,11 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine: Record "Sales Line";
         ICSalesHeader: Record "Sales Header";
         SalesHeader: Record "Sales Header";
+        Item: Record Item;
     begin
+        Item.Get(SalesLine."No.");
+        if Item.Type = Item.Type::Service then exit;
+
         SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
 
         ICSalesHeader.ChangeCompany(InventoryCompanyName);
@@ -228,6 +390,7 @@ codeunit 50101 "Sales Truth Mgt"
             ICSalesLine."Line No." := SalesLine."Line No.";
             ICSalesLine.Type := SalesLine.Type;
             ICSalesLine."BOM Item" := SalesLine."BOM Item";
+            ICSalesLine.Insert();
         end;
 
     end;

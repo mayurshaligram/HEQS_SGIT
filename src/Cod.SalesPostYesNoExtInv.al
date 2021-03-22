@@ -142,14 +142,14 @@ codeunit 50103 "Sales-Post (Yes/No) Ext Inv"
                         exit(false);
             end;
             "Print Posted Documents" := false;
-            "Tax Document Marked" := false;
-            case "Tax Document Type" of
-                "Tax Document Type"::"Document Post":
-                    "Tax Document Marked" := true;
-                "Tax Document Type"::Prompt:
-                    if Confirm(TaxDocPostConfirmQst, false) then
-                        "Tax Document Marked" := true;
-            end;
+            // "Tax Document Marked" := false;
+            // case "Tax Document Type" of
+            //     "Tax Document Type"::"Document Post":
+            //         "Tax Document Marked" := true;
+            //     "Tax Document Type"::Prompt:
+            //         if Confirm(TaxDocPostConfirmQst, false) then
+            //             "Tax Document Marked" := true;
+            // end;
         end;
         exit(true);
     end;
@@ -161,13 +161,13 @@ codeunit 50103 "Sales-Post (Yes/No) Ext Inv"
         with SalesHeader do
             if Invoice or ("Document Type" in ["Document Type"::Invoice, "Document Type"::"Credit Memo"]) then begin
                 GLSetup.Get();
-                if GLSetup."Enable Tax Invoices" then begin
-                    if "Tax Document Marked" then
-                        SalesSetup.TestField("Posted Tax Invoice Nos.");
-                    if "Document Type" in ["Document Type"::"Credit Memo", "Document Type"::"Return Order"] then
-                        if "Tax Document Marked" then
-                            SalesSetup.TestField("Posted Tax Credit Memo Nos");
-                end;
+                // if GLSetup."Enable Tax Invoices" then begin
+                //     if "Tax Document Marked" then
+                //         SalesSetup.TestField("Posted Tax Invoice Nos.");
+                //     if "Document Type" in ["Document Type"::"Credit Memo", "Document Type"::"Return Order"] then
+                //         if "Tax Document Marked" then
+                //             SalesSetup.TestField("Posted Tax Credit Memo Nos");
+                // end;
             end;
     end;
 

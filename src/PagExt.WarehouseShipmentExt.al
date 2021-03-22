@@ -41,6 +41,7 @@ pageextension 50112 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                     RetailSalesOrder.ChangeCompany(InventorySalesOrder."Sell-to Customer Name");
                     RetailSalesOrder.Get(RetailPurchaseOrder."Document Type", RetailPurchaseOrder."Sales Order Ref");
                     RetailSalesOrder."External Document No." := InventorySalesOrder."No.";
+                    RetailSalesOrder."Automate Purch.Doc No." := '';
                     RetailSalesOrder.Modify();
                     //
                     Message('Posting Retail Company Sales Order.');

@@ -26,6 +26,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     begin
     end;
 
+
+
     trigger OnAfterModify();
     var
         TempText: Text[20];
@@ -38,6 +40,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         Whship: Record "Warehouse Request";
         ReleaseSalesDoc: Codeunit "Release Sales Document";
         TextList: List of [Text];
+
+        ICSalesOrder: Record "Sales Header";
     begin
         InventoryName := 'HEQS International Pty Ltd';
         if Rec.CurrentCompany <> InventoryName then begin
@@ -52,6 +56,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             if (SORecord.findset) then
                 repeat
                     ICrec.ChangeCompany(InventoryName);
+                    ICrec."Due Date" := Rec."Due Date";
                     ICRec.Get(SORecord."Document type", SORecord."No.");
                     ICrec."Ship-to Name" := rec."Ship-to Name";
                     ICrec."Ship-to Address" := rec."Ship-to Address";
@@ -111,6 +116,11 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         until (SLrec.Next() = 0);
                 until (SORecord.next() = 0);
         end;
+
+        ICSalesOrder.ChangeCompany(InventoryName);
+        ICSalesOrder.SetRange("No.", Rec."Automate Purch.Doc No.");
+        if ICSalesOrder.FindSet() then
+            ICSalesOrder.Status := Rec.Status;
     end;
 
     trigger OnAfterDelete();
@@ -285,8 +295,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         ApprovalsMgmt: Codeunit "Approvals Mgmt.";
         WhseSourceHeader: Codeunit "Whse. Validate Source Header";
         SalesLineReserve: Codeunit "Sales Line-Reserve";
-        PostCodeCheck: Codeunit "Post Code Check";
-        BASManagement: Codeunit "BAS Management";
+        // PostCodeCheck: Codeunit "Post Code Check";
+        // BASManagement: Codeunit "BAS Management";
         PostingSetupMgt: Codeunit PostingSetupManagement;
         ApplicationAreaMgmt: Codeunit "Application Area Mgmt.";
         CurrencyDate: Date;

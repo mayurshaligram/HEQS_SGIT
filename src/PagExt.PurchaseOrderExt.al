@@ -68,9 +68,32 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
             end;
             //    
         }
+        modify(Release)
+        {
+            trigger OnBeforeAction();
+            begin
+                if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."Sales Order Ref" = '') then begin
+
+                end
+                else
+                    Error('Please do release action in "%1", Sales Order: "%2"', Rec.CurrentCompany, Rec."Sales Order Ref");
+            end;
+        }
+        modify(Reopen)
+        {
+            trigger OnBeforeAction();
+            begin
+                if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."Sales Order Ref" = '') then begin
+
+                end
+                else
+                    Error('Please do release action in "%1", Sales Order: "%2"', Rec.CurrentCompany, Rec."Sales Order Ref");
+            end;
+        }
     }
     var
         WorkDescription: Text;
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
     procedure GetWorkDescription(): Text
     var
