@@ -43,19 +43,18 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
         ICSalesOrder: Record "Sales Header";
     begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if Rec.CurrentCompany <> InventoryName then begin
+        if Rec.CurrentCompany <> InventoryCompanyName then begin
             if POrecord.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") then begin
                 UpdatePurchaseHeader(POrecord);
             end;
 
             // Action 2 SO
-            SORecord.ChangeCompany(InventoryName);
+            SORecord.ChangeCompany(InventoryCompanyName);
             SORecord.SetCurrentKey("External Document No.");
             SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
             if (SORecord.findset) then
                 repeat
-                    ICrec.ChangeCompany(InventoryName);
+                    ICrec.ChangeCompany(InventoryCompanyName);
                     ICrec."Due Date" := Rec."Due Date";
                     ICRec.Get(SORecord."Document type", SORecord."No.");
                     ICrec."Ship-to Name" := rec."Ship-to Name";
@@ -69,7 +68,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     ICREC.Modify();
                     SLrec.SetCurrentKey("Document No.");
                     SLrec.SetRange("Document No.", rec."No.");
-                    ISLrec.ChangeCompany(InventoryName);
+                    ISLrec.ChangeCompany(InventoryCompanyName);
                     if (SLrec.findset) then
                         repeat
                             if SLrec.Type = SLrec.Type::Item then begin
@@ -117,7 +116,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                 until (SORecord.next() = 0);
         end;
 
-        ICSalesOrder.ChangeCompany(InventoryName);
+        ICSalesOrder.ChangeCompany(InventoryCompanyName);
         ICSalesOrder.SetRange("No.", Rec."Automate Purch.Doc No.");
         if ICSalesOrder.FindSet() then
             ICSalesOrder.Status := Rec.Status;
@@ -131,20 +130,19 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         SORecord: Record "Sales Header";
         icrec: Record "sales Header";
     begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if rec.CurrentCompany <> InventoryName then begin
+        if rec.CurrentCompany <> InventoryCompanyName then begin
             // Action 1 PO 
             if POrecord.Get(Porecord."Document Type"::Order, Rec."Automate Purch.Doc No.") then begin
                 POrecord.Delete();
             end;
 
             // Action 2 SO
-            SORecord.ChangeCompany(InventoryName);
+            SORecord.ChangeCompany(InventoryCompanyName);
             SORecord.SetCurrentKey("External Document No.");
             SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
             if (SORecord.findset) then
                 repeat
-                    ICrec.ChangeCompany(InventoryName);
+                    ICrec.ChangeCompany(InventoryCompanyName);
                     ICRec.get(SORecord."Document type", SORecord."No.");
                     ICREC.Delete();
                 until (SORecord.next() = 0);
@@ -179,7 +177,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                 pline."Unit of Measure" := sline."Unit of Measure";
                 pline."Bin Code" := sline."Bin Code";
                 pline."Unit Price (LCY)" := sline."Unit Price";
-                Vendor."Search Name" := InventoryName;
+                Vendor."Search Name" := InventoryCompanyName;
                 Vendor.FindSet();
                 pline."Buy-from Vendor No." := Vendor."No.";
                 pline."Pay-to Vendor No." := Vendor."No.";
@@ -207,10 +205,10 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     procedure UpdatePurchaseHeader(PurchaseHeader: Record "Purchase Header");
     var
         Vendor: Record Vendor;
-        InventoryName: Text;
+        InventoryCompanyName: Text;
     begin
-        InventoryName := 'HEQS INTERNATIONAL PTY LTD';
-        Vendor."Search Name" := InventoryName;
+        InventoryCompanyName := 'HEQS INTERNATIONAL PTY LTD';
+        Vendor."Search Name" := InventoryCompanyName;
         Vendor.FindSet();
         PurchaseHeader."Buy-from Vendor No." := Vendor."No.";
         PurchaseHeader."Buy-from Vendor Name" := Vendor.Name;
@@ -238,7 +236,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     end;
 
     var
-        InventoryName: Text;
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
         Text003: Label 'You cannot rename a %1.';
         ConfirmChangeQst: Label 'Do you want to change %1?', Comment = '%1 = a Field Caption like Currency Code';
         Text005: Label 'You cannot reset %1 because the document still has one or more lines.';
