@@ -531,12 +531,12 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             IsICSalesHeader := true;
 
         if IsICSalesHeader then begin
-            UpdateICStatus();
+            UpdateStatus();
             Currpage.Editable(false);
         end;
     end;
 
-    local procedure UpdateICStatus();
+    local procedure UpdateStatus();
     var
         RetailSalesOrder: Record "Sales Header";
     begin

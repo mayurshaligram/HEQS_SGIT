@@ -5,6 +5,13 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+    [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
+    local procedure AfterCreateSalesDocument(var SalesHeader: Record "Sales Header"; ICInboxSalesHeader: Record "IC Inbox Sales Header"; HandledICInboxSalesHeader: Record "Handled IC Inbox Sales Header");
+    begin
+        SalesHeader.Status := SalesHeader.Status::Released;
+        SalesHeader.Modify();
+    end;
+
     [EventSubscriber(ObjectType::Table, 36, 'OnInsertPurchaseHeader', '', false, false)]
     local procedure InsertPurchaseHeader(var SalesHeader: Record "Sales Header");
     var
