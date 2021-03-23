@@ -106,9 +106,16 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
     end;
 
     trigger OnAfterGetRecord()
+    var
+        IsAutomatePurchHeader: Boolean;
     begin
         WorkDescription := GetWorkDescription;
-        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+
+        IsAutomatePurchHeader := false;
+        if (Rec.CurrentCompany <> InventoryCompanyName) and (Rec."Sales Order Ref" <> '') then
+            IsAutomatePurchHeader := true;
+
+        if IsAutomatePurchHeader then
             Currpage.Editable(false);
     end;
 }

@@ -28,7 +28,7 @@ codeunit 50101 "Sales Truth Mgt"
         NoSeriesCode: Code[20];
         NoSeries: Record "No. Series";
         NoSeriesLine: Record "No. Series Line";
-        PurchaseOrder: Record "Purchase Header";
+        PurchaseHeader: Record "Purchase Header";
         Vendor: Record Vendor;
     begin
         PurchPaySetup.Get('');
@@ -39,19 +39,40 @@ codeunit 50101 "Sales Truth Mgt"
         if NoSeriesLine.FindSet() = false then
             Error('Please Create No series line');
         begin
-            PurchaseOrder.Init();
-            PurchaseOrder."Document Type" := SalesHeader."Document Type";
-            PurchaseOrder."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
-            PurchaseOrder."Sales Order Ref" := SalesHeader."No.";
+            PurchaseHeader.Init();
+            PurchaseHeader."Document Type" := SalesHeader."Document Type";
+            PurchaseHeader."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
+            PurchaseHeader."Sales Order Ref" := SalesHeader."No.";
             TempText := 'HEQS INTERNATIONAL PTY LTD';
             Vendor."Search Name" := TempText;
             Vendor.FindSet();
-            PurchaseOrder.Validate("Buy-from Vendor No.", Vendor."No.");
-            PurchaseOrder."Due Date" := System.Today();
-            PurchaseOrder."Currency Factor" := SalesHeader."Currency Factor";
-            PurchaseOrder.Insert();
-            SalesHeader.UpdatePurchaseHeader(PurchaseOrder);
-            SalesHeader."Automate Purch.Doc No." := PurchaseOrder."No.";
+            PurchaseHeader.Validate("Buy-from Vendor No.", Vendor."No.");
+            PurchaseHeader."Due Date" := System.Today();
+            PurchaseHeader."Currency Factor" := SalesHeader."Currency Factor";
+            PurchaseHeader."Buy-from Vendor No." := Vendor."No.";
+            PurchaseHeader."Buy-from Vendor Name" := Vendor.Name;
+            // Update Based on SO
+            PurchaseHeader."Pay-to Vendor No." := Vendor."No.";
+            PurchaseHeader."Pay-to Name" := Vendor.Name;
+            PurchaseHeader."VAT Bus. Posting Group" := Vendor."VAT Bus. Posting Group";
+            PurchaseHeader."Order Date" := System.Today();
+
+            PurchaseHeader."Document Date" := SalesHeader."Document Date";
+            PurchaseHeader."Location Code" := SalesHeader."Location Code";
+            PurchaseHeader.Amount := SalesHeader.Amount;
+            SalesHeader.CALCFIELDS("Work Description");
+            PurchaseHeader."Work Description" := SalesHeader."Work Description";
+            PurchaseHeader."Ship-to Address" := SalesHeader."Ship-to Address";
+            PurchaseHeader."Ship-to Contact" := SalesHeader."Ship-to Contact";
+            PurchaseHeader."Currency Code" := SalesHeader."Currency Code";
+            PurchaseHeader."Ship-to Name" := SalesHeader."Ship-to Name";
+            PurchaseHeader."Ship-to Address" := SalesHeader."Ship-to Address";
+            PurchaseHeader."Send IC Document" := true;
+            PurchaseHeader."Posting Date" := SalesHeader."Posting Date";
+            PurchaseHeader."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
+            PurchaseHeader."Status" := SalesHeader."Status";
+            PurchaseHeader.Insert();
+            SalesHeader."Automate Purch.Doc No." := PurchaseHeader."No.";
             SalesHeader.Modify();
         end;
     end;
