@@ -11,14 +11,12 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 ErrorMessage: Label 'Please release the current Sales Order(%1) in Sales Order at Retail Company';
                 SalesOrder: Text;
                 TempText: Text;
-                InventoryName: Text;
             begin
-                InventoryName := 'HEQS International Pty Ltd';
-                if Rec.CurrentCompany = InventoryName then
+                if Rec.CurrentCompany = InventoryCompanyName then
                     if Rec."External Document No." <> '' then begin
                         Error(ErrorMessage);
                     end;
-                if Rec.CurrentCompany <> InventoryName then begin
+                if Rec.CurrentCompany <> InventoryCompanyName then begin
                     if PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") = False then begin
                         PurchaseHeader.Init();
                         PurchaseHeader."Document Type" := Rec."Document Type";
@@ -43,21 +41,19 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 Whship: Record "Warehouse Request";
                 TempText: Text[20];
                 hasPO: Boolean;
-                InventoryName: Text;
                 InventoryICInboxTransaction: Record "IC Inbox Transaction";
                 ICPage: Page "IC Inbox Transactions";
             begin
-                InventoryName := 'HEQS International Pty Ltd';
-                if Rec.CurrentCompany <> InventoryName then begin
+                if Rec.CurrentCompany <> InventoryCompanyName then begin
                     PurchaseHeader.Get(Rec."Document Type"::Order, Rec."Automate Purch.Doc No.");
                     Rec.UpdatePurchaseHeader(PurchaseHeader);
-                    SORecord.ChangeCompany(InventoryName);
+                    SORecord.ChangeCompany(InventoryCompanyName);
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
                     if not (SORecord.findset) then
                         if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
                             ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
-                    InventoryICInboxTransaction.ChangeCompany(InventoryName);
+                    InventoryICInboxTransaction.ChangeCompany(InventoryCompanyName);
                     if InventoryICInboxTransaction.FindSet() then
                         repeat
                             InventoryICInboxTransaction."Line Action" := InventoryICInboxTransaction."Line Action"::Accept;
@@ -65,12 +61,12 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                             InventoryICInboxTransaction.Modify();
                             ICAutomate(InventoryICInboxTransaction);
                         until InventoryICInboxTransaction.Next() = 0;
-                    SORecord.ChangeCompany(InventoryName);
+                    SORecord.ChangeCompany(InventoryCompanyName);
                     SORecord.SetCurrentKey("External Document No.");
                     SORecord.SetRange("External Document No.", PurchaseHeader."No.");
                     if (SORecord.findset) then
                         repeat
-                            Whship.ChangeCompany(InventoryName);
+                            Whship.ChangeCompany(InventoryCompanyName);
                             Whship.Init();
                             Whship."Source Document" := Whship."Source Document"::"Sales Order";
                             Whship."Source No." := SORecord."No.";
@@ -79,7 +75,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                             Whship."Destination No." := SORecord."Sell-to Customer No.";
                             Whship."Shipping Advice" := Whship."Shipping Advice"::Partial;
                             Whship.Insert();
-                            ICrec.ChangeCompany(InventoryName);
+                            ICrec.ChangeCompany(InventoryCompanyName);
                             ICRec.Get(SORecord."Document type", SORecord."No.");
                             if Rec.Status = Rec.Status::Released then
                                 if ICRec.Status <> Rec.Status then
@@ -101,10 +97,8 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             var
                 SalesOrder: Text;
                 ErrorMessage: Label 'Please reopen the current Sales Order(%1) in Sales Order at Retail Company';
-                InventoryName: Text;
             begin
-                InventoryName := 'HEQS International Pty Ltd';
-                if Rec.CurrentCompany = InventoryName then
+                if Rec.CurrentCompany = InventoryCompanyName then
                     if Rec."External Document No." <> '' then begin
                         Error(ErrorMessage, Rec."No.");
                     end;
@@ -432,7 +426,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         // }
     }
     var
-        InventoryName: Text;
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
     // trigger OnClosePage();
     // var
@@ -445,19 +439,18 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
     //     SLrec: Record "Sales Line";
     //     ReleaseSalesDoc: Codeunit "Release Sales Document";
     // begin
-    //     InventoryName := 'HEQS International Pty Ltd';
-    //     if (Rec.CurrentCompany <> InventoryName) and (Rec."No." <> '') then begin
+    //     if (Rec.CurrentCompany <> InventoryCompanyName) and (Rec."No." <> '') then begin
     //         if POrecord.Get(Porecord."Document Type"::Order, Rec."Automate Purch.Doc No.") then begin
     //             Rec.UpdatePurchaseHeader(POrecord);
     //         end;
 
     //         // Action 2 SO
-    //         SORecord.ChangeCompany(InventoryName);
+    //         SORecord.ChangeCompany(InventoryCompanyName);
     //         SORecord.SetCurrentKey("External Document No.");
     //         SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
     //         if (SORecord.findset) then
     //             repeat
-    //                 ICrec.ChangeCompany(InventoryName);
+    //                 ICrec.ChangeCompany(InventoryCompanyName);
     //                 ICRec.get(SORecord."Document type", SORecord."No.");
     //                 if Rec.Status = Rec.Status::Released then
     //                     if ICrec.status = Rec.Status::Released then
@@ -472,7 +465,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
     //                 ICREC.Modify();
     //                 SLrec.SetCurrentKey("Document No.");
     //                 SLrec.SetRange("Document No.", Rec."No.");
-    //                 ISLrec.ChangeCompany(InventoryName);
+    //                 ISLrec.ChangeCompany(InventoryCompanyName);
     //                 if (SLrec.findset) then
     //                     repeat
     //                         if SLrec.Type = SLrec.Type::Item then begin
@@ -531,10 +524,8 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
     trigger OnAfterGetRecord();
     var
         RetailSalesOrder: Record "Sales Header";
-        InventroyName: Text;
     begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if (Rec.CurrentCompany = InventoryName) and (Rec."External Document No." <> '') then begin
+        if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."External Document No." <> '') then begin
             RetailSalesOrder.ChangeCompany(Rec."Sell-to Customer Name");
             RetailSalesOrder.SetRange("Automate Purch.Doc No.", Rec."External Document No.");
             if RetailSalesOrder.FindSet() then
