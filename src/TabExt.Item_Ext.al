@@ -2,10 +2,20 @@ tableextension 50102 "Item_Ext" extends "Item"
 {
 
     trigger OnBeforeModify()
+    var
+        IsValid: Boolean;
     begin
-        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
-            if Rec.Type <> Rec.Type::Service then
+        IsValid := false;
+        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then begin
+            if (Rec.Type = Rec.Type::Inventory) and (Rec."Unit Cost" <> xRec."Unit Cost") then
+                IsValid := true;
+
+            if Rec.Type = Rec.Type::Service then
+                IsValid := true;
+
+            if IsValid = false then
                 Error('Please only creat new service item in Retail, for other type item please go to HEQS International.');
+        end;
     end;
 
     // trigger OnBeforeModify()

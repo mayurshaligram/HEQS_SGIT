@@ -37,7 +37,22 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                     PurchaseLine: Record "Purchase Line";
 
                     RetailSalesLine: Record "Sales Line";
+
+                    TempSalesLine: Record "Sales Line";
+                    TempItem: Record Item;
+                    IsValideIC: Boolean;
+                // Only the Sales Header associated with more then one inventory item sale line could be pass
                 begin
+                    IsValideIC := false;
+                    TempSalesLine.SetRange("Document No.", Rec."No.");
+                    TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
+                    if TempSalesLine.FindSet() then
+                        repeat
+                            TempItem.Get(TempSalesLine."No.");
+                            if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
+                        until TempSalesLine.Next() = 0;
+
+                    if IsValideIC = false then Error('Please Only use the normal Posting');
                     SessionId := 51;
 
                     InventorySalesOrder.Reset();

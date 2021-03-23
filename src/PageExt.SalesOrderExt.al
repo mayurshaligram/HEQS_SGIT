@@ -43,50 +43,65 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 hasPO: Boolean;
                 InventoryICInboxTransaction: Record "IC Inbox Transaction";
                 ICPage: Page "IC Inbox Transactions";
+
+                TempSalesLine: Record "Sales Line";
+                TempItem: Record Item;
+                IsValideIC: Boolean;
+            // Only the Sales Header associated with more then one inventory item sale line could be pass
             begin
+                IsValideIC := false;
                 if Rec.CurrentCompany <> InventoryCompanyName then begin
-                    PurchaseHeader.Get(Rec."Document Type"::Order, Rec."Automate Purch.Doc No.");
-                    Rec.UpdatePurchaseHeader(PurchaseHeader);
-                    SORecord.ChangeCompany(InventoryCompanyName);
-                    SORecord.SetCurrentKey("External Document No.");
-                    SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
-                    if not (SORecord.findset) then
-                        if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
-                            ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
-                    InventoryICInboxTransaction.ChangeCompany(InventoryCompanyName);
-                    if InventoryICInboxTransaction.FindSet() then
+                    TempSalesLine.SetRange("Document No.", Rec."No.");
+                    TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
+                    if TempSalesLine.FindSet() then
                         repeat
-                            InventoryICInboxTransaction."Line Action" := InventoryICInboxTransaction."Line Action"::Accept;
-                            InventoryICInboxTransaction.Validate("Line Action", InventoryICInboxTransaction."Line Action"::Accept);
-                            InventoryICInboxTransaction.Modify();
-                            ICAutomate(InventoryICInboxTransaction);
-                        until InventoryICInboxTransaction.Next() = 0;
-                    SORecord.ChangeCompany(InventoryCompanyName);
-                    SORecord.SetCurrentKey("External Document No.");
-                    SORecord.SetRange("External Document No.", PurchaseHeader."No.");
-                    if (SORecord.findset) then
-                        repeat
-                            Whship.ChangeCompany(InventoryCompanyName);
-                            Whship.Init();
-                            Whship."Source Document" := Whship."Source Document"::"Sales Order";
-                            Whship."Source No." := SORecord."No.";
-                            Whship."External Document No." := SORecord."External Document No.";
-                            Whship."Destination Type" := Whship."Destination Type"::Customer;
-                            Whship."Destination No." := SORecord."Sell-to Customer No.";
-                            Whship."Shipping Advice" := Whship."Shipping Advice"::Partial;
-                            Whship.Insert();
-                            ICrec.ChangeCompany(InventoryCompanyName);
-                            ICRec.Get(SORecord."Document type", SORecord."No.");
-                            if Rec.Status = Rec.Status::Released then
-                                if ICRec.Status <> Rec.Status then
-                                    ICRec.Status := Rec.Status;
-                            // ReleaseSalesDoc.PerformManualRelease(ICrec);
-                            ICrec."Work Description" := Rec."Work Description";
-                            Rec.CALCFIELDS("Work Description");
-                            ICrec."Work Description" := Rec."Work Description";
-                            ICrec.Status := Rec.Status;
-                            ICREC.Modify();
-                        until (SORecord.next() = 0);
+                            TempItem.Get(TempSalesLine."No.");
+                            if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
+                        until TempSalesLine.Next() = 0;
+                    if IsValideIC then begin
+                        PurchaseHeader.Get(Rec."Document Type"::Order, Rec."Automate Purch.Doc No.");
+                        Rec.UpdatePurchaseHeader(PurchaseHeader);
+                        SORecord.ChangeCompany(InventoryCompanyName);
+                        SORecord.SetCurrentKey("External Document No.");
+                        SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+                        if not (SORecord.findset) then
+                            if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
+                                ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
+                        InventoryICInboxTransaction.ChangeCompany(InventoryCompanyName);
+                        if InventoryICInboxTransaction.FindSet() then
+                            repeat
+                                InventoryICInboxTransaction."Line Action" := InventoryICInboxTransaction."Line Action"::Accept;
+                                InventoryICInboxTransaction.Validate("Line Action", InventoryICInboxTransaction."Line Action"::Accept);
+                                InventoryICInboxTransaction.Modify();
+                                ICAutomate(InventoryICInboxTransaction);
+                            until InventoryICInboxTransaction.Next() = 0;
+                        SORecord.ChangeCompany(InventoryCompanyName);
+                        SORecord.SetCurrentKey("External Document No.");
+                        SORecord.SetRange("External Document No.", PurchaseHeader."No.");
+                        if (SORecord.findset) then
+                            repeat
+                                Whship.ChangeCompany(InventoryCompanyName);
+                                Whship.Init();
+                                Whship."Source Document" := Whship."Source Document"::"Sales Order";
+                                Whship."Source No." := SORecord."No.";
+                                Whship."External Document No." := SORecord."External Document No.";
+                                Whship."Destination Type" := Whship."Destination Type"::Customer;
+                                Whship."Destination No." := SORecord."Sell-to Customer No.";
+                                Whship."Shipping Advice" := Whship."Shipping Advice"::Partial;
+                                Whship.Insert();
+                                ICrec.ChangeCompany(InventoryCompanyName);
+                                ICRec.Get(SORecord."Document type", SORecord."No.");
+                                if Rec.Status = Rec.Status::Released then
+                                    if ICRec.Status <> Rec.Status then
+                                        ICRec.Status := Rec.Status;
+                                // ReleaseSalesDoc.PerformManualRelease(ICrec);
+                                ICrec."Work Description" := Rec."Work Description";
+                                Rec.CALCFIELDS("Work Description");
+                                ICrec."Work Description" := Rec."Work Description";
+                                ICrec.Status := Rec.Status;
+                                ICREC.Modify();
+                            until (SORecord.next() = 0);
+                    end;
                     // ISL updata
                 end;
             end;

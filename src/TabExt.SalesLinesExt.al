@@ -83,27 +83,36 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         Item: Record Item;
         IsItemLine: Boolean;
     begin
-        OnDeleteBOM_Purch_IC(Rec);
-        if (rec.CurrentCompany <> 'HEQS International Pty Ltd') and (rec.Type = rec.Type::Item) then begin
-            FromSO.Get(Rec."Document Type", Rec."Document No.");
-            PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
-            PLrec.get(rec."Document Type", PO."NO.", rec."Line No.");
-            PLrec.Delete();
-            // ISO line
-            ISLrec.ChangeCompany('HEQS International Pty Ltd');
-            ISOrec.ChangeCompany('HEQS International Pty Ltd');
-            ISOrec.SetCurrentKey("External Document No.");
-            ISORec.SetRange("External Document No.", PO."No.");
-            if (ISORec.findset) then
-                repeat
-                    ISLrec.get(rec."Document Type", ISOrec."No.", rec."Line No.");
-                    ISLrec.Delete();
-                until (ISORec.next() = 0);
+        IsItemLine := false;
+
+        if (Rec.Type = Rec.Type::Item) then begin
+            Item.Get(Rec."No.");
+            if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+
+            OnDeleteBOM_Purch_IC(Rec);
+            if (rec.CurrentCompany <> 'HEQS International Pty Ltd') and (rec.Type = rec.Type::Item) then begin
+                FromSO.Get(Rec."Document Type", Rec."Document No.");
+                PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
+                PLrec.get(rec."Document Type", PO."NO.", rec."Line No.");
+                PLrec.Delete();
+                // ISO line
+                ISLrec.ChangeCompany('HEQS International Pty Ltd');
+                ISOrec.ChangeCompany('HEQS International Pty Ltd');
+                ISOrec.SetCurrentKey("External Document No.");
+                ISORec.SetRange("External Document No.", PO."No.");
+                if (ISORec.findset) then
+                    repeat
+                        ISLrec.get(rec."Document Type", ISOrec."No.", rec."Line No.");
+                        ISLrec.Delete();
+                    until (ISORec.next() = 0);
+            end;
         end;
+
+
     end;
 
     var
-
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
         Text003: Label 'There is not enough space to explode the BOM.';
         ToSalesLine: Record "Sales Line";
         FromBOMComp: Record "BOM Component";

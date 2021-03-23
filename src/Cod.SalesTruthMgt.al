@@ -5,6 +5,31 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+    [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOM_Purch_IC', '', false, false)]
+    local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
+    var
+
+    begin
+
+        //       InventoryName := 'HEQS International Pty Ltd';
+        // if (rec.CurrentCompany <> InventoryName) and (rec.Type = rec.Type::Item) then begin
+        //     FromSO.Get(Rec."Document Type", Rec."Document No.");
+        //     PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
+        //     PLrec.get(rec."Document Type", PO."NO.", rec."Line No.");
+        //     PLrec.Delete();
+        //     // ISO line
+        //     ISLrec.ChangeCompany('HEQS International Pty Ltd');
+        //     ISOrec.ChangeCompany('HEQS International Pty Ltd');
+        //     ISOrec.SetCurrentKey("External Document No.");
+        //     ISORec.SetRange("External Document No.", PO."No.");
+        //     if (ISORec.findset) then
+        //         repeat
+        //             ISLrec.get(rec."Document Type", ISOrec."No.", rec."Line No.");
+        //             ISLrec.Delete();
+        //         until (ISORec.next() = 0);
+        // end;
+    end;
+
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
     local procedure AfterCreateSalesDocument(var SalesHeader: Record "Sales Header"; ICInboxSalesHeader: Record "IC Inbox Sales Header"; HandledICInboxSalesHeader: Record "Handled IC Inbox Sales Header");
     var
@@ -369,8 +394,16 @@ codeunit 50101 "Sales Truth Mgt"
         BOMComponent: Record "BOM Component";
         IsMainItem: Boolean;
 
+        IsValideIC: Boolean;
     begin
-        Item.Get(SalesLine."No.");
+        IsValideIC := false;
+        if SalesLine.Type = SalesLine.Type::Item then begin
+            Item.Get(SalesLine."No.");
+            if Item.Type = Item.Type::Inventory then IsValideIC := true;
+        end;
+
+        if IsValideIC = false then exit;
+
         If Item.Type = Item.Type::Service then
             exit;
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
