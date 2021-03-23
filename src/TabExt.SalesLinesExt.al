@@ -21,14 +21,24 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
     }
 
     trigger OnAfterInsert();
+    var
+        Item: Record Item;
+        IsItemLine: Boolean;
     begin
-        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then begin
-            onCreatePurch_IC_BOM(Rec);
+        IsItemLine := false;
+
+        if (Rec.Type = Rec.Type::Item) then begin
+            Item.Get(Rec."No.");
+            if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+        end;
+
+        if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
+            onInsertBOMPurchIC(Rec);
         end;
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure onCreatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    local procedure onInsertBOMPurchIC(var SalesLine: Record "Sales Line");
     begin
     end;
 

@@ -227,8 +227,8 @@ codeunit 50101 "Sales Truth Mgt"
     end;
 
 
-    [EventSubscriber(ObjectType::Table, 37, 'OnCreatePurch_IC_BOM', '', false, false)]
-    local procedure CreatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    [EventSubscriber(ObjectType::Table, 37, 'onInsertBOMPurchIC', '', false, false)]
+    local procedure InsertBOMPurchIC(var SalesLine: Record "Sales Line");
     begin
         if SalesLine.CurrentCompany = InventoryCompanyName then
             ExplodeBOM(SalesLine);
