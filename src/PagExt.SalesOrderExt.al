@@ -523,16 +523,28 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 
     trigger OnAfterGetRecord();
     var
+        IsICSalesHeader: Boolean;
         RetailSalesOrder: Record "Sales Header";
     begin
-        if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."External Document No." <> '') then begin
-            RetailSalesOrder.ChangeCompany(Rec."Sell-to Customer Name");
-            RetailSalesOrder.SetRange("Automate Purch.Doc No.", Rec."External Document No.");
-            if RetailSalesOrder.FindSet() then
-                Rec.Status := RetailSalesOrder.Status;
-            Rec.Modify();
+        IsICSalesHeader := false;
+        if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."External Document No." <> '') then
+            IsICSalesHeader := true;
+
+        if IsICSalesHeader then begin
+            UpdateICStatus();
             Currpage.Editable(false);
         end;
+    end;
+
+    local procedure UpdateICStatus();
+    var
+        RetailSalesOrder: Record "Sales Header";
+    begin
+        RetailSalesOrder.ChangeCompany(Rec."Sell-to Customer Name");
+        RetailSalesOrder.SetRange("Automate Purch.Doc No.", Rec."External Document No.");
+        if RetailSalesOrder.FindSet() then
+            Rec.Status := RetailSalesOrder.Status;
+        Rec.Modify();
     end;
 
     local procedure ICAutomate(ICInboxTransaction: Record "IC Inbox Transaction");
