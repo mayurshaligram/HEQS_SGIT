@@ -6,9 +6,9 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         {
             field("Purchase Order"; Rec."Automate Purch.Doc No.")
             {
-                Caption = 'Automate Purch.Doc No.';
+                Caption = 'Automate PurchOrder No.';
                 ApplicationArea = Basic, Suite;
-                ToolTip = 'Specifies the number of the involved entry or record, according to the specified number series.';
+                ToolTip = 'Specifies the number of the automated generated purchorder no';
                 Visible = isInventoryCompany;
             }
         }
@@ -20,10 +20,10 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
             action(sssssss)
             {
                 ApplicationArea = Basic, Suite;
-                Caption = 'Auto IC Post';
-                Image = ReleaseDoc;
+                Caption = 'Auto Post Invoice';
+                Image = Approval;
                 Promoted = true;
-                PromotedCategory = Category6;
+                PromotedCategory = Category7;
                 PromotedOnly = true;
                 trigger OnAction();
                 var
@@ -87,11 +87,7 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         isInventoryCompany: Boolean;
 
     trigger OnOpenPage();
-    var
-        CompanyRecord: Record "Company Information";
     begin
-        // CompanyRecord.Get(Rec.CurrentCompany);
-        // Message(CompanyRecord.Id);
         isInventoryCompany := true;
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then
             isInventoryCompany := false;
