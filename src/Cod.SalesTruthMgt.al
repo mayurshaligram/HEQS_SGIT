@@ -7,8 +7,15 @@ codeunit 50101 "Sales Truth Mgt"
 
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
     local procedure AfterCreateSalesDocument(var SalesHeader: Record "Sales Header"; ICInboxSalesHeader: Record "IC Inbox Sales Header"; HandledICInboxSalesHeader: Record "Handled IC Inbox Sales Header");
+    var
+        RetailSalesHeader: Record "Sales Header";
     begin
+        RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
+        RetailSalesHeader.SetRange("Automate Purch.Doc No.", SalesHeader."External Document No.");
+        RetailSalesHeader.FindSet();
+
         SalesHeader.Status := SalesHeader.Status::Released;
+        SalesHeader."Work Description" := RetailSalesHeader."Work Description";
         SalesHeader.Modify();
     end;
 
@@ -24,33 +31,28 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseOrder: Record "Purchase Header";
         Vendor: Record Vendor;
     begin
-        if SalesHeader.CurrentCompany <> InventoryCompanyName then begin
-            PurchPaySetup.Get('');
-            NoSeriesCode := PurchPaySetup."Order Nos.";
-            NoSeries.Get(NoSeriesCode);
-            NoSeriesLine.SetRange("Series Code", NoSeries.Code);
+        PurchPaySetup.Get('');
+        NoSeriesCode := PurchPaySetup."Order Nos.";
+        NoSeries.Get(NoSeriesCode);
+        NoSeriesLine.SetRange("Series Code", NoSeries.Code);
 
-            if NoSeriesLine.FindSet() = false then
-                Error('Please Create No series line');
-            begin
-                PurchaseOrder.Init();
-                PurchaseOrder."Document Type" := SalesHeader."Document Type";
-                PurchaseOrder."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
-                PurchaseOrder."Sales Order Ref" := SalesHeader."No.";
-                TempText := 'HEQS INTERNATIONAL PTY LTD';
-                Vendor."Search Name" := TempText;
-                Vendor.FindSet();
-                PurchaseOrder.Validate("Buy-from Vendor No.", Vendor."No.");
-                PurchaseOrder."Due Date" := System.Today();
-                PurchaseOrder."Currency Factor" := SalesHeader."Currency Factor";
-                PurchaseOrder.Insert();
-                SalesHeader.UpdatePurchaseHeader(PurchaseOrder);
-                SalesHeader."Automate Purch.Doc No." := PurchaseOrder."No.";
-                SalesHeader.Modify();
-            end;
-        end
-        else begin
-            UpdateICSalesOrder(SalesHeader);
+        if NoSeriesLine.FindSet() = false then
+            Error('Please Create No series line');
+        begin
+            PurchaseOrder.Init();
+            PurchaseOrder."Document Type" := SalesHeader."Document Type";
+            PurchaseOrder."No." := NoSeriesMgt.DoGetNextNo(NoSeries.Code, System.Today(), true, true);
+            PurchaseOrder."Sales Order Ref" := SalesHeader."No.";
+            TempText := 'HEQS INTERNATIONAL PTY LTD';
+            Vendor."Search Name" := TempText;
+            Vendor.FindSet();
+            PurchaseOrder.Validate("Buy-from Vendor No.", Vendor."No.");
+            PurchaseOrder."Due Date" := System.Today();
+            PurchaseOrder."Currency Factor" := SalesHeader."Currency Factor";
+            PurchaseOrder.Insert();
+            SalesHeader.UpdatePurchaseHeader(PurchaseOrder);
+            SalesHeader."Automate Purch.Doc No." := PurchaseOrder."No.";
+            SalesHeader.Modify();
         end;
     end;
 

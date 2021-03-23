@@ -20,8 +20,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then
             OnInsertPurchaseHeader(Rec)
-        else
-            Message('Testing this for onAfterInsert Sales Header see IC');
     end;
 
     [IntegrationEvent(false, false)]
