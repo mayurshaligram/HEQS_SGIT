@@ -18,11 +18,14 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
     trigger OnAfterInsert();
     begin
-        OnCreatePurchaseOrder(Rec);
+        if Rec.CurrentCompany <> InventoryCompanyName then
+            OnInsertPurchaseHeader(Rec)
+        else
+            Message('Testing this for onAfterInsert Sales Header see IC');
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnCreatePurchaseOrder(var SalesHeader: Record "Sales Header");
+    local procedure OnInsertPurchaseHeader(var SalesHeader: Record "Sales Header");
     begin
     end;
 
@@ -115,11 +118,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         until (SLrec.Next() = 0);
                 until (SORecord.next() = 0);
         end;
-
-        ICSalesOrder.ChangeCompany(InventoryCompanyName);
-        ICSalesOrder.SetRange("No.", Rec."Automate Purch.Doc No.");
-        if ICSalesOrder.FindSet() then
-            ICSalesOrder.Status := Rec.Status;
     end;
 
     trigger OnAfterDelete();

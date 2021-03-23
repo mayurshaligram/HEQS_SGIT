@@ -5,8 +5,8 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
-    [EventSubscriber(ObjectType::Table, 36, 'OnCreatePurchaseOrder', '', false, false)]
-    local procedure CreatePurchaseOrder(var SalesHeader: Record "Sales Header");
+    [EventSubscriber(ObjectType::Table, 36, 'OnInsertPurchaseHeader', '', false, false)]
+    local procedure InsertPurchaseHeader(var SalesHeader: Record "Sales Header");
     var
         TempText: Text;
         PurchPaySetup: Record "Purchases & Payables Setup";
