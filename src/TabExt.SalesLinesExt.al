@@ -43,16 +43,34 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
     end;
 
     trigger OnAfterModify();
+    var
+        Item: Record Item;
+        IsItemLine: Boolean;
     begin
-        onUpdatePurch_IC_BOM(Rec);
+        IsItemLine := false;
+
+        if (Rec.Type = Rec.Type::Item) then begin
+            Item.Get(Rec."No.");
+            if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+        end;
+
+        if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
+            OnUpdatePurch_IC_BOM(Rec);
+        end;
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure onUpdatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    local procedure OnUpdatePurch_IC_BOM(var SalesLine: Record "Sales Line");
     begin
     end;
 
+
     // Could be refactorize to CodeUnit
+    [IntegrationEvent(false, false)]
+    local procedure OnDeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
+    begin
+    end;
+
     trigger OnAfterDelete();
     var
         FromSO: Record "Sales Header";
@@ -61,10 +79,12 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
         ISLrec: Record "Sales Line";
         ISOrec: Record "Sales Header";
         temp: text[20];
-        InventoryName: Text;
+
+        Item: Record Item;
+        IsItemLine: Boolean;
     begin
-        InventoryName := 'HEQS International Pty Ltd';
-        if (rec.CurrentCompany <> InventoryName) and (rec.Type = rec.Type::Item) then begin
+        OnDeleteBOM_Purch_IC(Rec);
+        if (rec.CurrentCompany <> 'HEQS International Pty Ltd') and (rec.Type = rec.Type::Item) then begin
             FromSO.Get(Rec."Document Type", Rec."Document No.");
             PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
             PLrec.get(rec."Document Type", PO."NO.", rec."Line No.");
@@ -83,6 +103,7 @@ tableextension 50104 "Sales line_Ext" extends "Sales Line"
     end;
 
     var
+
         Text003: Label 'There is not enough space to explode the BOM.';
         ToSalesLine: Record "Sales Line";
         FromBOMComp: Record "BOM Component";
