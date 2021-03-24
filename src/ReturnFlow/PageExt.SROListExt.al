@@ -109,5 +109,10 @@ pageextension 50112 SROListExt extends "Sales Return Order List"
         IsInventoryCompany := true;
         if Rec.CurrentCompany = InventoryCompanyName then
             IsInventoryCompany := false;
+
+        Rec.SetView('sorting (Rec."No.") order(descending)');
+        Rec.SetRange("No.");
+        if Rec.FindFirst() then
+            CurrPage.SetRecord(Rec);
     end;
 }

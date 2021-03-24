@@ -1,5 +1,6 @@
 pageextension 50100 "Sales Order List" extends "Sales Order List"
 {
+
     layout
     {
         addafter("No.")
@@ -105,11 +106,14 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
     trigger OnOpenPage();
     begin
         IsInventoryCompany := true;
-        if Rec.CurrentCompany = InventoryCompanyName then
+        if Rec.CurrentCompany = InventoryCompanyName then begin
             IsInventoryCompany := false;
+        end;
 
-        Rec.SetCurrentKey("No.");
-        Rec.SetAscending("No.", false);
+        Rec.SetView('sorting (Rec."No.") order(descending)');
+        Rec.SetRange("No.");
+        if Rec.FindFirst() then
+            CurrPage.SetRecord(Rec);
     end;
 
 
