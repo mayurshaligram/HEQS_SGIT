@@ -15,24 +15,12 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
             trigger OnAfterAction()
             var
                 ICSalesHeader: Record "Sales Header";
-
                 ICInOutboxMgt: Codeunit ICInboxOutboxMgt;
                 ApprovalsMgmt: Codeunit "Approvals Mgmt.";
-                ReleaseSalesDoc: Codeunit "Release Sales Document";
                 PurchaseHeader: Record "Purchase Header";
-
-                ICRec: Record "Sales Header";
-                SLrec: Record "Sales Line";
-                ISLrec: Record "Sales Line";
-                ISOsrec: Record "Sales Header";
-                Whship: Record "Warehouse Request";
-                TempText: Text[20];
-                hasPO: Boolean;
-                InventoryICInboxTransaction: Record "IC Inbox Transaction";
-                ICPage: Page "IC Inbox Transactions";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
-                    PurchaseHeader.Get(Rec."Document Type"::Order, Rec."Automate Purch.Doc No.");
+                    PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.");
                     ICSalesHeader.ChangeCompany(InventoryCompanyName);
                     ICSalesHeader.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
                     if ICSalesHeader.Findset() = false then
@@ -68,65 +56,6 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
         }
         modify("Create &Warehouse Shipment")
         {
-            trigger OnBeforeAction();
-            var
-                SalesLine: Record "Sales Line";
-                WarehouseRequest: Record "Warehouse Request";
-                TempInteger: Integer;
-                ReleaseSalesDoc: Codeunit "Release Sales Document";
-            begin
-                Rec.Status := Rec.Status::Open;
-                Rec.Modify();
-                // Rec.RecreateSalesLines('Sell-to Customer');
-                SalesLine.SetRange("Document No.", Rec."No.");
-                if SalesLine.FindSet() then
-                    repeat
-                        SalesLine."Location Code" := 'NSW';
-                        SalesLine.Modify();
-                    until SalesLine.Next() = 0;
-                TempInteger := 37;
-                // message('OnBeforeActionCreating');
-                // ReleaseSalesDoc.PerformManualRelease(Rec);
-                Rec.Status := Rec.Status::Released;
-                Rec.Modify();
-                if WarehouseRequest.get(WarehouseRequest.Type::Outbound, SalesLine."Location Code", TempInteger, WarehouseRequest."Source Subtype"::"1", Rec."No.") then begin
-                    // message('Please take a look how it is the 5763');
-                    WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
-                    WarehouseRequest."Source No." := Rec."No.";
-                    WarehouseRequest."Source Subtype" := 1;
-                    WarehouseRequest."External Document No." := Rec."External Document No.";
-                    WarehouseRequest."Destination Type" := WarehouseRequest."Destination Type"::Customer;
-                    WarehouseRequest."Destination No." := Rec."Sell-to Customer No.";
-                    WarehouseRequest."Shipping Advice" := WarehouseRequest."Shipping Advice"::Partial;
-                    WarehouseRequest."Shipment Date" := Rec."Document Date";
-                    WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
-                    WarehouseRequest."Source Type" := 37;
-                    WarehouseRequest."Location Code" := SalesLine."Location Code";
-                    WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
-                    Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
-                    WarehouseRequest.Modify();
-                end
-                else begin
-                    WarehouseRequest.Init();
-                    WarehouseRequest."Source Document" := WarehouseRequest."Source Document"::"Sales Order";
-                    WarehouseRequest."Source No." := Rec."No.";
-                    WarehouseRequest."Source Subtype" := 1;
-                    WarehouseRequest."External Document No." := Rec."External Document No.";
-                    WarehouseRequest."Destination Type" := WarehouseRequest."Destination Type"::Customer;
-                    WarehouseRequest."Destination No." := Rec."Sell-to Customer No.";
-                    WarehouseRequest."Shipping Advice" := WarehouseRequest."Shipping Advice"::Partial;
-                    WarehouseRequest."Shipment Date" := Rec."Document Date";
-                    WarehouseRequest.Type := WarehouseRequest.Type::Outbound;
-                    WarehouseRequest."Source Type" := 37;
-                    WarehouseRequest."Location Code" := SalesLine."Location Code";
-                    WarehouseRequest."Document Status" := WarehouseRequest."Document Status"::Released;
-                    Warehouserequest."Shipment Date" := DT2Date(system.CurrentDateTime);
-                    WarehouseRequest.Insert();
-                    message('WR insert');
-                end;
-
-            end;
-
             trigger OnAfterAction();
             var
                 WarehouseShipmentHeader: Record "Warehouse Shipment Header";

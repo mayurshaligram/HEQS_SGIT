@@ -67,12 +67,13 @@ codeunit 50101 "Sales Truth Mgt"
         RetailSalesHeader: Record "Sales Header";
         RetailSalesLine: Record "Sales Line";
         SalesLine: Record "Sales Line";
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
+
     begin
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
         RetailSalesHeader.SetRange("Automate Purch.Doc No.", SalesHeader."External Document No.");
         RetailSalesHeader.FindSet();
 
-        SalesHeader.Status := SalesHeader.Status::Released;
         RetailSalesHeader.CalcFields("Work Description");
         SalesHeader."Work Description" := RetailSalesHeader."Work Description";
         SalesHeader.Modify();
@@ -88,6 +89,7 @@ codeunit 50101 "Sales Truth Mgt"
                     SalesLine.Modify();
                 end;
             until RetailSalesLine.Next() = 0;
+        ReleaseSalesDoc.PerformManualRelease(SalesHeader);
     end;
 
     [EventSubscriber(ObjectType::Table, 36, 'OnInsertPurchaseHeader', '', false, false)]
