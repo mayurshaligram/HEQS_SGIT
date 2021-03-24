@@ -1,4 +1,4 @@
-tableextension 50112 "Warehouse Activity Line_Ext" extends "Warehouse Activity Line"
+tableextension 50107 "Warehouse Activity Line_Ext" extends "Warehouse Activity Line"
 {
     // Need description
     // Field number not in the system requirement range

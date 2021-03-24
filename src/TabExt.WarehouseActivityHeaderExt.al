@@ -1,4 +1,4 @@
-tableextension 50110 "Warehouse Activity Header_Ext" extends "Warehouse Activity Header"
+tableextension 50106 "Warehouse Activity Header_Ext" extends "Warehouse Activity Header"
 {
     // Need Description
     // Number of field not in the system requirement review

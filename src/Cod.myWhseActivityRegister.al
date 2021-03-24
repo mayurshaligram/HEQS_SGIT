@@ -1,5 +1,5 @@
 // ??
-codeunit 50107 "myWhse.-Activity-Register"
+codeunit 50105 "myWhse.-Activity-Register"
 {
     Permissions = TableData "Registered Whse. Activity Hdr." = i,
                   TableData "Registered Whse. Activity Line" = i,

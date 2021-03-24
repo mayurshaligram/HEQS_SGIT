@@ -1,4 +1,4 @@
-page 50108 "My Sales Orders"
+page 50102 "My Sales Orders"
 {
     Caption = 'Sales Orders';
     DataCaptionFields = "No.";

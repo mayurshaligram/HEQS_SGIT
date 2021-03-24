@@ -1,6 +1,6 @@
 // Codeunit modified existed Sales-Post
 // For Post Shipment Only
-codeunit 50141 "Sales-Post (Yes/No) Ext"
+codeunit 50106 "Sales-Post (Yes/No) Ext"
 {
     EventSubscriberInstance = Manual;
     TableNo = "Sales Header";

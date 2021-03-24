@@ -1,4 +1,4 @@
-page 50122 "Purch Order Lines"
+page 50103 "Purch Order Lines"
 {
     Caption = 'Released Purchase Order Lines';
     Editable = false;

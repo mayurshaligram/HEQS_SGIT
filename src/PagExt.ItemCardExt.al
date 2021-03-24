@@ -1,4 +1,4 @@
-pageextension 50125 "Item Card_Ext" extends "Item Card"
+pageextension 50109 "Item Card_Ext" extends "Item Card"
 {
     Caption = 'Item Card_Ext';
     // Editable = false;

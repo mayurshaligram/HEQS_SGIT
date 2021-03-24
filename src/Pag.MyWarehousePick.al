@@ -1,4 +1,4 @@
-page 50103 "My Warehouse Pick"
+page 50100 "My Warehouse Pick"
 {
 
     Caption = 'Warehouse Pick';

@@ -1,4 +1,4 @@
-pageextension 50122 "Sales Return Order_Ext" extends "Sales Return Order"
+pageextension 50106 "Sales Return Order_Ext" extends "Sales Return Order"
 {
     Caption = 'Sales Return Order_Ext';
 

@@ -9,13 +9,13 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                 Caption = 'Automate PurchOrder No.';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies the number of the automated generated purchorder no';
-                Visible = isInventoryCompany;
+                Visible = IsInventoryCompany;
             }
         }
     }
     actions
     {
-        addafter(Post)
+        addbefore(Post)
         {
             action(sssssss)
             {
@@ -25,6 +25,7 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                 Promoted = true;
                 PromotedCategory = Category7;
                 PromotedOnly = true;
+                PromotedIsBig = true;
                 trigger OnAction();
                 var
                     SalesLine: Record "Sales Line";
@@ -99,13 +100,14 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         }
     }
     var
-        isInventoryCompany: Boolean;
+        IsInventoryCompany: Boolean;
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
     trigger OnOpenPage();
     begin
-        isInventoryCompany := true;
-        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then
-            isInventoryCompany := false;
+        IsInventoryCompany := true;
+        if Rec.CurrentCompany = InventoryCompanyName then
+            IsInventoryCompany := false;
     end;
 
 

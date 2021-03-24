@@ -1,4 +1,4 @@
-tableextension 50126 "Item Charge AssignmentExt" extends "Item Charge Assignment (Purch)"
+tableextension 50108 "Item Charge AssignmentExt" extends "Item Charge Assignment (Purch)"
 {
     Caption = 'Item Charge Assignment (Purch)_Ext';
     fields

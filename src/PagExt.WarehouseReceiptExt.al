@@ -1,4 +1,4 @@
-pageextension 50145 "Warehouse Receipt Ext" extends "Warehouse Receipt"
+pageextension 50111 "Warehouse Receipt Ext" extends "Warehouse Receipt"
 {
 
 

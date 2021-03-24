@@ -1,4 +1,4 @@
-page 50104 "My Whse. Pick Subform"
+page 50101 "My Whse. Pick Subform"
 {
     AutoSplitKey = true;
     Caption = 'Lines';
