@@ -1,1 +1,1 @@
-﻿{"Added":[],"Modified":[{"Id":50111,"Kind":16,"Name":"Warehouse Receipt Ext","PackagePath":"/src/src/PagExt.WarehouseReceiptExt.al"},{"Id":50100,"Kind":16,"Name":"Sales Order List","PackagePath":"/src/src/SalesFlow/PageExt.SalesOrderList.al"}],"Removed":[{"Id":50112,"Kind":16,"Name":"SROListExt","PackagePath":"/src/src/ReturnFlow/PageExt.SROListExt.al"},{"Id":50114,"Kind":16,"Name":"Purchase Order List_Ext","PackagePath":"/src/src/SalesFlow/PageExt.PurchaseOrderListEx.al"}]}
+﻿{"Added":[],"Modified":[],"Removed":[]}

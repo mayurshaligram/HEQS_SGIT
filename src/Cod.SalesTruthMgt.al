@@ -5,6 +5,26 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+    procedure IsRetailSalesHeader(var RetailSalesHeader: Record "Sales Header"): Boolean;
+    var
+        TempSalesLine: Record "Sales Line";
+        TempItem: Record Item;
+        IsValid: Boolean;
+    begin
+        IsValid := false;
+        if RetailSalesHeader.CurrentCompany <> InventoryCompanyName then begin
+            TempSalesLine.SetRange("Document Type", RetailSalesHeader."Document Type");
+            TempSalesLine.SetRange("Document No.", RetailSalesHeader."No.");
+            TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
+            if TempSalesLine.FindSet() then
+                repeat
+                    TempItem.Get(TempSalesLine."No.");
+                    if TempItem.Type = TempItem.Type::Inventory then IsValid := true;
+                until TempSalesLine.Next() = 0;
+        end;
+        exit(IsValid);
+    end;
+
     procedure IsICSalesHeader(var ICSalesHeader: Record "Sales Header"): Boolean;
     var
         IsICSalesHeader: Boolean;
