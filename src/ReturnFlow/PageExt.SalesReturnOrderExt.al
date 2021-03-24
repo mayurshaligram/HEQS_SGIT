@@ -1,6 +1,5 @@
 pageextension 50106 "Sales Return Order_Ext" extends "Sales Return Order"
 {
-    Caption = 'Sales Return Order_Ext';
 
     actions
     {
@@ -104,6 +103,22 @@ pageextension 50106 "Sales Return Order_Ext" extends "Sales Return Order"
             end;
         }
     }
+    var
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+
+    trigger OnAfterGetRecord();
+    var
+        IsICSalesHeader: Boolean;
+    begin
+        IsICSalesHeader := SalesTruthMgt.IsICSalesHeader(Rec);
+
+        // Temperory Solution
+        if IsICSalesHeader then begin
+            SalesTruthMgt.UpdateFromRetail(Rec);
+            Currpage.Editable(false);
+        end;
+    end;
 
     trigger OnClosePage();
     var
@@ -207,9 +222,6 @@ pageextension 50106 "Sales Return Order_Ext" extends "Sales Return Order"
         end;
     end;
 
-    trigger OnAfterGetRecord();
-    begin
-        if (Rec.CurrentCompany = 'HEQS International Pty Ltd') and (Rec."External Document No." <> '') then
-            Currpage.Editable(false);
-    end;
+    //////////////////////////////////////////////////////////////////////////////////////
+
 }

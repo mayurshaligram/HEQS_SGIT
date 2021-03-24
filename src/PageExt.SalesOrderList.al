@@ -17,11 +17,11 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
     {
         addbefore(Post)
         {
-            action(sssssss)
+            action("Auto Post Invoice")
             {
                 ApplicationArea = Basic, Suite;
                 Caption = 'Auto Post Invoice';
-                Image = Approval;
+                Image = PostOrder;
                 Promoted = true;
                 PromotedCategory = Category7;
                 PromotedOnly = true;
@@ -93,7 +93,6 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
 
                     StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
                         'HEQS International Pty Ltd', InventorySalesOrder);
-
                 end;
 
             }

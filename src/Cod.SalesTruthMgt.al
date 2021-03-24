@@ -5,6 +5,30 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+    procedure IsICSalesHeader(var ICSalesHeader: Record "Sales Header"): Boolean;
+    var
+        IsICSalesHeader: Boolean;
+    begin
+        IsICSalesHeader := false;
+        if (ICSalesHeader.CurrentCompany = InventoryCompanyName) and (ICSalesHeader."External Document No." <> '') then
+            IsICSalesHeader := true;
+
+        exit(IsICSalesHeader);
+    end;
+
+    procedure UpdateFromRetail(var ICSalesHeader: Record "Sales Header");
+    var
+        RetailSalesHeader: Record "Sales Header";
+    begin
+        RetailSalesHeader.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+        RetailSalesHeader.SetRange("Automate Purch.Doc No.", ICSalesHeader."External Document No.");
+        if RetailSalesHeader.FindSet() then begin
+            ICSalesHeader.Status := RetailSalesHeader.Status;
+            ICSalesHeader."Work Description" := RetailSalesHeader."Work Description";
+            ICSalesHeader.Modify();
+        end;
+    end;
+
     [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOM_Purch_IC', '', false, false)]
     local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
     var
