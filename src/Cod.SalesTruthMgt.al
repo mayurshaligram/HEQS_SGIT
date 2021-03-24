@@ -81,12 +81,16 @@ codeunit 50101 "Sales Truth Mgt"
         Vendor: Record Vendor;
     begin
         PurchPaySetup.Get('');
-        NoSeriesCode := PurchPaySetup."Order Nos.";
+        if SalesHeader."Document Type" = SalesHeader."Document Type"::Order then
+            NoSeriesCode := PurchPaySetup."Order Nos."
+        else
+            if SalesHeader."Document Type" = SalesHeader."Document Type"::"Return Order" then
+                NoSeriesCode := PurchPaySetup."Return Order Nos.";
         NoSeries.Get(NoSeriesCode);
         NoSeriesLine.SetRange("Series Code", NoSeries.Code);
 
         if NoSeriesLine.FindSet() = false then
-            Error('Please Create No series line');
+            Error('Please Create No series line in Purchase & Payable setup');
         begin
             PurchaseHeader.Init();
             PurchaseHeader."Document Type" := SalesHeader."Document Type";

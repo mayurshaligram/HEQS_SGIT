@@ -19,7 +19,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     trigger OnAfterInsert();
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then
-            OnInsertPurchaseHeader(Rec)
+            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then
+                OnInsertPurchaseHeader(Rec)
     end;
 
     [IntegrationEvent(false, false)]
