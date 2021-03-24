@@ -45,6 +45,8 @@ codeunit 50101 "Sales Truth Mgt"
     local procedure AfterCreateSalesDocument(var SalesHeader: Record "Sales Header"; ICInboxSalesHeader: Record "IC Inbox Sales Header"; HandledICInboxSalesHeader: Record "Handled IC Inbox Sales Header");
     var
         RetailSalesHeader: Record "Sales Header";
+        RetailSalesLine: Record "Sales Line";
+        SalesLine: Record "Sales Line";
     begin
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
         RetailSalesHeader.SetRange("Automate Purch.Doc No.", SalesHeader."External Document No.");
@@ -53,8 +55,19 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader.Status := SalesHeader.Status::Released;
         RetailSalesHeader.CalcFields("Work Description");
         SalesHeader."Work Description" := RetailSalesHeader."Work Description";
-        SalesHeader."Sell-to Address" := 'HHHHHH';
         SalesHeader.Modify();
+
+        RetailSalesLine.ChangeCompany(SalesHeader."Sell-to Customer Name");
+        RetailSalesLine.SetRange("Document Type", RetailSalesHeader."Document Type");
+        RetailSalesLine.SetRange("Document No.", RetailSalesHeader."No.");
+        if RetailSalesLine.FindSet() then
+            repeat
+                if IsValideICSalesLine(RetailSalesLine) then begin
+                    SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No.");
+                    SalesLine."Location Code" := RetailSalesLine."Location Code";
+                    SalesLine.Modify();
+                end;
+            until RetailSalesLine.Next() = 0;
     end;
 
     [EventSubscriber(ObjectType::Table, 36, 'OnInsertPurchaseHeader', '', false, false)]
