@@ -107,6 +107,9 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         IsInventoryCompany := true;
         if Rec.CurrentCompany = InventoryCompanyName then
             IsInventoryCompany := false;
+
+        Rec.SetCurrentKey("No.");
+        Rec.SetAscending("No.", false);
     end;
 
 

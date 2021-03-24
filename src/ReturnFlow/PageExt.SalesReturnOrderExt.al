@@ -115,7 +115,6 @@ pageextension 50106 "Sales Return Order_Ext" extends "Sales Return Order"
 
         // Temperory Solution
         if IsICSalesHeader then begin
-            SalesTruthMgt.UpdateFromRetail(Rec);
             Currpage.Editable(false);
         end;
     end;

@@ -16,19 +16,6 @@ codeunit 50101 "Sales Truth Mgt"
         exit(IsICSalesHeader);
     end;
 
-    procedure UpdateFromRetail(var ICSalesHeader: Record "Sales Header");
-    var
-        RetailSalesHeader: Record "Sales Header";
-    begin
-        RetailSalesHeader.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
-        RetailSalesHeader.SetRange("Automate Purch.Doc No.", ICSalesHeader."External Document No.");
-        if RetailSalesHeader.FindSet() then begin
-            ICSalesHeader.Status := RetailSalesHeader.Status;
-            ICSalesHeader."Work Description" := RetailSalesHeader."Work Description";
-            ICSalesHeader.Modify();
-        end;
-    end;
-
     [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOM_Purch_IC', '', false, false)]
     local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
     var
@@ -64,7 +51,9 @@ codeunit 50101 "Sales Truth Mgt"
         RetailSalesHeader.FindSet();
 
         SalesHeader.Status := SalesHeader.Status::Released;
+        RetailSalesHeader.CalcFields("Work Description");
         SalesHeader."Work Description" := RetailSalesHeader."Work Description";
+        SalesHeader."Sell-to Address" := 'HHHHHH';
         SalesHeader.Modify();
     end;
 
@@ -183,7 +172,7 @@ codeunit 50101 "Sales Truth Mgt"
         if TempSalesLine.FindSet() then
             repeat
                 if PurchaseLine.Get(TempSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") = false then
-                    CreatePurchaseLine(TempSalesLine)
+                    InsertPurchaseLine(TempSalesLine)
                 else begin
                     PurchaseLine.Validate("No.", TempSalesLine."No.");
                     PurchaseLine."BOM Item" := TempSalesLine."BOM Item";
@@ -280,13 +269,13 @@ codeunit 50101 "Sales Truth Mgt"
     end;
 
 
-    [EventSubscriber(ObjectType::Table, 37, 'onInsertBOMPurchIC', '', false, false)]
-    local procedure InsertBOMPurchIC(var SalesLine: Record "Sales Line");
+    [EventSubscriber(ObjectType::Table, 37, 'onInsertPurchICBOM', '', false, false)]
+    local procedure InsertPurchICBOM(var SalesLine: Record "Sales Line");
     begin
         if SalesLine.CurrentCompany = InventoryCompanyName then
             ExplodeBOM(SalesLine);
         if (SalesLine.CurrentCompany <> InventoryCompanyName) and (SalesLine.Type = SalesLine.Type::Item) then begin
-            CreatePurchaseLine(SalesLine);
+            InsertPurchaseLine(SalesLine);
             CreateICSalesLine(SalesLine);
             ExplodeBOM(SalesLine);
         end;
@@ -407,13 +396,27 @@ codeunit 50101 "Sales Truth Mgt"
                     ToSalesLine.AutoReserve();
 
 
-                CreatePurchaseLine(ToSalesLine);
+                InsertPurchaseLine(ToSalesLine);
                 CreateICSalesLine(ToSalesLine);
             until BOMComponent.Next = 0;
 
     end;
 
-    local procedure CreatePurchaseLine(SalesLine: Record "Sales Line");
+    local procedure IsValideICSalesLine(var SalesLine: Record "Sales Line"): Boolean;
+    var
+        IsValid: Boolean;
+        Item: Record Item;
+    begin
+        IsValid := false;
+        if SalesLine.Type = SalesLine.Type::Item then begin
+            Item.Get(SalesLine."No.");
+            if Item.Type = Item.Type::Inventory then IsValid := true;
+        end;
+
+        exit(IsValid);
+    end;
+
+    local procedure InsertPurchaseLine(SalesLine: Record "Sales Line");
     var
         PurchaseLine: Record "Purchase Line";
         SalesHeader: Record "Sales Header";
@@ -421,19 +424,11 @@ codeunit 50101 "Sales Truth Mgt"
         Item: Record Item;
         BOMComponent: Record "BOM Component";
         IsMainItem: Boolean;
-
-        IsValideIC: Boolean;
     begin
-        IsValideIC := false;
-        if SalesLine.Type = SalesLine.Type::Item then begin
-            Item.Get(SalesLine."No.");
-            if Item.Type = Item.Type::Inventory then IsValideIC := true;
-        end;
+        if IsValideICSalesLine(SalesLine) = false then exit;
 
-        if IsValideIC = false then exit;
+        Item.Get(SalesLine."No.");
 
-        If Item.Type = Item.Type::Service then
-            exit;
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
         Vendor.FindSet();
 
@@ -444,18 +439,10 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine."Document No." := SalesHeader."Automate Purch.Doc No.";
         PurchaseLine."Line No." := SalesLine."Line No.";
         PurchaseLine.Type := SalesLine.Type;
-        // Validate No, System will trigger onValide to update unit price, and unit of measure
         PurchaseLine.Validate("No.", SalesLine."No.");
         PurchaseLine."BOM Item" := SalesLine."BOM Item";
-        // Fix Problem of not carry quantiti to receive 
-        PurchaseLine.Validate(Quantity, SalesLine.Quantity);
-        PurchaseLine.Validate("Location Code", SalesLine."Location Code");
-        PurchaseLine.Validate("Buy-from Vendor No.", Vendor."No.");
-        PurchaseLine."VAT Bus. Posting Group" := SalesLine."VAT Bus. Posting Group";
-        PurchaseLine."VAT Prod. Posting Group" := PurchaseLine."VAT Prod. Posting Group";
-        PurchaseLine."Direct Unit Cost" := Item."Unit Cost";
         PurchaseLine.Insert();
-        if (PurchaseLine."Direct Unit Cost" = 0) and (PurchaseLine."BOM Item" = false) then
+        if (Item."Unit Cost" = 0) and (PurchaseLine."BOM Item" = false) then
             Error('Please Set Purchase Price for item %1', Item."No.");
     end;
 
@@ -466,8 +453,9 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader: Record "Sales Header";
         Item: Record Item;
     begin
+        if IsValideICSalesLine(SalesLine) = false then exit;
+
         Item.Get(SalesLine."No.");
-        if Item.Type = Item.Type::Service then exit;
 
         SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
 
@@ -480,6 +468,8 @@ codeunit 50101 "Sales Truth Mgt"
             ICSalesLine."Document No." := SalesLine."Document No.";
             ICSalesLine."Line No." := SalesLine."Line No.";
             ICSalesLine.Type := SalesLine.Type;
+            ICSalesLine.Validate("No.", SalesLine."No.");
+            ICSalesLine."Location Code" := SalesLine."Location Code";
             ICSalesLine."BOM Item" := SalesLine."BOM Item";
             ICSalesLine.Insert();
         end;

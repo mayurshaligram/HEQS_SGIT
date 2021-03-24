@@ -223,9 +223,7 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
     begin
         IsICSalesHeader := SalesTruthMgt.IsICSalesHeader(Rec);
 
-        // Temperory Solution
         if IsICSalesHeader then begin
-            SalesTruthMgt.UpdateFromRetail(Rec);
             Currpage.Editable(false);
         end;
     end;

@@ -33,12 +33,12 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         end;
 
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
-            onInsertBOMPurchIC(Rec);
+            onInsertPurchICBOM(Rec);
         end;
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure onInsertBOMPurchIC(var SalesLine: Record "Sales Line");
+    local procedure onInsertPurchICBOM(var SalesLine: Record "Sales Line");
     begin
     end;
 
