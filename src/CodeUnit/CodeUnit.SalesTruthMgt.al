@@ -510,4 +510,9 @@ codeunit 50101 "Sales Truth Mgt"
         end;
 
     end;
+
+    procedure InventoryCompany(): Text;
+    begin
+        exit(InventoryCompanyName);
+    end;
 }
