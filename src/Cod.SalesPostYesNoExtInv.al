@@ -129,11 +129,12 @@ codeunit 50103 "Sales-Post (Yes/No) Ext Inv"
                     end;
                 "Document Type"::"Return Order":
                     begin
-                        Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
-                        if Selection = 0 then
-                            exit(false);
-                        Receive := Selection in [1, 3];
-                        Invoice := Selection in [2, 3];
+                        // Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
+                        // if Selection = 0 then
+                        //     exit(false);
+                        // Receive := Selection in [1, 3];
+                        // Invoice := Selection in [2, 3];
+                        Invoice := true;
                     end
                 else
                     if not ConfirmManagement.GetResponseOrDefault(

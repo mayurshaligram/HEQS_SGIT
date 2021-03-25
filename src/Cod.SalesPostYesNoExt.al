@@ -17,12 +17,14 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         SalesHeader: Record "Sales Header";
         InventorySaleOrder: Record "Sales Header";
         Temp: Text;
+        TempType: Enum "Sales Document Type";
     begin
         // OnBeforeOnRun(Rec);
 
         // if not Find then
         //     Error(NothingToPostErr);
         Temp := Rec."External Document No.";
+        TempType := Rec."Document Type";
         Rec."External Document No." := '';
         Rec.Status := Rec.Status::Open;
         Rec.Modify();
@@ -36,7 +38,7 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         SalesHeader.Copy(Rec);
         Code(SalesHeader, false);
         InventorySaleOrder.ChangeCompany('HEQS International Pty Ltd');
-        InventorySaleOrder.Get(InventorySaleOrder."Document Type"::Order, Temp);
+        InventorySaleOrder.Get(TempType, Temp);
         InventorySaleOrder."External Document No." := Rec."Automate Purch.Doc No.";
         InventorySaleOrder.Modify();
     end;
