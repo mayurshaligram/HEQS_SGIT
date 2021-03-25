@@ -26,7 +26,7 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         Rec."External Document No." := '';
         Rec.Status := Rec.Status::Open;
         Rec.Modify();
-        Rec.RecreateSalesLinesExt('Sell-to Customer');
+        // Rec.RecreateSalesLinesExt('Sell-to Customer');
         TempInteger := 37;
         // message('OnBeforeActionCreating');
         // ReleaseSalesDoc.PerformManualRelease(Rec);
