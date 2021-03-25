@@ -27,12 +27,6 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         Rec.Status := Rec.Status::Open;
         Rec.Modify();
         Rec.RecreateSalesLinesExt('Sell-to Customer');
-        SalesLine.SetRange("Document No.", Rec."No.");
-        if SalesLine.FindSet() then
-            repeat
-                SalesLine."Location Code" := 'NSW';
-                SalesLine.Modify();
-            until SalesLine.Next() = 0;
         TempInteger := 37;
         // message('OnBeforeActionCreating');
         // ReleaseSalesDoc.PerformManualRelease(Rec);
@@ -130,16 +124,17 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
                         // Selection := StrMenu(ShipInvoiceQst, DefaultOption);
                         Ship := true;
                         // Invoice := Selection in [2, 3];
-                        if Selection = 0 then
-                            exit(false);
+                        // if Selection = 0 then
+                        //     exit(false);
                     end;
                 "Document Type"::"Return Order":
                     begin
-                        Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
-                        if Selection = 0 then
-                            exit(false);
-                        Receive := Selection in [1, 3];
-                        Invoice := Selection in [2, 3];
+                        // Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
+                        // if Selection = 0 then
+                        //     exit(false);
+                        Receive := true;
+                        // Receive := Selection in [1, 3];
+                        // Invoice := Selection in [2, 3];
                     end
                 else
                     if not ConfirmManagement.GetResponseOrDefault(
