@@ -29,9 +29,15 @@ pageextension 50104 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                     RetailSalesOrder.SetRange("Automate Purch.Doc No.", InventorySalesHeader."External Document No.");
                     RetailSalesOrder.FindSet();
 
+                    InventorySalesHeader."External Document No." := '';
+                    InventorySalesHeader.Modify();
+
+                    RetailSalesOrder."External Document No." := InventorySalesHeader."No.";
+                    RetailSalesOrder.Modify();
+
                     SessionID := 50;
-                    if StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder) then
-                        StopSession(SessionId, 'Posting Retail Success.');
+                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
+
                 end;
             end;
         }
