@@ -45,78 +45,79 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
         ICSalesOrder: Record "Sales Header";
     begin
-        if Rec.CurrentCompany <> InventoryCompanyName then begin
-            if POrecord.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") then begin
-                UpdatePurchaseHeader(POrecord);
-            end;
+        if Rec.CurrentCompany <> InventoryCompanyName then
+            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then begin
+                if POrecord.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") then begin
+                    UpdatePurchaseHeader(POrecord);
+                end;
 
-            // Action 2 SO
-            SORecord.ChangeCompany(InventoryCompanyName);
-            SORecord.SetCurrentKey("External Document No.");
-            SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
-            if (SORecord.findset) then
-                repeat
-                    ICrec.ChangeCompany(InventoryCompanyName);
-                    ICrec."Due Date" := Rec."Due Date";
-                    ICRec.Get(SORecord."Document type", SORecord."No.");
-                    ICrec."Ship-to Name" := rec."Ship-to Name";
-                    ICrec."Ship-to Address" := rec."Ship-to Address";
-                    ICrec.Ship := rec.ship;
-                    ICrec."Work Description" := rec."Work Description";
-                    rec.CALCFIELDS("Work Description");
-                    ICrec."Work Description" := rec."Work Description";
-                    ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
-                    ICrec.Status := rec.Status;
-                    ICREC.Modify();
-                    SLrec.SetCurrentKey("Document No.");
-                    SLrec.SetRange("Document No.", rec."No.");
-                    ISLrec.ChangeCompany(InventoryCompanyName);
-                    if (SLrec.findset) then
-                        repeat
-                            if SLrec.Type = SLrec.Type::Item then begin
-                                if ISLrec.Get(SLrec."Document Type", ICREC."No.", SLrec."Line No.") then begin
-                                    // UPdata
-                                    ISLrec.Type := SLrec.Type::Item;
-                                    ISLrec."No." := SLrec."No.";
-                                    ISLrec."Document Type" := SLrec."Document Type";
-                                    ISLrec."Document No." := ICREC."No.";
-                                    ISLrec.Type := SLrec.Type::Item;
-                                    ISLrec."Line No." := SLrec."Line No.";
-                                    ISLrec."No." := SLrec."No.";
-                                    ISLrec."Description" := SLrec."Description";
-                                    ISLrec.Quantity := SLrec.Quantity;
-                                    ISLrec."Location Code" := SLrec."Location Code";
-                                    ISLrec."Unit Price" := SLrec."Unit Price";
-                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
-                                    ISLrec."Bin Code" := SLrec."Bin Code";
-                                    ISLrec."Unit of Measure Code" := SLrec."Unit of Measure Code";
-                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
-                                    // ISLrec.UpdateAmounts();
-                                    ISLrec.Modify()
-                                end
-                                else begin
-                                    ISLrec.Type := SLrec.Type::Item;
-                                    ISLrec."No." := SLrec."No.";
-                                    ISLrec."Document Type" := SLrec."Document Type";
-                                    ISLrec."Document No." := ICREC."No.";
-                                    ISLrec.Type := SLrec.Type::Item;
-                                    ISLrec."Line No." := SLrec."Line No.";
-                                    ISLrec."No." := SLrec."No.";
-                                    ISLrec."Description" := SLrec."Description";
-                                    ISLrec.Quantity := SLrec.Quantity;
-                                    ISLrec."Location Code" := SLrec."Location Code";
-                                    ISLrec."Unit of Measure" := SLrec."Unit of Measure";
-                                    ISLrec."Bin Code" := SLrec."Bin Code";
-                                    ISLrec."Unit of Measure Code" := SLrec."Unit of Measure";
-                                    ISLrec."Unit Price" := SLrec."Unit Price";
-                                    // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
-                                    ISLrec.UpdateAmounts();
-                                    ISLrec.Insert();
+                // Action 2 SO
+                SORecord.ChangeCompany(InventoryCompanyName);
+                SORecord.SetCurrentKey("External Document No.");
+                SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+                if (SORecord.findset) then
+                    repeat
+                        ICrec.ChangeCompany(InventoryCompanyName);
+                        ICrec."Due Date" := Rec."Due Date";
+                        ICRec.Get(SORecord."Document type", SORecord."No.");
+                        ICrec."Ship-to Name" := rec."Ship-to Name";
+                        ICrec."Ship-to Address" := rec."Ship-to Address";
+                        ICrec.Ship := rec.ship;
+                        ICrec."Work Description" := rec."Work Description";
+                        rec.CALCFIELDS("Work Description");
+                        ICrec."Work Description" := rec."Work Description";
+                        ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
+                        ICrec.Status := rec.Status;
+                        ICREC.Modify();
+                        SLrec.SetCurrentKey("Document No.");
+                        SLrec.SetRange("Document No.", rec."No.");
+                        ISLrec.ChangeCompany(InventoryCompanyName);
+                        if (SLrec.findset) then
+                            repeat
+                                if SLrec.Type = SLrec.Type::Item then begin
+                                    if ISLrec.Get(SLrec."Document Type", ICREC."No.", SLrec."Line No.") then begin
+                                        // UPdata
+                                        ISLrec.Type := SLrec.Type::Item;
+                                        ISLrec."No." := SLrec."No.";
+                                        ISLrec."Document Type" := SLrec."Document Type";
+                                        ISLrec."Document No." := ICREC."No.";
+                                        ISLrec.Type := SLrec.Type::Item;
+                                        ISLrec."Line No." := SLrec."Line No.";
+                                        ISLrec."No." := SLrec."No.";
+                                        ISLrec."Description" := SLrec."Description";
+                                        ISLrec.Quantity := SLrec.Quantity;
+                                        ISLrec."Location Code" := SLrec."Location Code";
+                                        ISLrec."Unit Price" := SLrec."Unit Price";
+                                        ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                        ISLrec."Bin Code" := SLrec."Bin Code";
+                                        ISLrec."Unit of Measure Code" := SLrec."Unit of Measure Code";
+                                        // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                        // ISLrec.UpdateAmounts();
+                                        ISLrec.Modify()
+                                    end
+                                    else begin
+                                        ISLrec.Type := SLrec.Type::Item;
+                                        ISLrec."No." := SLrec."No.";
+                                        ISLrec."Document Type" := SLrec."Document Type";
+                                        ISLrec."Document No." := ICREC."No.";
+                                        ISLrec.Type := SLrec.Type::Item;
+                                        ISLrec."Line No." := SLrec."Line No.";
+                                        ISLrec."No." := SLrec."No.";
+                                        ISLrec."Description" := SLrec."Description";
+                                        ISLrec.Quantity := SLrec.Quantity;
+                                        ISLrec."Location Code" := SLrec."Location Code";
+                                        ISLrec."Unit of Measure" := SLrec."Unit of Measure";
+                                        ISLrec."Bin Code" := SLrec."Bin Code";
+                                        ISLrec."Unit of Measure Code" := SLrec."Unit of Measure";
+                                        ISLrec."Unit Price" := SLrec."Unit Price";
+                                        // message('in onafteraction %1 %2 %3', ISLrec.CurrentCompany, ISLrec."No.", ISLrec.Type);
+                                        ISLrec.UpdateAmounts();
+                                        ISLrec.Insert();
+                                    end;
                                 end;
-                            end;
-                        until (SLrec.Next() = 0);
-                until (SORecord.next() = 0);
-        end;
+                            until (SLrec.Next() = 0);
+                    until (SORecord.next() = 0);
+            end;
     end;
 
     trigger OnAfterDelete();
@@ -127,23 +128,24 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         SORecord: Record "Sales Header";
         icrec: Record "sales Header";
     begin
-        if rec.CurrentCompany <> InventoryCompanyName then begin
-            // Action 1 PO 
-            if POrecord.Get(Porecord."Document Type"::Order, Rec."Automate Purch.Doc No.") then begin
-                POrecord.Delete();
-            end;
+        if rec.CurrentCompany <> InventoryCompanyName then
+            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then begin
+                // Action 1 PO 
+                if POrecord.Get(Porecord."Document Type"::Order, Rec."Automate Purch.Doc No.") then begin
+                    POrecord.Delete();
+                end;
 
-            // Action 2 SO
-            SORecord.ChangeCompany(InventoryCompanyName);
-            SORecord.SetCurrentKey("External Document No.");
-            SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
-            if (SORecord.findset) then
-                repeat
-                    ICrec.ChangeCompany(InventoryCompanyName);
-                    ICRec.get(SORecord."Document type", SORecord."No.");
-                    ICREC.Delete();
-                until (SORecord.next() = 0);
-        end;
+                // Action 2 SO
+                SORecord.ChangeCompany(InventoryCompanyName);
+                SORecord.SetCurrentKey("External Document No.");
+                SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+                if (SORecord.findset) then
+                    repeat
+                        ICrec.ChangeCompany(InventoryCompanyName);
+                        ICRec.get(SORecord."Document type", SORecord."No.");
+                        ICREC.Delete();
+                    until (SORecord.next() = 0);
+            end;
     end;
 
     procedure loadlines();
