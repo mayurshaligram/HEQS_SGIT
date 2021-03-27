@@ -76,6 +76,9 @@ codeunit 50101 "Sales Truth Mgt"
 
         RetailSalesHeader.CalcFields("Work Description");
         SalesHeader."Work Description" := RetailSalesHeader."Work Description";
+        SalesHeader."Location Code" := RetailSalesHeader."Location Code";
+        SalesHeader."Requested Delivery Date" := RetailSalesHeader."Requested Delivery Date";
+        SalesHeader."Promised Delivery Date" := RetailSalesHeader."Promised Delivery Date";
         SalesHeader.Modify();
 
         RetailSalesLine.ChangeCompany(SalesHeader."Sell-to Customer Name");

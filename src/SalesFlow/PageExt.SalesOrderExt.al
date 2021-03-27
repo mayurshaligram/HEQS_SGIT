@@ -1,5 +1,19 @@
 pageextension 50102 "Sales Order_Ext" extends "Sales Order"
 {
+    layout
+    {
+        addlast("Shipping and Billing")
+        {
+            field(Delivery; Rec.Delivery)
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Delivery';
+                ToolTip = 'Specifies the Delivery Option';
+                Importance = Promoted;
+            }
+        }
+    }
 
     actions
     {

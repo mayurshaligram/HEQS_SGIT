@@ -54,6 +54,8 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
         end;
 
+        if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
+
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
             OnUpdatePurch_IC_BOM(Rec);
         end;

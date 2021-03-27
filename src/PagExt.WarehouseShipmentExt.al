@@ -6,7 +6,6 @@ pageextension 50104 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
         {
             trigger OnAfterAction()
             var
-
                 RetailPurchaseOrder: Record "Purchase Header";
                 RetailSalesOrder: Record "Sales Header";
                 RetailSalesOrderPage: Page "Sales Order";

@@ -1,7 +1,26 @@
+enum 50145 "Delivery Option"
+{
+    Extensible = true;
+
+    value(0; Delivery)
+    {
+    }
+    value(1; Pickup)
+    {
+    }
+
+}
 tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
     fields
     {
+        modify("Promised Delivery Date")
+        {
+            trigger OnBeforeValidate(){
+
+
+            }
+    }
         field(50100; Money; Boolean)
         {
             Caption = 'Receive Money';
@@ -13,6 +32,11 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Caption = 'Automate Purch.Doc No.';
             Description = 'This field is to show the No. of automated purchase order';
             Editable = false;
+        }
+        field(50148; "Delivery"; Enum "Delivery Option")
+        {
+            Caption = 'Delivery Option';
+            Description = 'Specife the Delivery Option';
         }
     }
 
