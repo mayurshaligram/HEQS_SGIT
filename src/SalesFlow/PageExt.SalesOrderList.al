@@ -12,6 +12,7 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                 ToolTip = 'Specifies the number of the automated generated purchorder no';
                 Visible = IsInventoryCompany;
             }
+
         }
     }
     actions
@@ -115,6 +116,4 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
     end;
-
-
 }

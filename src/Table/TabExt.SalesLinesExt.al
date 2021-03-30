@@ -18,6 +18,26 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             Description = 'Car ID for Delivery';
             Editable = false;
         }
+        field(50103; NeedAssemble; Boolean)
+        {
+            Description = 'The Line Need Assemble.';
+            Editable = true;
+        }
+        field(50104; AssemblyHour; Decimal)
+        {
+            Description = 'Assembly Hour';
+            Editable = true;
+        }
+        field(50105; UnitAssembleHour; Decimal)
+        {
+            Description = 'The Assemble hour for just one item';
+            Editable = true;
+        }
+        field(50106; "Main Item Line"; Integer)
+        {
+            Description = 'Main Item Line';
+            Editable = false;
+        }
     }
 
     trigger OnAfterInsert();
@@ -57,12 +77,12 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
 
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
-            OnUpdatePurch_IC_BOM(Rec);
+            OnUpdatePurchICBOM(Rec);
         end;
     end;
 
     [IntegrationEvent(false, false)]
-    local procedure OnUpdatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    local procedure OnUpdatePurchICBOM(var SalesLine: Record "Sales Line");
     begin
     end;
 

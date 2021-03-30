@@ -1,6 +1,13 @@
 tableextension 50102 "Item_Ext" extends "Item"
 {
 
+    fields
+    {
+        field(50101; "Unit Assembly Hr"; Decimal)
+        {
+
+        }
+    }
     trigger OnBeforeModify()
     var
         IsValid: Boolean;
@@ -54,31 +61,31 @@ tableextension 50102 "Item_Ext" extends "Item"
         end;
     end;
 
-    // trigger OnAfterModify()
-    // var
-    //     TempText: Text;
-    //     RetailItemRecord: Record Item;
-    //     OtherCompanyRecord: Record Company;
-    //     TempCost: Integer;
-    //     TempPrice: Integer;
-    // begin
-    //     if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
-    //         OtherCompanyRecord.Reset();
-    //         if OtherCompanyRecord.Find('-') then
-    //             repeat
-    //                 if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-    //                     RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
-    //                     RetailItemRecord.Get(Rec."No.");
-    //                     TempCost := RetailItemRecord."Unit Cost";
-    //                     TempPrice := RetailItemRecord."Unit Price";
-    //                     RetailItemRecord := Rec;
-    //                     RetailItemRecord."Unit Cost" := TempCost;
-    //                     RetailItemRecord."Unit Price" := TempPrice;
-    //                     RetailItemRecord.Modify();
-    //                 end;
-    //             until OtherCompanyRecord.Next() = 0;
-    //     end;
-    // end;
+    trigger OnAfterModify()
+    var
+        TempText: Text;
+        RetailItemRecord: Record Item;
+        OtherCompanyRecord: Record Company;
+        TempCost: Integer;
+        TempPrice: Integer;
+    begin
+        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
+            OtherCompanyRecord.Reset();
+            if OtherCompanyRecord.Find('-') then
+                repeat
+                    if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
+                        RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
+                        RetailItemRecord.Get(Rec."No.");
+                        TempCost := RetailItemRecord."Unit Cost";
+                        TempPrice := RetailItemRecord."Unit Price";
+                        RetailItemRecord := Rec;
+                        RetailItemRecord."Unit Cost" := TempCost;
+                        RetailItemRecord."Unit Price" := TempPrice;
+                        RetailItemRecord.Modify();
+                    end;
+                until OtherCompanyRecord.Next() = 0;
+        end;
+    end;
 
     trigger OnAfterDelete()
     var

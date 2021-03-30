@@ -12,7 +12,58 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 ToolTip = 'Specifies the Delivery Option';
                 Importance = Promoted;
             }
+            field(IsScheduled; Rec.IsScheduled)
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'IsScheduled';
+                ToolTip = 'Specifies the Delivery Option';
+                Importance = Promoted;
+                Editable = false;
+            }
+            field(IsDeliveried; Rec.IsDeliveried)
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'IsDeliveried';
+                ToolTip = 'Specifies whether the sales order has been deliveried';
+                Importance = Promoted;
+                Editable = false;
+            }
+            field("Delivery Hour"; Rec."Delivery Hour")
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Delivery Hour';
+                ToolTip = 'Specifies the Delivery Hour';
+                Importance = Promoted;
+                Editable = false;
+            }
+            field("Ship-to Phone No."; Rec."Ship-to Phone No.")
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Ship-to Phone No.';
+                ToolTip = 'Specifies the Phone No.';
+                Importance = Promoted;
+                Editable = true;
+            }
+
+
         }
+
+        modify("Promised Delivery Date")
+        {
+            Editable = false;
+
+            trigger OnBeforeValidate();
+            begin
+                if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then
+                    Error('View Only Please Change the Attribute, at %1 Scheduling Section', SalesTruthMgt.InventoryCompany());
+            end;
+        }
+
+
     }
 
     actions
@@ -23,6 +74,14 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
             var
                 Text1: Label 'Please release the current Sales Order in at "%1"';
             begin
+                if Rec.Delivery = Rec.Delivery::" " then
+                    Error('Please select the delivery option')
+                else
+                    if Rec.Delivery = Rec.Delivery::Delivery then begin
+                        if Rec."Sell-to Address" = '' then begin
+                            Error('Please Give sell to address');
+                        end
+                    end;
                 if SalesTruthMgt.IsICSalesHeader(Rec) then Error(Text1, Rec."Sell-to Customer Name");
             end;
 

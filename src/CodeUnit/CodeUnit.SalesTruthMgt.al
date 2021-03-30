@@ -68,8 +68,14 @@ codeunit 50101 "Sales Truth Mgt"
         RetailSalesLine: Record "Sales Line";
         SalesLine: Record "Sales Line";
         ReleaseSalesDoc: Codeunit "Release Sales Document";
-
+        TempDeliveryItem: Text[200];
+        TempCubage: Decimal;
+        TempAssemble: Boolean;
+        TempAssembleHour: Decimal;
+        ZoneCode: Record ZoneTable;
+        TempAssemblyItem: Text[200];
     begin
+        TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
         RetailSalesHeader.SetRange("Automate Purch.Doc No.", SalesHeader."External Document No.");
         RetailSalesHeader.FindSet();
@@ -79,7 +85,15 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader."Location Code" := RetailSalesHeader."Location Code";
         SalesHeader."Requested Delivery Date" := RetailSalesHeader."Requested Delivery Date";
         SalesHeader."Promised Delivery Date" := RetailSalesHeader."Promised Delivery Date";
-        SalesHeader.Modify();
+        SalesHeader."Sell-to Contact" := RetailSalesHeader."Sell-to Contact";
+        SalesHeader."Sell-to Phone No." := RetailSalesHeader."Sell-to Phone No.";
+        SalesHeader.RetailSalesHeader := RetailSalesHeader."No.";
+        SalesHeader."Ship-to Phone No." := RetailSalesHeader."Ship-to Phone No.";
+        SalesHeader."Ship-to City" := RetailSalesHeader."Ship-to City";
+        ZoneCode."Order Price" := SalesHeader.Amount;
+        if ZoneCode.Find('>') then
+            SalesHeader.ZoneCode := ZoneCode.Code;
+
 
         RetailSalesLine.ChangeCompany(SalesHeader."Sell-to Customer Name");
         RetailSalesLine.SetRange("Document Type", RetailSalesHeader."Document Type");
@@ -89,11 +103,29 @@ codeunit 50101 "Sales Truth Mgt"
                 if IsValideICSalesLine(RetailSalesLine) then begin
                     SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No.");
                     SalesLine."Location Code" := RetailSalesLine."Location Code";
+                    if RetailSalesLine.NeedAssemble then
+                        TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
+                    else
+                        TempAssemblyItem := TempAssemblyItem + 'No' + '\';
+                    TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\';
+                    TempCubage := TempCubage + SalesLine."Unit Volume" * SalesLine.Quantity;
+                    TempAssembleHour := TempAssembleHour + SalesLine.AssemblyHour;
+                    if SalesLine.NeedAssemble = true then
+                        TempAssemble := true;
                     SalesLine.Modify();
                 end;
             until RetailSalesLine.Next() = 0;
+        SalesHeader."Estimate Assembly Time(hour)" := TempAssembleHour;
+        // SalesHeader.Note := GetWorkDescription(RetailSalesHeader);
+        SalesHeader.NeedAssemble := TempAssemble;
+        SalesHeader.Cubage := TempCubage;
+        SalesHeader."Delivery Item" := TempDeliveryItem;
+        SalesHeader.Delivery := RetailSalesHeader.Delivery;
+        SalesHeader."Assembly Item" := TempAssemblyItem;
+        SalesHeader.Modify();
         ReleaseSalesDoc.PerformManualRelease(SalesHeader);
     end;
+
 
     [EventSubscriber(ObjectType::Table, 36, 'OnInsertPurchaseHeader', '', false, false)]
     local procedure InsertPurchaseHeader(var SalesHeader: Record "Sales Header");
@@ -157,8 +189,8 @@ codeunit 50101 "Sales Truth Mgt"
         end;
     end;
 
-    [EventSubscriber(ObjectType::Table, 37, 'onUpdatePurch_IC_BOM', '', false, false)]
-    local procedure UpdatePurch_IC_BOM(var SalesLine: Record "Sales Line");
+    [EventSubscriber(ObjectType::Table, 37, 'onUpdatePurchICBOM', '', false, false)]
+    local procedure UpdatePurchICBOM(var SalesLine: Record "Sales Line");
     begin
         UpdateBOMSalesLine(SalesLine);
         if SalesLine.CurrentCompany <> 'HEQS International Pty Ltd' then begin
@@ -166,6 +198,35 @@ codeunit 50101 "Sales Truth Mgt"
             UpdateICSalesLine(SalesLine);
         end;
 
+    end;
+
+    [EventSubscriber(ObjectType::Table, 5741, 'onUpdateBOM', '', false, false)]
+    local procedure UpdateBOM(var TransferLine: Record "Transfer Line");
+    begin
+        if TransferLine."BOM Item" <> true then
+            UpdateBOMTransferLine(TransferLine);
+    end;
+
+    local procedure UpdateBOMTransferLine(var TransferLine: Record "Transfer Line");
+    var
+        BOMComponent: Record "BOM Component";
+        BOMTransferLine: Record "Transfer Line";
+    begin
+        BOMComponent.Reset();
+        BOMComponent.SetRange("Parent Item No.", TransferLine."Item No.");
+        if BOMComponent.FindSet() then
+            repeat
+                BOMTransferLine.Reset();
+                BOMTransferLine.SetRange("Document No.", TransferLine."Document No.");
+                BOMTransferLine.SetRange("Item No.", BOMComponent."No.");
+                BOMTransferLine.SetRange("BOM Item", true);
+                BOMTransferLine.SetRange("Main Item Line", TransferLine."Line No.");
+                if BOMTransferLine.FindSet() then
+                    repeat
+                        BOMTransferLine.Validate(Quantity, TransferLine.Quantity * BOMComponent."Quantity per");
+                        BOMTransferLine.Modify();
+                    until BOMTransferLine.Next() = 0;
+            until BOMComponent.Next() = 0;
     end;
 
     local procedure UpdateBOMSalesLine(var SalesLine: Record "Sales Line");
@@ -182,6 +243,7 @@ codeunit 50101 "Sales Truth Mgt"
                 BOMSalesLine.SetRange("Document No.", SalesLine."Document No.");
                 BOMSalesLine.SetRange("No.", BOMComponent."No.");
                 BOMSalesLine.SetRange("BOM Item", true);
+                BOMSalesLine.SetRange("Main Item Line", SalesLine."Line No.");
                 if BOMSalesLine.FindSet() then
                     repeat
                         BOMSalesLine.Validate("Location Code", SalesLine."Location Code");
@@ -319,6 +381,62 @@ codeunit 50101 "Sales Truth Mgt"
         end;
     end;
 
+    [EventSubscriber(ObjectType::Table, 5741, 'onInsertBOM', '', false, false)]
+    local procedure InsertBOM(var TransferLine: Record "Transfer Line");
+    begin
+        if TransferLine.CurrentCompany = InventoryCompanyName then
+            ExplodeTransferBOM(TransferLine);
+    end;
+
+    local procedure ExplodeTransferBOM(TransferLine: Record "Transfer Line");
+    var
+        Item: Record Item;
+        TempLineNo: Integer;
+        TransferHeader: Record "Transfer Header";
+        BOMComponent: Record "BOM Component";
+        LineSpacing: Integer;
+        ToTransferLine: Record "Transfer Line";
+        NextLineNo: Integer;
+    begin
+        // Find Line No
+        TransferHeader.Reset();
+        TransferHeader.Get(TransferLine."Document No.");
+        TempLineNo := TransferLine."Line No.";
+        ToTransferLine.Reset();
+        ToTransferLine.SetRange("Document No.", TransferLine."Document No.");
+        ToTransferLine."Document No." := TransferLine."Document No.";
+        NextLineNo := TransferLine."Line No.";
+        if ToTransferLine.FindLast() then
+            if ToTransferLine."Line No." >= NextLineNo then
+                NextLineNo := ToTransferLine."Line No.";
+        LineSpacing := 10000;
+        BOMComponent.Reset();
+        BOMComponent.SetRange("Parent Item No.", TransferLine."Item No.");
+        if BOMComponent.FindSet then
+            repeat
+                ToTransferLine.Init();
+                NextLineNo := NextLineNo + LineSpacing;
+                ToTransferLine."Line No." := NextLineNo;
+
+                Item.Get(BOMComponent."No.");
+                // ToTransferLine.Validate("Unit of Measure Code", BOMComponent."Unit of Measure Code");
+                ToTransferLine.Validate(Quantity, TransferLine.Quantity * BOMComponent."Quantity per");
+
+                if TransferHeader."Shipment Date" <> TransferLine."Shipment Date" then
+                    ToTransferLine.Validate("Shipment Date", TransferLine."Shipment Date");
+                ToTransferLine.Description := BOMComponent.Description;
+
+                // Modify Place, Only Give Item Type
+                ToTransferLine."Document No." := TransferLine."Document No.";
+                ToTransferLine.Validate("Item No.", BOMComponent."No.");
+                ToTransferLine."BOM Item" := true;
+                ToTransferLine."Main Item Line" := TransferLine."Line No.";
+                ToTransferLine.Insert();
+            until BOMComponent.Next = 0;
+
+    end;
+
+
     local procedure ExplodeBOM(SalesLine: Record "Sales Line");
     var
         PreviousSalesLine: Record "Sales Line";
@@ -428,6 +546,7 @@ codeunit 50101 "Sales Truth Mgt"
                 ToSalesLine."BOM Item" := true;
                 ToSalesLine."Location Code" := SalesLine."Location Code";
                 ToSalesLine.Validate("Qty. to Assemble to Order");
+                ToSalesLine."Main Item Line" := SalesLine."Line No.";
                 ToSalesLine.Insert();
 
                 if (ToSalesLine.Type = ToSalesLine.Type::Item) and (ToSalesLine.Reserve = ToSalesLine.Reserve::Always) then

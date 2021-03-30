@@ -2,11 +2,15 @@ enum 50145 "Delivery Option"
 {
     Extensible = true;
 
-    value(0; Delivery)
+    value(0; " ")
     {
     }
     value(1; Pickup)
     {
+    }
+    value(2; Delivery)
+    {
+
     }
 
 }
@@ -14,13 +18,23 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
     fields
     {
-        modify("Promised Delivery Date")
+        field(50144; TempDate; Date)
         {
-            trigger OnBeforeValidate(){
+            Caption = 'Promised Delivery Date';
+            Description = 'Works Temp Delivery Date';
+            Editable = false;
+        }
+        field(50143; "Vehicle NO"; Text[20])
+        {
+            Caption = 'Promised Delivery Date';
+            Description = 'Works Temp Delivery Date';
+        }
+        field(50142; "Driver"; Text[20])
+        {
+            Caption = 'Directed Driver';
+            Description = 'Driver';
+        }
 
-
-            }
-    }
         field(50100; Money; Boolean)
         {
             Caption = 'Receive Money';
@@ -37,6 +51,91 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         {
             Caption = 'Delivery Option';
             Description = 'Specife the Delivery Option';
+        }
+        field(50147; "Delivery Item"; Text[200])
+        {
+            Caption = 'Delivery Item';
+            Description = 'Display all the item in this sales Header';
+            Editable = false;
+        }
+        field(50146; RetailSalesHeader; Code[20])
+        {
+            Caption = 'Retail Sales Header';
+            Description = 'Indicate the No. of IC Retail Sales Header';
+            Editable = false;
+        }
+        field(50145; IsScheduled; Boolean)
+        {
+            Caption = 'IsScheduled';
+            Description = 'Indicate the sales order has been is scheduled';
+            Editable = true;
+        }
+        field(50141; "Delivery Hour"; Text[20])
+        {
+            Caption = 'Delivery Hour';
+            Description = 'Indicate the Delivery Hour for the Sales Order';
+            Editable = true;
+        }
+        field(50140; Cubage; Decimal)
+        {
+            Caption = 'Total Cubage';
+            Description = 'Indicate the total Cubage for the Sales Header';
+            Editable = false;
+        }
+        field(50139; NeedAssemble; Boolean)
+        {
+            Caption = 'Need Assemble';
+            Description = 'Indicate whether contain the sales line need to be assemled';
+            Editable = false;
+        }
+        field(50138; Note; Text[200])
+        {
+            Caption = 'Other Note';
+            Description = 'Indicate the text version for the work description';
+            Editable = false;
+        }
+        field(50137; NeedCollectPayment; Boolean)
+        {
+            Caption = 'NeedCollectPayment';
+            Description = 'Indicate whether need to collect payment';
+            Editable = false;
+        }
+        field(50136; "Estimate Assembly Time(hour)"; Decimal)
+        {
+            Caption = 'Estimate Assembly Time';
+            Description = 'Indicate total assembly time in this sales header';
+            Editable = false;
+        }
+        field(50135; Stair; Integer)
+        {
+            Caption = 'Stairs';
+            Description = 'Indicate the stairs of the sales order';
+            Editable = true;
+        }
+        field(50134; IsDeliveried; Boolean)
+        {
+            Caption = 'IsDeliveried';
+            Description = 'Indicate the Sales Order is deliveried or not';
+            Editable = true;
+        }
+        field(50133; "Ship-to Phone No."; Text[20])
+        {
+            Caption = 'Ship-to Phone No.';
+            Description = 'Indicate the Ship-To Phone No.';
+            Editable = true;
+        }
+        field(50132; ZoneCode; Text[30])
+        {
+            Caption = 'ZoneCode';
+            Description = 'Price Level Zone Code';
+            Editable = false;
+        }
+        field(50131; "Assembly Item"; Text[200])
+
+        {
+            Caption = 'Assembly Item';
+            Description = 'Assembly Item';
+            Editable = false;
         }
     }
 
@@ -172,6 +271,27 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             end;
     end;
 
+    local procedure SetWorkDescription(NewWorkDescription: Text)
+    var
+        OutStream: OutStream;
+    begin
+        Clear("Work Description");
+        "Work Description".CreateOutStream(OutStream, TEXTENCODING::UTF8);
+        OutStream.WriteText(NewWorkDescription);
+        Modify;
+    end;
+
+    local procedure GetWorkDescription() WorkDescription: Text
+    var
+        TypeHelper: Codeunit "Type Helper";
+        InStream: InStream;
+    begin
+        CalcFields("Work Description");
+        "Work Description".CreateInStream(InStream, TEXTENCODING::UTF8);
+        if not TypeHelper.TryReadAsTextWithSeparator(InStream, TypeHelper.LFSeparator(), WorkDescription) then
+            Message(ReadingDataSkippedMsg, FieldCaption("Work Description"));
+    end;
+
     procedure loadlines();
     var
         sline: Record "Sales Line";
@@ -222,6 +342,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         myinstream.Read(mytext, 100);
         Exit(mytext);
     end;
+
 
 
 

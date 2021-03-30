@@ -2,11 +2,10 @@ page 50146 Schedule
 {
     ApplicationArea = Basic, Suite, Assembly;
     Caption = 'Schedule';
-    CardPageID = "Sales Order";
     DataCaptionFields = "Sell-to Customer No.";
-    Editable = true;
+    Insertallowed = false;
+    DeleteAllowed = false;
     PageType = List;
-    PromotedActionCategories = 'New,Process,Report,Request Approval,Order,Release,Posting,Print/Send,Navigate';
     QueryCategory = 'Sales Order List';
     RefreshOnActivate = true;
     SourceTable = "Sales Header";
@@ -20,62 +19,266 @@ page 50146 Schedule
             repeater(Control1)
             {
                 ShowCaption = false;
+                field("No."; Rec.RetailSalesHeader)
+                {
+                    Caption = 'Order Number';
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the number of the involved entry or record, according to the specified number series.';
+                }
+                field(Suburb; Rec."Ship-to City")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Suburb';
+                    ToolTip = 'Specifies the city code of the address that the items are shipped to.';
+                }
+                field(Zone; Rec.ZoneCode)
+                {
+                    Caption = 'Zone';
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the price level Zone Code';
+                }
+                field("Promised delivery date"; Rec.TempDate)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the date that you have promised to deliver the order, as a result of the Order Promising function.';
+                    Editable = true;
+                    Visible = Not IsSimplePage;
+
+                    trigger OnValidate();
+                    var
+                        RetailSalesHeader: Record "Sales Header";
+                    begin
+                        RetailSalesHeader.ChangeCompany(Rec."Sell-to Customer Name");
+                        if Rec."External Document No." <> '' then begin
+                            RetailSalesHeader.SetRange("Document Type", Rec."Document Type");
+                            RetailSalesHeader.SetRange("Automate Purch.Doc No.", Rec."External Document No.");
+                            if RetailSalesHeader.FindSet() then begin
+                                RetailSalesHeader."Promised Delivery Date" := Rec.TempDate;
+                                RetailSalesHeader.Modify();
+                            end;
+                        end;
+                        Rec."Promised Delivery Date" := Rec.TempDate;
+                        Rec.Modify();
+                    end;
+                }
+                field("Delivery Hour"; Rec."Delivery Hour")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the date that you have promised to deliver the order, as a result of the Order Promising function.';
+                    Editable = true;
+                    Visible = Not IsSimplePage;
+                    trigger OnValidate();
+                    var
+                        RetailSalesHeader: Record "Sales Header";
+                    begin
+                        RetailSalesHeader.ChangeCompany(Rec."Sell-to Customer Name");
+                        RetailSalesHeader.Get(Rec."Document Type", Rec.RetailSalesHeader);
+                        RetailSalesHeader."Delivery Hour" := Rec."Delivery Hour";
+                        RetailSalesHeader.Modify();
+                    end;
+                }
+                field("Delivery Item"; Rec."Delivery Item")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specified a Delivery Item and Quantity.';
+                    MultiLine = true;
+                    Editable = false;
+                    Visible = true;
+                }
+
+                field("Assembly Item"; Rec."Assembly Item")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Assemble';
+                    ToolTip = 'Specified a Delivery Item and Quantity.';
+                    MultiLine = true;
+                    Editable = false;
+                    Style = StrongAccent;
+                    Visible = true;
+                }
+
+
+                field(Stair; Rec.Stair)
+                {
+                    Caption = 'Extra';
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the Delivery Stair';
+                    Editable = true;
+                    Visible = NOT IsSimplePage;
+                }
+                field("Sell-to Contact"; Rec."Sell-to Contact")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the name of the contact person at the customer''s main address.';
+                    Visible = Not IsSimplePage;
+                }
+                field("Phone No."; Rec."Ship-to Phone No.")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the contact phone No for shipping';
+                    Caption = 'Phone number';
+                    Visible = Not IsSimplePage;
+                }
+
+                field("Vehicle NO"; Rec."Vehicle NO")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the Delivery Vehicle No.';
+                    Visible = NOT IsSimplePage;
+                    Caption = 'Delivery Vehicle';
+                }
+                field(IsScheduled; Rec.IsScheduled)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specife the order has been scheduled';
+                    Editable = true;
+
+                    trigger OnValidate();
+                    var
+                        RetailSalesHeader: Record "Sales Header";
+                    begin
+                        if Rec.RetailSalesHeader <> '' then begin
+                            RetailSalesHeader.ChangeCompany(Rec."Sell-to Customer Name");
+                            RetailSalesHeader.Get(Rec."Document Type", Rec.RetailSalesHeader);
+                            RetailSalesHeader.IsScheduled := Rec.IsScheduled;
+                            RetailSalesHeader.Modify();
+                        end;
+                    end;
+                }
+
+
 
                 field(Delivery; Rec.Delivery)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the Delivery Option.';
                 }
+                //////////////////////////////////////
 
-                field("Sell-to Customer Name"; "Sell-to Customer Name")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the name of the customer.';
-                }
-                field("No."; "No.")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the number of the involved entry or record, according to the specified number series.';
-                }
 
-                field("Sell-to Customer No."; "Sell-to Customer No.")
+                field(InventorySalesOrder; Rec."No.")
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the number of the customer.';
+                    ToolTip = 'Specifies the Associated Invenotry Sales Order.';
+                    Visible = Not IsSimplePage;
                 }
-                field("Requested Delivery Date"; "Requested Delivery Date")
+                field(IsDeliveried; Rec.IsDeliveried)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the sales order has been deliveried or not';
+                    Visible = Not IsSimplePage;
+                    Editable = true;
+
+                    trigger OnValidate();
+                    var
+                        RetailSalesHeader: Record "Sales Header";
+                    begin
+                        if Rec.RetailSalesHeader <> '' then begin
+                            RetailSalesHeader.ChangeCompany(Rec."Sell-to Customer Name");
+                            RetailSalesHeader.Get(Rec."Document Type", Rec.RetailSalesHeader);
+                            RetailSalesHeader.IsDeliveried := Rec.IsDeliveried;
+                            RetailSalesHeader.Modify();
+                        end;
+                    end;
+                }
+                field("Requested Delivery Date"; Rec."Requested Delivery Date")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the date that the customer has asked for the order to be delivered.';
                 }
-                field("Promised delivery date"; Rec."Promised delivery date")
+
+
+
+                field(Cubage; Rec.Cubage)
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the date that you have promised to deliver the order, as a result of the Order Promising function.';
+                    ToolTip = 'Specifies the total cubage fo the sales order';
+                    Visible = Not IsSimplePage;
                 }
-                field("External Document No."; "External Document No.")
+                field("Sell-to Customer No."; "Sell-to Customer No.")
                 {
                     ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies a document number that refers to the customer''s or vendor''s numbering system.';
+                    ToolTip = 'Specifies the number of the customer.';
+                    Visible = Not IsSimplePage;
                 }
+
+                field("Customer Name"; "Sell-to Customer Name")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the name of the customer.';
+                    Visible = Not IsSimplePage;
+                }
+
+                field(Driver; Rec.Driver)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the Delivery Vehicle No.';
+                    Visible = NOT IsSimplePage;
+
+                    trigger OnLookup(var Text: Text): Boolean;
+                    var
+                        Driver: Record Driver;
+                    begin
+                        Driver.Reset();
+                        if Page.RunModal(Page::"Driver Lookup", Driver) = Action::LookupOK then
+                            Rec.Driver := Driver."First Name" + ' ' + Driver."Last Name";
+                    end;
+                }
+
                 field("Sell-to Post Code"; "Sell-to Post Code")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the postal code of the customer''s main address.';
-                    Visible = false;
+                    Visible = Not IsSimplePage;
                 }
+
+                field(NeedCollectPayment; Rec.NeedCollectPayment)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies whether in the delivery payment needed to be collected';
+                    Visible = Not IsSimplePage;
+                }
+                field("Other Note"; Rec.Note)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the note for the sales header';
+                    Visible = Not IsSimplePage;
+                }
+
+                field("Ship-to Code"; "Ship-to Code")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies a code for an alternate shipment address if you want to ship to another address than the one that has been entered automatically. This field is also used in case of drop shipment.';
+                    Visible = Not IsSimplePage;
+                }
+                field("Ship-to Name"; "Ship-to Name")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the name of the customer at the address that the items are shipped to.';
+                    Visible = Not IsSimplePage;
+                }
+                field("Ship-to Post Code"; "Ship-to Post Code")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the postal code of the address that the items are shipped to.';
+                    Visible = Not IsSimplePage;
+                }
+
+                field("Ship-to Contact"; "Ship-to Contact")
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specifies the name of the contact person at the address that the items are shipped to.';
+                    Visible = Not IsSimplePage;
+                }
+
+                /////////////////////////////////////////////
                 field("Sell-to Country/Region Code"; "Sell-to Country/Region Code")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the country/region code of the customer''s main address.';
                     Visible = false;
                 }
-                field("Sell-to Contact"; "Sell-to Contact")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the name of the contact person at the customer''s main address.';
-                    Visible = false;
-                }
+
                 field("Bill-to Customer No."; "Bill-to Customer No.")
                 {
                     ApplicationArea = Basic, Suite;
@@ -106,36 +309,6 @@ page 50146 Schedule
                     ToolTip = 'Specifies the name of the contact person at the customer''s billing address.';
                     Visible = false;
                 }
-                field("Ship-to Code"; "Ship-to Code")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies a code for an alternate shipment address if you want to ship to another address than the one that has been entered automatically. This field is also used in case of drop shipment.';
-                    Visible = false;
-                }
-                field("Ship-to Name"; "Ship-to Name")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the name of the customer at the address that the items are shipped to.';
-                    Visible = false;
-                }
-                field("Ship-to Post Code"; "Ship-to Post Code")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the postal code of the address that the items are shipped to.';
-                    Visible = false;
-                }
-                field("Ship-to Country/Region Code"; "Ship-to Country/Region Code")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the country/region code of the address that the items are shipped to.';
-                    Visible = false;
-                }
-                field("Ship-to Contact"; "Ship-to Contact")
-                {
-                    ApplicationArea = Basic, Suite;
-                    ToolTip = 'Specifies the name of the contact person at the address that the items are shipped to.';
-                    Visible = false;
-                }
                 field("Posting Date"; "Posting Date")
                 {
                     ApplicationArea = Basic, Suite;
@@ -158,6 +331,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Location;
                     ToolTip = 'Specifies the location from where inventory items to the customer on the sales document are to be shipped by default.';
+                    Visible = Not IsSimplePage;
                 }
                 field("Quote No."; "Quote No.")
                 {
@@ -175,6 +349,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the ID of the user who is responsible for the document.';
+                    Visible = false;
                 }
                 field("Currency Code"; "Currency Code")
                 {
@@ -186,6 +361,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the date when the related document was created.';
+                    Visible = Not IsSimplePage;
                 }
 
                 field("Campaign No."; "Campaign No.")
@@ -198,6 +374,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies whether the document is open, waiting to be approved, has been invoiced for prepayment, or has been released to the next stage of processing.';
+                    Visible = Not IsSimplePage;
                 }
                 field("Payment Terms Code"; "Payment Terms Code")
                 {
@@ -245,7 +422,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies when items on the document are shipped or were shipped. A shipment date is usually calculated from a requested delivery date plus lead time.';
-                    Visible = false;
+                    Visible = Not IsSimplePage;
                 }
                 field("Shipping Advice"; "Shipping Advice")
                 {
@@ -257,6 +434,7 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies whether all the items on the order have been shipped or, in the case of inbound items, completely received.';
+                    Visible = Not IsSimplePage;
                 }
                 field("Job Queue Status"; "Job Queue Status")
                 {
@@ -279,21 +457,25 @@ page 50146 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the sum, in LCY, for items that have been shipped but not yet been invoiced. The amount is calculated as Amount Including VAT x Qty. Shipped Not Invoiced / Quantity.';
+                    Visible = false;
                 }
                 field("Amt. Ship. Not Inv. (LCY)"; "Amt. Ship. Not Inv. (LCY)")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the sum, in LCY, for items that have been shipped but not yet been invoiced. The amount is calculated as Amount Including VAT x Qty. Shipped Not Invoiced / Quantity.';
+                    Visible = false;
                 }
                 field(Amount; Amount)
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the sum of amounts in the Line Amount field on the sales order lines.';
+                    Visible = false;
                 }
                 field("Amount Including VAT"; "Amount Including VAT")
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the total of the amounts, including VAT, on all the lines on the document.';
+                    Visible = false;
                 }
                 field("Posting Description"; "Posting Description")
                 {
@@ -304,9 +486,39 @@ page 50146 Schedule
             }
         }
     }
-
     actions
     {
+        area(processing)
+        {
+            action(ClassicView)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Show More Columns';
+                Image = SetupColumns;
+                ToolTip = 'View all available fields. Fields not frequently used are currently hidden.';
+                Visible = IsSimplePage;
+
+                trigger OnAction()
+                begin
+                    IsSimplePage := false;
+                    CurrPage.Update();
+                end;
+            }
+            action(SimpleView)
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Show Fewer Columns';
+                Image = SetupList;
+                ToolTip = 'Hide fields that are not frequently used.';
+                Visible = NOT IsSimplePage;
+
+                trigger OnAction()
+                begin
+                    IsSimplePage := true;
+                    CurrPage.Update();
+                end;
+            }
+        }
 
     }
 
@@ -318,9 +530,10 @@ page 50146 Schedule
             Caption = 'NSW';
             SharedLayout = false;
             Filters = where("Location Code" = const('NSW'),
-                 "Requested Delivery Date" = filter('<>0D'),
-                 "Sell-to Customer Name" = const('Priceworth Retail Pty Ltd'),
-                 Delivery = const(Delivery));
+                 "Requested Delivery Date" = filter(''),
+                 "Sell-to Customer Name" = const(''),
+                 Delivery = const(Delivery),
+                 IsScheduled = const(false));
             layout
             {
                 moveafter("No."; "Location Code")
@@ -336,9 +549,11 @@ page 50146 Schedule
             Caption = 'VIC';
             SharedLayout = false;
             Filters = where("Location Code" = const('VIC'),
-                 "Requested Delivery Date" = filter('<>0D'),
-                 "Sell-to Customer Name" = const('Priceworth Retail Pty Ltd'),
-                 Delivery = const(Delivery));
+                 "Requested Delivery Date" = filter(''),
+                 "Sell-to Customer Name" = const(''),
+                 Delivery = const(Delivery),
+                                  IsScheduled = const(false)
+                 );
             layout
             {
                 moveafter("No."; "Location Code")
@@ -354,9 +569,9 @@ page 50146 Schedule
             Caption = 'QLD';
             SharedLayout = false;
             Filters = where("Location Code" = const('QLD'),
-                 "Requested Delivery Date" = filter('<>0D'),
-                 "Sell-to Customer Name" = const('Priceworth Retail Pty Ltd'),
-                 Delivery = const(Delivery));
+                 "Requested Delivery Date" = filter(''),
+                 "Sell-to Customer Name" = const(''),
+                 Delivery = const(Delivery), IsScheduled = const(false));
             layout
             {
                 moveafter("No."; "Location Code")
@@ -411,12 +626,16 @@ page 50146 Schedule
         exit(NewStepCount);
     end;
 
+
     trigger OnOpenPage()
     var
         SalesSetup: Record "Sales & Receivables Setup";
         CRMIntegrationManagement: Codeunit "CRM Integration Management";
         OfficeMgt: Codeunit "Office Management";
+
+        SalesLine: Record "Sales Line";
     begin
+
         if UserMgt.GetSalesFilter <> '' then begin
             FilterGroup(2);
             SetRange("Responsibility Center", UserMgt.GetSalesFilter);
@@ -431,10 +650,13 @@ page 50146 Schedule
 
         CopySellToCustomerFilter;
 
+        IsSimplePage := false;
 
     end;
 
     var
+        IsSimplePage: Boolean;
+        DeliveryDescription: Text;
         ApplicationAreaMgmtFacade: Codeunit "Application Area Mgmt. Facade";
         DocPrint: Codeunit "Document-Print";
         ReportPrint: Codeunit "Test Report-Print";
@@ -458,6 +680,7 @@ page 50146 Schedule
     begin
         SalesPostYesNo.Preview(Rec);
     end;
+
 
     local procedure SetControlVisibility()
     var
