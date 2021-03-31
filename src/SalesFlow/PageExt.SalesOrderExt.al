@@ -148,6 +148,42 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                     until WarehouseShipmentLine.Next() = 0;
             end;
         }
+        modify(CopyDocument)
+        {
+            trigger OnAfterAction();
+            var
+                Item: Record Item;
+                SalesLine: Record "Sales Line";
+                BOMSalesLine: Record "Sales Line";
+                BOMComponent: Record "BOM Component";
+                TempLineNo: Integer;
+            begin
+                if SalesLine.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
+                    SalesLine.SetRange("Document Type", Rec."Document Type");
+                    SalesLine.SetRange("Document No.", Rec."No.");
+                    SalesLine.SetRange(Type, SalesLine.Type::Item);
+                    SalesLine.SetRange("BOM Item", false);
+
+                    if SalesLine.FindSet() then begin
+                        repeat
+                            TempLineNo := SalesLine."Line No.";
+                            Item.Get(SalesLine."No.");
+                            if Item.Type = Item.Type::Inventory then begin
+                                BOMComponent.SetRange("Parent Item No.", Item."No.");
+                                if BOMComponent.FindSet() then
+                                    repeat
+                                        TempLineNo += 10000;
+                                        BOMSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo);
+                                        BOMSalesLine."BOM Item" := true;
+                                        BOMSalesLine."Main Item Line" := SalesLine."Line No.";
+                                        BOMSalesLine.Modify();
+                                    until BOMComponent.Next() = 0;
+                            end;
+                        until SalesLine.Next() = 0;
+                    end;
+                end;
+            end;
+        }
     }
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
@@ -163,6 +199,8 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
         if IsICSalesHeader then begin
             Currpage.Editable(false);
         end;
+
+
     end;
 
     procedure RunInboxTransactions(var ICInboxTransaction: Record "IC Inbox Transaction")

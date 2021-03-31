@@ -36,29 +36,82 @@ codeunit 50101 "Sales Truth Mgt"
         exit(IsICSalesHeader);
     end;
 
-    [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOM_Purch_IC', '', false, false)]
+    local procedure DeleteBOMSalesLine(Var SalesLine: Record "Sales Line");
+    var
+        BOMSalesLine: Record "Sales Line";
+        SalesHeader: Record "Sales Header";
+        BOMPurchaseLine: Record "Purchase Line";
+        BOMICSalesLine: Record "Sales Line";
+        ICSalesHeader: Record "Sales Header";
+
+        ExistIC: Boolean;
+    begin
+        SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
+        ExistIC := false;
+        ICSalesHeader.ChangeCompany(InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+        if ICSalesHeader.FindSet() then
+            ExistIC := true;
+        BOMSalesLine.SetRange("Document Type", SalesLine."Document Type");
+        BOMSalesLine.SetRange("Document No.", SalesLine."Document No.");
+        BOMSalesLine.SetRange(Type, BOMSalesLine.Type::Item);
+        BOMSalesLine.SetRange("BOM Item", true);
+        BOMSalesLine.SetRange("Main Item Line", SalesLine."Line No.");
+        if BOMSalesLine.FindSet() then
+            repeat
+                BOMPurchaseLine.Get(BOMSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", BOMSalesLine."Line No.");
+                BOMPurchaseLine.Delete();
+                if ExistIC then begin
+                    BOMICSalesLine.ChangeCompany(InventoryCompany());
+                    BOMICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", BOMSalesLine."Line No.");
+                    BOMICSalesLine.Delete();
+                end;
+
+                BOMSalesLine.Delete();
+            until BOMSalesLine.Next() = 0;
+    end;
+
+    local procedure DeletePurchaseLine(var SalesLine: Record "Sales Line");
+    var
+        SalesHeader: Record "Sales Header";
+        PurchaseLine: Record "Purchase Line";
+    begin
+        SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
+        PurchaseLine.Get(PurchaseLine."Document Type"::Order, SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
+        PurchaseLine.Delete();
+    end;
+
+    local procedure DeleteICSalesLine(var SalesLine: Record "Sales Line");
+    var
+        ICSalesHeader: Record "Sales Header";
+        ICSalesLine: Record "Sales Line";
+    begin
+        ICSalesHeader.ChangeCompany(InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+        ICSalesHeader.FindSet();
+        ICSalesLine.ChangeCompany(InventoryCompany());
+        ICSalesLine.Get(SalesLine."Document Type", ICSalesHeader."No.", SalesLine."Line No.");
+        ICSalesLine.Delete();
+    end;
+
+    [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOMPurchIC', '', false, false)]
     local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
     var
-
+        ICSalesHeader: Record "Sales Header";
+        ExistIC: Boolean;
     begin
-
-        //       InventoryName := 'HEQS International Pty Ltd';
-        // if (rec.CurrentCompany <> InventoryName) and (rec.Type = rec.Type::Item) then begin
-        //     FromSO.Get(Rec."Document Type", Rec."Document No.");
-        //     PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
-        //     PLrec.get(rec."Document Type", PO."NO.", rec."Line No.");
-        //     PLrec.Delete();
-        //     // ISO line
-        //     ISLrec.ChangeCompany('HEQS International Pty Ltd');
-        //     ISOrec.ChangeCompany('HEQS International Pty Ltd');
-        //     ISOrec.SetCurrentKey("External Document No.");
-        //     ISORec.SetRange("External Document No.", PO."No.");
-        //     if (ISORec.findset) then
-        //         repeat
-        //             ISLrec.get(rec."Document Type", ISOrec."No.", rec."Line No.");
-        //             ISLrec.Delete();
-        //         until (ISORec.next() = 0);
-        // end;
+        ExistIC := false;
+        if ICSalesHeader.ChangeCompany(InventoryCompany()) then begin
+            ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+            if ICSalesHeader.FindSet() then
+                ExistIC := true;
+        end;
+        DeleteBOMSalesLine(SalesLine);
+        DeletePurchaseLine(SalesLine);
+        if ExistIC then
+            DeleteICSalesLine(SalesLine);
     end;
 
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
@@ -69,11 +122,14 @@ codeunit 50101 "Sales Truth Mgt"
         SalesLine: Record "Sales Line";
         ReleaseSalesDoc: Codeunit "Release Sales Document";
         TempDeliveryItem: Text[200];
+        TempDeliveryItemWithoutBOM: Text[200];
         TempCubage: Decimal;
         TempAssemble: Boolean;
         TempAssembleHour: Decimal;
         ZoneCode: Record ZoneTable;
         TempAssemblyItem: Text[200];
+        TempAssemblyItemWithoutBOM: Text[200];
+
     begin
         TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
@@ -103,11 +159,19 @@ codeunit 50101 "Sales Truth Mgt"
                 if IsValideICSalesLine(RetailSalesLine) then begin
                     SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No.");
                     SalesLine."Location Code" := RetailSalesLine."Location Code";
+                    SalesLine."BOM Item" := RetailSalesLine."BOM Item";
                     if RetailSalesLine.NeedAssemble then
                         TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
                     else
                         TempAssemblyItem := TempAssemblyItem + 'No' + '\';
                     TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\';
+                    if SalesLine."BOM Item" = false then begin
+                        TempDeliveryItemWithoutBOM := TempDeliveryItemWithoutBOM + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\';
+                        if RetailSalesLine.NeedAssemble then
+                            TempAssemblyItemWithoutBOM := TempAssemblyItemWithoutBOM + 'Yes' + '\'
+                        else
+                            TempAssemblyItemWithoutBOM := TempAssemblyItemWithoutBOM + 'No' + '\';
+                    end;
                     TempCubage := TempCubage + SalesLine."Unit Volume" * SalesLine.Quantity;
                     TempAssembleHour := TempAssembleHour + SalesLine.AssemblyHour;
                     if SalesLine.NeedAssemble = true then
@@ -120,6 +184,8 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader.NeedAssemble := TempAssemble;
         SalesHeader.Cubage := TempCubage;
         SalesHeader."Delivery Item" := TempDeliveryItem;
+        SalesHeader."Delivery without BOM Item" := TempDeliveryItemWithoutBOM;
+        SalesHeader."Assembly Item without BOM Item" := TempAssemblyItemWithoutBOM;
         SalesHeader.Delivery := RetailSalesHeader.Delivery;
         SalesHeader."Assembly Item" := TempAssemblyItem;
         SalesHeader.Modify();
@@ -191,6 +257,9 @@ codeunit 50101 "Sales Truth Mgt"
 
     [EventSubscriber(ObjectType::Table, 37, 'onUpdatePurchICBOM', '', false, false)]
     local procedure UpdatePurchICBOM(var SalesLine: Record "Sales Line");
+    var
+        PurchaseLine: Record "Purchase Line";
+        SalesHeader: Record "Sales Header";
     begin
         UpdateBOMSalesLine(SalesLine);
         if SalesLine.CurrentCompany <> 'HEQS International Pty Ltd' then begin
@@ -259,6 +328,7 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader: Record "Sales Header";
         PurchaseLine: Record "Purchase Line";
         TempSalesLine: Record "Sales Line";
+        NeedRecursion: Boolean;
     begin
         Item.Get(SalesLine."No.");
         if Item.Type = Item.Type::Service then
@@ -271,8 +341,9 @@ codeunit 50101 "Sales Truth Mgt"
 
         if TempSalesLine.FindSet() then
             repeat
-                if PurchaseLine.Get(TempSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") = false then
-                    InsertPurchaseLine(TempSalesLine)
+                if PurchaseLine.Get(TempSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") = false then begin
+                    InsertPurchaseLine(TempSalesLine);
+                end
                 else begin
                     PurchaseLine.Validate("No.", TempSalesLine."No.");
                     PurchaseLine."BOM Item" := TempSalesLine."BOM Item";
@@ -598,6 +669,7 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine.Type := SalesLine.Type;
         PurchaseLine.Validate("No.", SalesLine."No.");
         PurchaseLine."BOM Item" := SalesLine."BOM Item";
+        PurchaseLine.Validate(Quantity, SalesLine.Quantity);
         PurchaseLine.Insert();
         if (Item."Unit Cost" = 0) and (PurchaseLine."BOM Item" = false) then
             Error('Please Set Purchase Price for item %1', Item."No.");

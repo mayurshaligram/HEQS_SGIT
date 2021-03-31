@@ -137,6 +137,18 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Description = 'Assembly Item';
             Editable = false;
         }
+        field(50130; "Delivery without BOM Item"; Text[200])
+        {
+            Caption = 'Delivery without BOM Item';
+            Description = 'Display all the item without BOM in this sales Header';
+            Editable = false;
+        }
+        field(50129; "Assembly Item without BOM Item"; Text[200])
+        {
+            Caption = 'Assembly Item without BOM';
+            Description = 'Assembly Item without BOM';
+            Editable = false;
+        }
     }
 
     trigger OnAfterInsert();

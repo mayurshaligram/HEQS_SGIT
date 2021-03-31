@@ -16,6 +16,15 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
             Error('Please Change the Purchase Order Information in %1', ParentPurchaseHeader."Sales Order Ref");
     end;
 
+    trigger OnBeforeDelete()
+    var
+        ParentPurchaseHeader: Record "Purchase Header";
+    begin
+        ParentPurchaseHeader.Get(Rec."Document Type", Rec."Document No.");
+        if ParentPurchaseHeader."Sales Order Ref" <> '' then
+            Error('Please Change the Purchase Order Information in %1', ParentPurchaseHeader."Sales Order Ref");
+    end;
+
     trigger OnAfterInsert()
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then

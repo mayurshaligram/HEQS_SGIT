@@ -83,7 +83,17 @@ page 50146 Schedule
                     ToolTip = 'Specified a Delivery Item and Quantity.';
                     MultiLine = true;
                     Editable = false;
-                    Visible = true;
+                    Visible = Not IsSimplePage;
+                }
+
+                field("Delivery without BOM Item"; Rec."Delivery without BOM Item")
+                {
+                    Caption = 'Delivery Item';
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'Specified a Delivery Item and Quantity.';
+                    MultiLine = true;
+                    Editable = false;
+                    Visible = IsSimplePage;
                 }
 
                 field("Assembly Item"; Rec."Assembly Item")
@@ -94,7 +104,17 @@ page 50146 Schedule
                     MultiLine = true;
                     Editable = false;
                     Style = StrongAccent;
-                    Visible = true;
+                    Visible = Not IsSimplePage;
+                }
+                field("Assembly Item without BOM Item"; Rec."Assembly Item without BOM Item")
+                {
+                    ApplicationArea = Basic, Suite;
+                    Caption = 'Assemble';
+                    ToolTip = 'Specified a Delivery Item and Quantity.';
+                    MultiLine = true;
+                    Editable = false;
+                    Style = StrongAccent;
+                    Visible = IsSimplePage;
                 }
 
 
