@@ -25,8 +25,9 @@ pageextension 50130 "Sales Order Subform_Ext" extends "Sales Order Subform"
                         BOMSalesLine.NeedAssemble := Rec.NeedAssemble;
                         BOMSalesLine.Modify();
                     end;
-                end;
 
+
+                end;
             }
             field(UnitAssembleHour; Rec.UnitAssembleHour)
             {

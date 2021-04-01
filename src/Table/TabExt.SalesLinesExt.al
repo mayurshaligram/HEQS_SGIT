@@ -2,6 +2,13 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
 {
     fields
     {
+        modify("Requested Delivery Date")
+        {
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := true;
+            end;
+        }
         field(50100; "BOM Item"; Boolean)
         {
             Caption = 'IsBOM';
@@ -38,6 +45,11 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             Description = 'Main Item Line';
             Editable = false;
         }
+        field(50107; Token; Boolean)
+        {
+            Description = 'Developing Internal Only';
+            Editable = false;
+        }
     }
 
     trigger OnAfterInsert();
@@ -64,9 +76,13 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
 
     trigger OnBeforeModify();
     begin
-        if Rec.Type = Rec.Type::Item then
-            if Rec."BOM Item" = true then
-                Error('Please Only Edit Main Item, Bom is managed by system only');
+        if Rec.Token = false then begin
+            if Rec.Type = Rec.Type::Item then
+                if Rec."BOM Item" = true then
+                    Error('Please Only Edit Main Item, Bom is managed by system only')
+        end
+        else
+            Rec.Token := false;
     end;
 
     trigger OnAfterModify();

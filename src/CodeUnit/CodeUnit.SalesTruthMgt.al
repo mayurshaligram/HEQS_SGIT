@@ -158,8 +158,12 @@ codeunit 50101 "Sales Truth Mgt"
             repeat
                 if IsValideICSalesLine(RetailSalesLine) then begin
                     SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No.");
+                    // RetailSalesLineToICSalesLineCopy(SalesLine, RetailSalesLine);
                     SalesLine."Location Code" := RetailSalesLine."Location Code";
                     SalesLine."BOM Item" := RetailSalesLine."BOM Item";
+                    SalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
+                    SalesLine.AssemblyHour := RetailSalesLine.AssemblyHour;
+                    SalesLine.UnitAssembleHour := RetailSalesLine.UnitAssembleHour;
                     if RetailSalesLine.NeedAssemble then
                         TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
                     else
@@ -261,12 +265,70 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine: Record "Purchase Line";
         SalesHeader: Record "Sales Header";
     begin
+        Message('Message From UpdatePurchICBOM');
         UpdateBOMSalesLine(SalesLine);
         if SalesLine.CurrentCompany <> 'HEQS International Pty Ltd' then begin
+            Message('Inside1');
             UpdatePurchLine(SalesLine);
+            Message('Inside2');
             UpdateICSalesLine(SalesLine);
+            Message('Inside3');
+            UpdateICSalesHeader(SalesLine);
         end;
 
+    end;
+
+    local procedure UpdateICSalesHeader(var SalesLine: Record "Sales Line");
+    var
+        ICSalesHeader: Record "Sales Header";
+        ICSalesLine: Record "Sales Line";
+
+        TempDeliveryItem: Text[200];
+        TempDeliveryItemWithoutBOM: Text[200];
+        TempCubage: Decimal;
+        TempAssemble: Boolean;
+        TempAssembleHour: Decimal;
+        ZoneCode: Record ZoneTable;
+        TempAssemblyItem: Text[200];
+        TempAssemblyItemWithoutBOM: Text[200];
+
+    begin
+        ICSalesHeader.ChangeCompany(InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+        if ICSalesHeader.FindSet() = false then exit;
+
+        ICSalesLine.ChangeCompany(InventoryCompany());
+        ICSalesLine.SetRange("Document Type", ICSalesHeader."Document Type");
+        ICSalesLine.SetRange("Document No.", ICSalesHeader."No.");
+        if ICSalesLine.FindSet() then
+            repeat
+                if ICSalesLine.NeedAssemble then
+                    TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
+                else
+                    TempAssemblyItem := TempAssemblyItem + 'No' + '\';
+                TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + ICSalesLine.Description + '\';
+                if ICSalesLine."BOM Item" = false then begin
+                    TempDeliveryItemWithoutBOM := TempDeliveryItemWithoutBOM + Format(ICSalesLine.Quantity) + '*' + ICSalesLine.Description + '\';
+                    if ICSalesLine.NeedAssemble then
+                        TempAssemblyItemWithoutBOM := TempAssemblyItemWithoutBOM + 'Yes' + '\'
+                    else
+                        TempAssemblyItemWithoutBOM := TempAssemblyItemWithoutBOM + 'No' + '\';
+                    TempCubage := TempCubage + ICSalesLine."Unit Volume" * ICSalesLine.Quantity;
+                    TempAssembleHour := TempAssembleHour + ICSalesLine.AssemblyHour;
+                    if SalesLine.NeedAssemble = true then
+                        TempAssemble := true;
+                end;
+            until ICSalesLine.Next() = 0;
+        ICSalesHeader."Estimate Assembly Time(hour)" := TempAssembleHour;
+        // SalesHeader.Note := GetWorkDescription(RetailSalesHeader);
+        ICSalesHeader.NeedAssemble := TempAssemble;
+        ICSalesHeader.Cubage := TempCubage;
+        ICSalesHeader."Delivery Item" := TempDeliveryItem;
+        ICSalesHeader."Delivery without BOM Item" := TempDeliveryItemWithoutBOM;
+        ICSalesHeader."Assembly Item without BOM Item" := TempAssemblyItemWithoutBOM;
+        ICSalesHeader."Assembly Item" := TempAssemblyItem;
+        ICSalesHeader.Modify();
     end;
 
     [EventSubscriber(ObjectType::Table, 5741, 'onUpdateBOM', '', false, false)]
@@ -315,6 +377,7 @@ codeunit 50101 "Sales Truth Mgt"
                 BOMSalesLine.SetRange("Main Item Line", SalesLine."Line No.");
                 if BOMSalesLine.FindSet() then
                     repeat
+                        BOMSalesLine.NeedAssemble := SalesLine.NeedAssemble;
                         BOMSalesLine.Validate("Location Code", SalesLine."Location Code");
                         BOMSalesLine.Validate(Quantity, SalesLine.Quantity * BOMComponent."Quantity per");
                         BOMSalesLine.Modify();
@@ -370,16 +433,13 @@ codeunit 50101 "Sales Truth Mgt"
         Item.Get(SalesLine."No.");
         if Item.Type = Item.Type::Service then
             exit;
-
-        SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
-
+        SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
         ICSalesHeader.ChangeCompany('HEQS International Pty Ltd');
         ICSalesHeader.SetRange("External Document No.", SalesHeader."Automate Purch.Doc No.");
         if ICSalesHeader.FindSet() = false then exit;
 
         TempSalesLine.SetRange("Document Type", SalesLine."Document Type");
         TempSalesLine.SetRange("Document No.", SalesLine."Document No.");
-
         if TempSalesLine.FindSet() then begin
             Item.Get(TempSalesLine."No.");
             if Item.Type <> Item.Type::Service then
@@ -388,10 +448,18 @@ codeunit 50101 "Sales Truth Mgt"
                     if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", TempSalesLine."Line No.") = false then
                         CreateICSalesLine(TempSalesLine)
                     else begin
-                        ICSalesLine.Validate("No.", TempSalesLine."No.");
+                        // ICSalesLine.Validate("No.", TempSalesLine."No.");
+                        ICSalesLine."No." := TempSalesLine."No.";
+                        ICSalesLine.Description := TempSalesLine.Description;
                         ICSalesLine."BOM Item" := TempSalesLine."BOM Item";
-                        ICSalesLine.Validate(Quantity, TempSalesLine.Quantity);
-                        ICSalesLine.Validate("Location Code", TempSalesLine."Location Code");
+                        ICSalesLine.Quantity := TempSalesLine.Quantity;
+                        ICSalesLine."Location Code" := TempSalesLine."Location Code";
+                        ICSalesLine.NeedAssemble := TempSalesLine.NeedAssemble;
+                        ICSalesLine.AssemblyHour := TempSalesLine.AssemblyHour;
+                        ICSalesLine."Package Tracking ID" := TempSalesLine."Package Tracking ID";
+                        ICSalesLine."Car ID" := TempSalesLine."Car ID";
+                        ICSalesLine.UnitAssembleHour := TempSalesLine.UnitAssembleHour;
+                        ICSalesLine."Main Item Line" := TempSalesLine."Main Item Line";
                         ICSalesLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
                         ICSalesLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
                         ICSalesLine."Unit Price" := TempSalesLine."Unit Price";
@@ -708,5 +776,24 @@ codeunit 50101 "Sales Truth Mgt"
     procedure InventoryCompany(): Text;
     begin
         exit(InventoryCompanyName);
+    end;
+
+    local procedure RetailSalesLineToICSalesLineCopy(var RetailSalesLine: Record "Sales Line"; var ICSalesLine: Record "Sales Line");
+    begin
+        //System Field
+        ICSalesLine.Validate("No.", RetailSalesLine."No.");
+        ICSalesLine.Validate(Quantity, RetailSalesLine.Quantity);
+        ICSalesLine.Validate("Location Code", RetailSalesLine."Location Code");
+        ICSalesLine."VAT Bus. Posting Group" := RetailSalesLine."VAT Bus. Posting Group";
+        ICSalesLine."VAT Prod. Posting Group" := RetailSalesLine."VAT Prod. Posting Group";
+        ICSalesLine."Unit Price" := RetailSalesLine."Unit Price";
+        //Customize Field
+        ICSalesLine."BOM Item" := RetailSalesLine."BOM Item";
+        ICSalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
+        ICSalesLine.AssemblyHour := RetailSalesLine.AssemblyHour;
+        ICSalesLine."Package Tracking ID" := RetailSalesLine."Package Tracking ID";
+        ICSalesLine."Car ID" := RetailSalesLine."Car ID";
+        ICSalesLine.UnitAssembleHour := RetailSalesLine.UnitAssembleHour;
+        ICSalesLine."Main Item Line" := ICSalesLine."Main Item Line";
     end;
 }
