@@ -265,14 +265,10 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine: Record "Purchase Line";
         SalesHeader: Record "Sales Header";
     begin
-        Message('Message From UpdatePurchICBOM');
         UpdateBOMSalesLine(SalesLine);
         if SalesLine.CurrentCompany <> 'HEQS International Pty Ltd' then begin
-            Message('Inside1');
             UpdatePurchLine(SalesLine);
-            Message('Inside2');
             UpdateICSalesLine(SalesLine);
-            Message('Inside3');
             UpdateICSalesHeader(SalesLine);
         end;
 
