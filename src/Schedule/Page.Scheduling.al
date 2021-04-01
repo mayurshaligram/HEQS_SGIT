@@ -508,6 +508,10 @@ page 50146 Schedule
     }
     actions
     {
+
+
+
+
         area(processing)
         {
             action(ClassicView)
@@ -607,6 +611,7 @@ page 50146 Schedule
 
     trigger OnAfterGetCurrRecord()
     begin
+        Rec.ChangeCompany(SalesTruthMgt.InventoryCompany());
         SetControlVisibility;
     end;
 
@@ -668,13 +673,16 @@ page 50146 Schedule
         CRMIntegrationEnabled := CRMIntegrationManagement.IsCRMIntegrationEnabled;
         IsOfficeAddin := OfficeMgt.IsAvailable;
 
-        CopySellToCustomerFilter;
+        Rec.CopySellToCustomerFilter;
 
         IsSimplePage := false;
 
+        if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then
+            Hyperlink('https://businesscentral.dynamics.com/UAT?page=50146&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx');
     end;
 
     var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsSimplePage: Boolean;
         DeliveryDescription: Text;
         ApplicationAreaMgmtFacade: Codeunit "Application Area Mgmt. Facade";

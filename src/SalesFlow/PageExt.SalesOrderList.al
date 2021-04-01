@@ -32,15 +32,19 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                 var
                     SalesLine: Record "Sales Line";
                     WarehouseRequest: Record "Warehouse Request";
-                    TempInteger: Integer;
                     ReleaseSalesDoc: Codeunit "Release Sales Document";
                     InventorySalesOrder: Record "Sales Header";
                     SessionId: Integer;
                     PurchaseHeader: Record "Purchase Header";
                     PurchaseLine: Record "Purchase Line";
-
+                    PostedSalesInvoiceHeader: Record "Sales Invoice Header";
+                    NoSeries: Record "No. Series";
+                    NoSeriesMgt: Codeunit NoSeriesManagement;
                     RetailSalesLine: Record "Sales Line";
-
+                    VendorInvoiceNo: Code[20];
+                    TempText: Text[20];
+                    TempNum: Text[20];
+                    TempInteger: Integer;
                     TempSalesLine: Record "Sales Line";
                     TempItem: Record Item;
                     IsValideIC: Boolean;
@@ -60,47 +64,68 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
 
                     InventorySalesOrder.Reset();
                     InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
-                    // InventorySalesOrder.SetRange("External Document No.", PurchaseHeader."No.");
-                    InventorySalesOrder.FindLast();
+                    InventorySalesOrder.SetRange("Document Type", Rec."Document Type");
+                    InventorySalesOrder.SetRange(RetailSalesHeader, Rec."No.");
+                    if InventorySalesOrder.FindLast() then
+                        StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                                                   'HEQS International Pty Ltd', InventorySalesOrder);
 
+                    InventorySalesOrder.Reset();
+                    PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
+                    PostedSalesInvoiceHeader.FindLast();
+
+                    VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
+                    TempText := Format(VendorInvoiceNo);
+                    TempNum := TempText.Substring(7);
+                    Evaluate(TempInteger, TempNum);
+                    TempInteger += 1;
+                    VendorInvoiceNo := 'INTPSI' + Format(TempInteger);
+                    // InventorySalesOrder.SetRange("External Document No.", PurchaseHeader."No.");
                     PurchaseHeader.Reset();
                     PurchaseHeader.SetRange("Sales Order Ref", Rec."No.");
-                    PurchaseHeader.FindSet();
-                    PurchaseHeader."Due Date" := Rec."Due Date";
-                    // PurchaseHeader."Vendor Invoice No." := InventorySalesOrder."No.";
-                    PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
-                    PurchaseHeader.Modify();
+                    if PurchaseHeader.FindSet() and (VendorInvoiceNo <> '') then begin
+                        PurchaseHeader."Due Date" := Rec."Due Date";
 
-                    // RetailSalesLine.SetRange("Document No.", Rec."No.");
-                    // if RetailSalesLine.FindSet() then
-                    //     repeat
-                    //         RetailSalesLine."Quantity Shipped" := RetailSalesLine."Qty. to Ship";
-                    //         RetailSalesLine."Qty. to Ship" := 0;
-                    //         RetailSalesLine.Modify();
-                    //     until RetailSalesLine.Next() = 0;
+                        // PurchaseHeader."Vendor Invoice No." := InventorySalesOrder."No.";
+                        PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
+                        PurchaseHeader.Modify();
 
-                    PurchaseLine.Reset();
-                    PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
-                    if PurchaseLine.FindSet() then
-                        repeat
-                            PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
-                            PurchaseLine.Modify();
-                        until PurchaseLine.Next() = 0;
+                        // RetailSalesLine.SetRange("Document No.", Rec."No.");
+                        // if RetailSalesLine.FindSet() then
+                        //     repeat
+                        //         RetailSalesLine."Quantity Shipped" := RetailSalesLine."Qty. to Ship";
+                        //         RetailSalesLine."Qty. to Ship" := 0;
+                        //         RetailSalesLine.Modify();
+                        //     until RetailSalesLine.Next() = 0;
+
+                        PurchaseLine.Reset();
+                        PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+                        if PurchaseLine.FindSet() then
+                            repeat
+                                PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
+                                PurchaseLine.Modify();
+                            until PurchaseLine.Next() = 0;
+
+                        NoSeries.ChangeCompany(SalesTruthMgt.InventoryCompany());
+                        NoSeries.Get('S-INV+');
+                        PurchaseHeader."Vendor Invoice No." := VendorInvoiceNo;
+                        PurchaseHeader.Modify();
+                        Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
+                    end;
 
 
-                    Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
                     Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
                     // Post Purchase Order Invoice
                     // Post Intercompany Sales Order Invoice
 
-                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
-                        'HEQS International Pty Ltd', InventorySalesOrder);
+
                 end;
 
             }
         }
     }
     var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
