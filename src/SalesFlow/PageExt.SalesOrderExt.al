@@ -8,6 +8,7 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
             {
                 ApplicationArea = Basic, Suite;
 
+                ShowMandatory = true;
                 Caption = 'Delivery';
                 ToolTip = 'Specifies the Delivery Option';
                 Importance = Promoted;
@@ -74,14 +75,7 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
             var
                 Text1: Label 'Please release the current Sales Order in at "%1"';
             begin
-                if Rec.Delivery = Rec.Delivery::" " then
-                    Error('Please select the delivery option')
-                else
-                    if Rec.Delivery = Rec.Delivery::Delivery then begin
-                        if Rec."Sell-to Address" = '' then begin
-                            Error('Please Give sell to address');
-                        end
-                    end;
+                SalesTruthMgt.RequirFieldTesting(Rec);
                 if SalesTruthMgt.IsICSalesHeader(Rec) then Error(Text1, Rec."Sell-to Customer Name");
             end;
 

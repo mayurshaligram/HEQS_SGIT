@@ -792,4 +792,16 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.UnitAssembleHour := RetailSalesLine.UnitAssembleHour;
         ICSalesLine."Main Item Line" := ICSalesLine."Main Item Line";
     end;
+
+    procedure RequirFieldTesting(var SalesHeader: Record "Sales Header");
+    begin
+        if SalesHeader.Delivery = SalesHeader.Delivery::" " then
+            Error('Please select the delivery option')
+        else
+            if SalesHeader.Delivery = SalesHeader.Delivery::Delivery then begin
+                if SalesHeader."Ship-to Address" = '' then begin
+                    Error('Please Give Ship-to to address');
+                end
+            end;
+    end;
 }
