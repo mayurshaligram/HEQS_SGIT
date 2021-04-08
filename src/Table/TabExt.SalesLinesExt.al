@@ -118,9 +118,11 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
 
     trigger OnBeforeDelete();
     begin
-        if Rec.Type = Rec.Type::Item then
-            if Rec."BOM Item" = true then
-                Error('Please Only Edit Main Item, Bom is managed by system only');
+        if Rec.Token = false then
+            if Rec.Type = Rec.Type::Item then
+                if Rec."BOM Item" = true then
+                    Error('Please Only Edit Main Item, Bom is managed by system only');
+        Rec.Token := false;
     end;
 
     trigger OnAfterDelete();

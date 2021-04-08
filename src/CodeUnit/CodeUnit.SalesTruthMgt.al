@@ -96,6 +96,57 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.Delete();
     end;
 
+    [EventSubscriber(ObjectType::Codeunit, 80, 'OnBeforeSalesInvLineInsert', '', false, false)]
+    local procedure BeforeSalesInvLineInsert(var SalesInvLine: Record "Sales Invoice Line"; SalesInvHeader: Record "Sales Invoice Header"; SalesLine: Record "Sales Line"; CommitIsSuppressed: Boolean; var IsHandled: Boolean);
+    begin
+        SalesInvLine."BOM Item" := SalesLine."BOM Item";
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, 63, 'OnBeforeOnRun', '', false, false)]
+    local procedure BeforeOnRun(var SalesLine: Record "Sales Line"; var IsHandled: Boolean);
+    begin
+        DeleteBOMSalesLine(SalesLine);
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, 63, 'OnExplodeBOMCompLinesOnAfterToSalesLineInsert', '', false, false)]
+    local procedure ExplodeBOMCompLinesOnAfterToSalesLineInsert(ToSalesLine: Record "Sales Line"; SalesLine: Record "Sales Line"; FromBOMComp: Record "BOM Component");
+    begin
+        InsertPurchaseLineWithoutPriceCheck(ToSalesLine);
+        if ExistIC(SalesLine) then
+            CreateICSalesLine(ToSalesLine);
+    end;
+
+    local procedure ExistIC(var SalesLine: Record "Sales Line"): Boolean;
+    var
+        ICSalesHeader: Record "Sales Header";
+        ExistIC: Boolean;
+    begin
+        ExistIC := false;
+        ICSalesHeader.ChangeCompany(InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+        if ICSalesHeader.FindSet() then
+            ExistIC := true;
+        exit(ExistIC);
+        // Update Shipment
+        // Update Schedules
+    end;
+
+
+    [EventSubscriber(ObjectType::Codeunit, 63, 'OnAfterOnRun', '', false, false)]
+    local procedure AfterOnRun(ToSalesLine: Record "Sales Line"; SalesLine: Record "Sales Line")
+    var
+        ICSalesHeader: Record "Sales Header";
+    begin
+        DeletePurchaseLine(SalesLine);
+        ICSalesHeader.ChangeCompany(InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
+        if ICSalesHeader.FindSet() then
+            DeleteICSalesLine(SalesLine);
+    end;
+
+
     [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOMPurchIC', '', false, false)]
     local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
     var
@@ -412,7 +463,6 @@ codeunit 50101 "Sales Truth Mgt"
                     PurchaseLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
 
                     Item.Get(TempSalesLine."No.");
-                    PurchaseLine."Direct Unit Cost" := Item."Unit Cost";
                     PurchaseLine.Modify();
                 end;
             until TempSalesLine.Next() = 0;
@@ -716,13 +766,16 @@ codeunit 50101 "Sales Truth Mgt"
         Item: Record Item;
         BOMComponent: Record "BOM Component";
         IsMainItem: Boolean;
+        PurchasePrice: Record "Purchase Price";
     begin
         if IsValideICSalesLine(SalesLine) = false then exit;
 
         Item.Get(SalesLine."No.");
-
+        PurchasePrice.Reset();
+        PurchasePrice.SetRange("Item No.", Item."No.");
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
         Vendor.FindSet();
+        PurchasePrice.SetRange("Vendor No.", Vendor."No.");
 
         SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
         PurchaseLine.Reset();
@@ -735,8 +788,42 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine."BOM Item" := SalesLine."BOM Item";
         PurchaseLine.Validate(Quantity, SalesLine.Quantity);
         PurchaseLine.Insert();
-        if (Item."Unit Cost" = 0) and (PurchaseLine."BOM Item" = false) then
-            Error('Please Set Purchase Price for item %1', Item."No.");
+        if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
+            Error('Please Set Purchase Price Entry for item %1', Item."No.");
+    end;
+
+    local procedure InsertPurchaseLineWithoutPriceCheck(SalesLine: Record "Sales Line");
+    var
+        PurchaseLine: Record "Purchase Line";
+        SalesHeader: Record "Sales Header";
+        Vendor: Record Vendor;
+        Item: Record Item;
+        BOMComponent: Record "BOM Component";
+        IsMainItem: Boolean;
+        PurchasePrice: Record "Purchase Price";
+    begin
+        if IsValideICSalesLine(SalesLine) = false then exit;
+
+        Item.Get(SalesLine."No.");
+        PurchasePrice.Reset();
+        PurchasePrice.SetRange("Item No.", Item."No.");
+        Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
+        Vendor.FindSet();
+        PurchasePrice.SetRange("Vendor No.", Vendor."No.");
+
+        SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
+        PurchaseLine.Reset();
+        PurchaseLine.Init();
+        PurchaseLine."Document Type" := SalesLine."Document Type";
+        PurchaseLine."Document No." := SalesHeader."Automate Purch.Doc No.";
+        PurchaseLine."Line No." := SalesLine."Line No.";
+        PurchaseLine.Type := SalesLine.Type;
+        PurchaseLine.Validate("No.", SalesLine."No.");
+        PurchaseLine."BOM Item" := SalesLine."BOM Item";
+        PurchaseLine.Validate(Quantity, SalesLine.Quantity);
+        PurchaseLine.Insert();
+        // if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
+        //     Error('Please Set Purchase Price Entry for item %1', Item."No.");
     end;
 
     local procedure CreateICSalesLine(SalesLine: Record "Sales Line");
