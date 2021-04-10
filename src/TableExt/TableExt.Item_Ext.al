@@ -100,7 +100,6 @@ tableextension 50102 "Item_Ext" extends "Item"
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
                         RetailItemRecord.Get(Rec."No.");
-                        RetailItemRecord := Rec;
                         RetailItemRecord.Delete();
                     end;
                 until OtherCompanyRecord.Next() = 0;
