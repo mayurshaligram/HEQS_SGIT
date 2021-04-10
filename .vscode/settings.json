@@ -1,3 +1,4 @@
 {
-	"al.enableCodeAnalysis": true
+	"al.enableCodeAnalysis": true,
+	"al.enableCodeActions": true
 }

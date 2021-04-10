@@ -78,7 +78,7 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine: Record "Purchase Line";
     begin
         SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
-        PurchaseLine.Get(PurchaseLine."Document Type"::Order, SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
+        PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
         PurchaseLine.Delete();
     end;
 
@@ -112,7 +112,7 @@ codeunit 50101 "Sales Truth Mgt"
     local procedure ExplodeBOMCompLinesOnAfterToSalesLineInsert(ToSalesLine: Record "Sales Line"; SalesLine: Record "Sales Line"; FromBOMComp: Record "BOM Component");
     begin
         InsertPurchaseLineWithoutPriceCheck(ToSalesLine);
-        if ExistIC(SalesLine) then
+        if ExistIC(ToSalesLine) then
             CreateICSalesLine(ToSalesLine);
     end;
 
@@ -144,6 +144,7 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."Document No.");
         if ICSalesHeader.FindSet() then
             DeleteICSalesLine(SalesLine);
+        UpdateICSalesHeader(ToSalesLine);
     end;
 
 
@@ -330,14 +331,14 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader: Record "Sales Header";
         ICSalesLine: Record "Sales Line";
 
-        TempDeliveryItem: Text[200];
-        TempDeliveryItemWithoutBOM: Text[200];
+        TempDeliveryItem: Text[1000];
+        TempDeliveryItemWithoutBOM: Text[1000];
         TempCubage: Decimal;
         TempAssemble: Boolean;
         TempAssembleHour: Decimal;
         ZoneCode: Record ZoneTable;
-        TempAssemblyItem: Text[200];
-        TempAssemblyItemWithoutBOM: Text[200];
+        TempAssemblyItem: Text[1000];
+        TempAssemblyItemWithoutBOM: Text[1000];
 
     begin
         ICSalesHeader.ChangeCompany(InventoryCompany());
@@ -487,10 +488,14 @@ codeunit 50101 "Sales Truth Mgt"
         TempSalesLine.SetRange("Document Type", SalesLine."Document Type");
         TempSalesLine.SetRange("Document No.", SalesLine."Document No.");
         if TempSalesLine.FindSet() then begin
-            Item.Get(TempSalesLine."No.");
-            if Item.Type <> Item.Type::Service then
-                repeat
-                    ICSalesLine.ChangeCompany('HEQS International Pty Ltd');
+            repeat
+                if TempSalesLine.Type = TempSalesLine.Type::" " then begin
+                end
+                else begin
+
+                    Item.Get(TempSalesLine."No.");
+                    if Item.Type <> Item.Type::Service then
+                        ICSalesLine.ChangeCompany('HEQS International Pty Ltd');
                     if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", TempSalesLine."Line No.") = false then
                         CreateICSalesLine(TempSalesLine)
                     else begin
@@ -509,9 +514,19 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
                         ICSalesLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
                         ICSalesLine."Unit Price" := TempSalesLine."Unit Price";
+                        ICSalesLine.Type := SalesLine.Type;
+                        ICSalesLine."Quantity (Base)" := ICSalesLine."Quantity (Base)";
+                        ICSalesLine."Outstanding Quantity" := ICSalesLine."Outstanding Quantity";
+                        ICSalesLine."Outstanding Qty. (Base)" := ICSalesLine."Outstanding Qty. (Base)";
+                        ICSalesLine."Shipment Date" := SalesLine."Shipment Date";
+                        ICSalesLine."Qty. to Ship" := SalesLine."Qty. to Ship";
+                        ICSalesLine."Qty. to Invoice" := SalesLine."Qty. to Invoice";
+                        ICSalesLine."Line Amount" := SalesLine."Line Amount";
                         ICSalesLine.Modify();
                     end;
-                until TempSalesLine.Next() = 0;
+
+                end;
+            until TempSalesLine.Next() = 0;
         end;
     end;
 
@@ -845,15 +860,60 @@ codeunit 50101 "Sales Truth Mgt"
             ICSalesLine.Reset();
             ICSalesLine.ChangeCompany(InventoryCompanyName);
             ICSalesLine."Document Type" := SalesLine."Document Type";
-            ICSalesLine."Document No." := SalesLine."Document No.";
+            ICSalesLine."Document No." := ICSalesHeader."No.";
             ICSalesLine."Line No." := SalesLine."Line No.";
             ICSalesLine.Type := SalesLine.Type;
-            ICSalesLine.Validate("No.", SalesLine."No.");
+            ICSalesLine."No." := SalesLine."No.";
+            ICSalesLine.Quantity := SalesLine.Quantity;
+            ICSalesLine."Quantity (Base)" := ICSalesLine."Quantity (Base)";
+            ICSalesLine."Outstanding Quantity" := ICSalesLine."Outstanding Quantity";
+            ICSalesLine."Outstanding Qty. (Base)" := ICSalesLine."Outstanding Qty. (Base)";
             ICSalesLine."Location Code" := SalesLine."Location Code";
             ICSalesLine."BOM Item" := SalesLine."BOM Item";
+            ICSalesLine.Description := SalesLine.Description;
+            ICSalesLine."Shipment Date" := SalesLine."Shipment Date";
+            ICSalesLine."Qty. to Ship" := SalesLine."Qty. to Ship";
+            ICSalesLine."Qty. to Invoice" := SalesLine."Qty. to Invoice";
+            ICSalesLine."Line Amount" := SalesLine."Line Amount";
             ICSalesLine.Insert();
+            // if ICSalesLine."Document Type" = ICSalesLine."Document Type"::Order then
+            //     CreateWhseShipLine(ICSalesLine);
         end;
 
+    end;
+
+    local procedure CreateWhseShipLine(var ICSalesLine: Record "Sales Line");
+    var
+        WhseShipLine: Record "Warehouse Shipment Line";
+        SalesHeader: Record "Sales Header";
+        WhseShipHeader: Record "Warehouse Shipment Header";
+    begin
+        SalesHeader.Reset();
+        SalesHeader.ChangeCompany(InventoryCompanyName);
+        SalesHeader.Get(ICSalesLine."Document Type", ICSalesLine."Document No.");
+        WhseShipHeader.ChangeCompany(InventoryCompanyName);
+        WhseShipHeader.SetRange("External Document No.", SalesHeader."External Document No.");
+        if WhseShipHeader.FindSet() then begin
+            WhseShipLine.ChangeCompany(InventoryCompanyName);
+            WhseShipLine."No." := WhseShipHeader."No.";
+            WhseShipLine."Line No." := ICSalesLine."Line No.";
+            WhseShipLine."Source Type" := 37;
+            WhseshipLine."Source Subtype" := 1;
+            WhseShipLine."Source No." := ICSalesLine."Document No.";
+            WhseShipLine."Source Line No." := ICSalesLine."Line No.";
+            WhseShipLine."Source Document" := WhseShipLine."Source Document"::"Sales Order";
+            WhseShipLine."Location Code" := ICSalesLine."Location Code";
+            WhseShipLine."Item No." := ICSalesLine."No.";
+            WhseShipLine."Qty. (Base)" := ICSalesLine."Quantity (Base)";
+            WhseShipLine."Qty. Outstanding" := ICSalesLine."Outstanding Quantity";
+            WhseShipLine."Qty. Outstanding (Base)" := ICSalesLine."Outstanding Qty. (Base)";
+            WhseShipLine."Unit of Measure Code" := ICSalesLine."Unit of Measure Code";
+            WhseShipLine."Qty. per Unit of Measure" := ICSalesLine."Qty. per Unit of Measure";
+            WhseShipLine.Description := ICSalesLine.Description;
+            WhseShipLine."Sorting Sequence No." := ICSalesLine."Line No.";
+            WhseShipLine."Due Date" := ICSalesLine."Shipment Date";
+            WhseShipLine.Insert();
+        end;
     end;
 
     procedure InventoryCompany(): Text;
