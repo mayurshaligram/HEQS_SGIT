@@ -173,14 +173,14 @@ codeunit 50101 "Sales Truth Mgt"
         RetailSalesLine: Record "Sales Line";
         SalesLine: Record "Sales Line";
         ReleaseSalesDoc: Codeunit "Release Sales Document";
-        TempDeliveryItem: Text[200];
-        TempDeliveryItemWithoutBOM: Text[200];
+        TempDeliveryItem: Text[2000];
+        TempDeliveryItemWithoutBOM: Text[2000];
         TempCubage: Decimal;
         TempAssemble: Boolean;
         TempAssembleHour: Decimal;
         ZoneCode: Record ZoneTable;
-        TempAssemblyItem: Text[200];
-        TempAssemblyItemWithoutBOM: Text[200];
+        TempAssemblyItem: Text[2000];
+        TempAssemblyItemWithoutBOM: Text[2000];
 
     begin
         TempAssemble := false;
@@ -331,14 +331,14 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader: Record "Sales Header";
         ICSalesLine: Record "Sales Line";
 
-        TempDeliveryItem: Text[1000];
-        TempDeliveryItemWithoutBOM: Text[1000];
+        TempDeliveryItem: Text[2000];
+        TempDeliveryItemWithoutBOM: Text[2000];
         TempCubage: Decimal;
         TempAssemble: Boolean;
         TempAssembleHour: Decimal;
         ZoneCode: Record ZoneTable;
-        TempAssemblyItem: Text[1000];
-        TempAssemblyItemWithoutBOM: Text[1000];
+        TempAssemblyItem: Text[2000];
+        TempAssemblyItemWithoutBOM: Text[2000];
 
     begin
         ICSalesHeader.ChangeCompany(InventoryCompany());

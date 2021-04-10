@@ -69,7 +69,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Caption = 'Delivery Option';
             Description = 'Specife the Delivery Option';
         }
-        field(50147; "Delivery Item"; Text[1000])
+        field(50147; "Delivery Item"; Text[2000])
         {
             Caption = 'Delivery Item';
             Description = 'Display all the item in this sales Header';
@@ -154,13 +154,13 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Description = 'Assembly Item';
             Editable = false;
         }
-        field(50130; "Delivery without BOM Item"; Text[1000])
+        field(50130; "Delivery without BOM Item"; Text[2000])
         {
             Caption = 'Delivery without BOM Item';
             Description = 'Display all the item without BOM in this sales Header';
             Editable = false;
         }
-        field(50129; "Assembly Item without BOM Item"; Text[200])
+        field(50129; "Assembly Item without BOM Item"; Text[2000])
         {
             Caption = 'Assembly Item without BOM';
             Description = 'Assembly Item without BOM';
