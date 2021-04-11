@@ -41,6 +41,7 @@ pageextension 50103 "Warehouse Pick_Ext" extends "Warehouse Pick"
                     CurrPage.Update();
                 end;
             }
+
         }
 
     }

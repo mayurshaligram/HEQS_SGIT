@@ -146,18 +146,22 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 BOMComponent: Record "BOM Component";
                 SalesLine: Record "Sales Line";
             begin
-                WarehouseShipmentLine.SetRange("Source No.", Rec."No.");
-                if WarehouseShipmentLine.FindSet() then
-                    repeat
-                        BOMComponent.SetRange("Parent Item No.", WarehouseShipmentLine."Item No.");
-                        if BOMComponent.findset() then
-                            WarehouseShipmentLine."Pick-up Item" := false
-                        else
-                            WarehouseShipmentLine."Pick-up Item" := true;
-                        WarehouseShipmentLine.Modify();
-                    until WarehouseShipmentLine.Next() = 0;
-                Rec.Status := Rec.Status::Released;
-                Rec.Modify();
+                if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
+                    WarehouseShipmentLine.SetRange("Source No.", Rec."No.");
+                    if WarehouseShipmentLine.FindSet() then
+                        repeat
+                            BOMComponent.SetRange("Parent Item No.", WarehouseShipmentLine."Item No.");
+                            if BOMComponent.findset() then
+                                WarehouseShipmentLine."Pick-up Item" := false
+                            else
+                                WarehouseShipmentLine."Pick-up Item" := true;
+                            WarehouseShipmentLine."Original SO" := Rec.RetailSalesHeader;
+                            WarehouseShipmentLine.Modify();
+
+                        until WarehouseShipmentLine.Next() = 0;
+                    Rec.Status := Rec.Status::Released;
+                    Rec.Modify();
+                end;
             end;
         }
         modify(CopyDocument)

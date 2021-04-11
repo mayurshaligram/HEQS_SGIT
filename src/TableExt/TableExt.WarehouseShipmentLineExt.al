@@ -20,7 +20,7 @@ tableextension 50105 "Warehouse Shipment Line_Ext" extends "Warehouse Shipment L
     var
         SalesHeader: Record "Sales Header";
     begin
-        if (Rec.CurrentCompany() = SalesTruthMgt.InventoryCompany()) and (Rec."Source Document" = REc."Source Document"::"Sales Order") then begin
+        if (Rec.CurrentCompany() = SalesTruthMgt.InventoryCompany()) and (Rec."Source Document" = Rec."Source Document"::"Sales Order") then begin
             SalesHeader.Get(SalesHeader."Document Type"::Order, Rec."Source No.");
             Rec."Original SO" := SalesHeader.RetailSalesHeader;
         end;

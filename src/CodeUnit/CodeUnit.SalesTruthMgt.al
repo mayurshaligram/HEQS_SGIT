@@ -96,6 +96,26 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.Delete();
     end;
 
+    [EventSubscriber(ObjectType::Codeunit, 5752, 'OnAfterGetSingleOutboundDoc', '', false, false)]
+    local procedure AfterGetSingleOutboundDoc(var WarehouseShipmentHeader: Record "Warehouse Shipment Header");
+    var
+        WhseShipmentLine: Record "Warehouse Shipment Line";
+        SalesHeader: Record "Sales Header";
+    begin
+        if (WarehouseShipmentHeader.CurrentCompany = InventoryCompanyName) then begin
+            WhseShipmentLine.SetRange("No.", WarehouseShipmentHeader."No.");
+            if WhseShipmentLine.FindSet() then
+                repeat
+                    if WhseShipmentLine."Source Document" = WhseShipmentLine."Source Document"::"Sales Order" then begin
+                        SalesHeader.Get(SalesHeader."Document Type"::Order, WhseShipmentLine."Source No.");
+                        WhseShipmentLine."Original SO" := SalesHeader.RetailSalesHeader;
+                        WhseShipmentLine.Modify();
+                    end;
+                until WhseShipmentLine.Next() = 0;
+        end;
+    end;
+
+
     [EventSubscriber(ObjectType::Codeunit, 80, 'OnBeforeSalesInvLineInsert', '', false, false)]
     local procedure BeforeSalesInvLineInsert(var SalesInvLine: Record "Sales Invoice Line"; SalesInvHeader: Record "Sales Invoice Header"; SalesLine: Record "Sales Line"; CommitIsSuppressed: Boolean; var IsHandled: Boolean);
     begin

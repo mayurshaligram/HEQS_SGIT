@@ -12,5 +12,9 @@ tableextension 50107 "Warehouse Activity Line_Ext" extends "Warehouse Activity L
         {
             Editable = false;
         }
+        field(50100; "Original SO"; Code[20])
+        {
+            Editable = false;
+        }
     }
 }

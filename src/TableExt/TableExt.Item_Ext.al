@@ -3,9 +3,141 @@ tableextension 50102 "Item_Ext" extends "Item"
 
     fields
     {
+
         field(50101; "Unit Assembly Hr"; Decimal)
         {
 
+        }
+
+        field(50102; Token; Boolean)
+        {
+        }
+        modify("Indirect Cost %")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Unit Cost")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Unit Price")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Shelf No.")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+
+        modify("Standard Cost")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Last Direct Cost")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Item Disc. Group")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Vendor No.")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
+        }
+        modify("Vendor Item No.")
+        {
+            trigger OnBeforeValidate();
+            begin
+                Rec.Token := true;
+                Rec.Modify();
+            end;
+
+            trigger OnAfterValidate();
+            begin
+                Rec.Token := false;
+                Rec.Modify();
+            end;
         }
     }
     trigger OnBeforeModify()
@@ -20,8 +152,12 @@ tableextension 50102 "Item_Ext" extends "Item"
             if Rec.Type = Rec.Type::Service then
                 IsValid := true;
 
+            if Rec.Token = true then begin
+                IsValid := true;
+            end;
+
             if IsValid = false then
-                Error('Please only creat new service item in Retail, for other type item please go to HEQS International.');
+                Error('Please only creat new service item in current trading company , for other type item creation or modification please go to HEQS International.');
         end;
     end;
 
