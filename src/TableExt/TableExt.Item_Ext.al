@@ -68,6 +68,13 @@ tableextension 50102 "Item_Ext" extends "Item"
         OtherCompanyRecord: Record Company;
         TempCost: Integer;
         TempPrice: Integer;
+        TempShelfNo: Code[10];
+        TempStandardCost: Decimal;
+        TempIndirectCost: Decimal;
+        TempLastDirectCost: Decimal;
+        TempItemDiscGroup: Code[20];
+        TempVendorNO: Code[20];
+        TempVendorItemNo: Code[20];
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
@@ -79,10 +86,24 @@ tableextension 50102 "Item_Ext" extends "Item"
                         // AB#67
                         TempCost := RetailItemRecord."Unit Cost";
                         TempPrice := RetailItemRecord."Unit Price";
+                        TempShelfNo := RetailItemRecord."Shelf No.";
+                        TempStandardCost := RetailItemRecord."Standard Cost";
+                        TempIndirectCost := RetailItemRecord."Indirect Cost %";
+                        TempLastDirectCost := RetailItemRecord."Last Direct Cost";
+                        TempItemDiscGroup := RetailItemRecord."Item Disc. Group";
+                        TempVendorNO := RetailItemRecord."Vendor No.";
+                        TempVendorItemNo := RetailItemRecord."Vendor Item No.";
 
                         RetailItemRecord := Rec;
                         RetailItemRecord."Unit Cost" := TempCost;
                         RetailItemRecord."Unit Price" := TempPrice;
+                        RetailItemRecord."Shelf No." := TempShelfNo;
+                        RetailItemRecord."Standard Cost" := TempStandardCost;
+                        RetailItemRecord."Indirect Cost %" := TempIndirectCost;
+                        RetailItemRecord."Last Direct Cost" := TempLastDirectCost;
+                        RetailItemRecord."Item Disc. Group" := TempItemDiscGroup;
+                        RetailItemRecord."Vendor Item No." := TempVendorNO;
+                        RetailItemRecord."Vendor No." := TempVendorItemNo;
                         RetailItemRecord.Modify();
                     end;
                 until OtherCompanyRecord.Next() = 0;

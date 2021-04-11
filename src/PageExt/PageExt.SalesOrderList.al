@@ -7,7 +7,7 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
         {
             field("Retail SalesHeader"; Rec."RetailSalesHeader")
             {
-                Caption = 'Retail SalesHeader No.';
+                Caption = 'Original SO';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies the number of the Retail Sales header No';
                 Visible = IsInventoryCompany;
