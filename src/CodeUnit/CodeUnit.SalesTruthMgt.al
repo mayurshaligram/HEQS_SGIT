@@ -181,7 +181,7 @@ codeunit 50101 "Sales Truth Mgt"
         ZoneCode: Record ZoneTable;
         TempAssemblyItem: Text[2000];
         TempAssemblyItemWithoutBOM: Text[2000];
-
+        WarehouseRequest: Record "Warehouse Request";
     begin
         TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
@@ -246,6 +246,11 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader."Assembly Item" := TempAssemblyItem;
         SalesHeader.Modify();
         ReleaseSalesDoc.PerformManualRelease(SalesHeader);
+
+        WarehouseRequest.SetRange("Source No.", SalesHeader."No.");
+        WarehouseRequest.FindSet();
+        WarehouseRequest."Original SO" := SalesHeader.RetailSalesHeader;
+        WarehouseRequest.Modify();
     end;
 
 

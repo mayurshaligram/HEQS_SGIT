@@ -7,15 +7,4 @@ tableextension 50123 "Warehouse Request Ext" extends "Warehouse Request"
             Editable = false;
         }
     }
-
-    trigger OnBeforeInsert();
-    var
-        SalesHeader: Record "Sales Header";
-    begin
-        if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
-            Rec."Original SO" := SalesHeader.RetailSalesHeader;
-    end;
-
-    var
-        SalesTruthMgt: Codeunit "Sales Truth Mgt";
 }

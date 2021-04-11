@@ -65,7 +65,8 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         end;
 
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
-            onInsertPurchICBOM(Rec);
+            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
+                onInsertPurchICBOM(Rec);
         end;
     end;
 
@@ -100,7 +101,8 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
 
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
-            OnUpdatePurchICBOM(Rec);
+            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
+                OnUpdatePurchICBOM(Rec);
         end;
     end;
 
@@ -145,7 +147,8 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
 
             if (Rec."BOM Item" = false) and (IsItemLine = true) and (Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany()) then
-                OnDeleteBOMPurchIC(Rec);
+                if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
+                    OnDeleteBOMPurchIC(Rec);
             // if (rec.CurrentCompany <> 'HEQS International Pty Ltd') and (rec.Type = rec.Type::Item) then begin
             //     FromSO.Get(Rec."Document Type", Rec."Document No.");
             //     PO.Get(Rec."Document Type", FromSO."Automate Purch.Doc No.");
