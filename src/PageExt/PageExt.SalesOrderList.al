@@ -35,6 +35,22 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
     }
     actions
     {
+        modify(Post)
+        {
+            Visible = false;
+        }
+        modify(PostAndSend)
+        {
+            Visible = false;
+        }
+        modify("Post &Batch")
+        {
+            Visible = false;
+        }
+        modify("Preview Posting")
+        {
+            Visible = Not IsInventoryCompany;
+        }
         addbefore(Post)
         {
             action("Auto Post Invoice")
@@ -42,10 +58,11 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Auto Post Invoice';
                 Image = PostOrder;
+                Visible = Not IsInventoryCompany;
                 Promoted = true;
                 PromotedCategory = Category7;
-                PromotedOnly = true;
-                PromotedIsBig = true;
+                // PromotedOnly = true;
+                // PromotedIsBig = true;
                 trigger OnAction();
                 var
                     SalesLine: Record "Sales Line";
@@ -66,8 +83,11 @@ pageextension 50100 "Sales Order List" extends "Sales Order List"
                     TempSalesLine: Record "Sales Line";
                     TempItem: Record Item;
                     IsValideIC: Boolean;
+                    Text1: Label 'Please only post invoice in the retail company %1';
                 // Only the Sales Header associated with more then one inventory item sale line could be pass
                 begin
+                    if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
+                        Error(Text1, Rec."Sell-to Customer Name");
                     IsValideIC := false;
                     TempSalesLine.SetRange("Document No.", Rec."No.");
                     TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);

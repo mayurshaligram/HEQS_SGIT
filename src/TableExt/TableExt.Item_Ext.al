@@ -76,8 +76,10 @@ tableextension 50102 "Item_Ext" extends "Item"
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
                         RetailItemRecord.Get(Rec."No.");
+                        // AB#67
                         TempCost := RetailItemRecord."Unit Cost";
                         TempPrice := RetailItemRecord."Unit Price";
+
                         RetailItemRecord := Rec;
                         RetailItemRecord."Unit Cost" := TempCost;
                         RetailItemRecord."Unit Price" := TempPrice;
