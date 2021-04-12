@@ -786,7 +786,7 @@ codeunit 50101 "Sales Truth Mgt"
 
     end;
 
-    local procedure IsValideICSalesLine(var SalesLine: Record "Sales Line"): Boolean;
+    procedure IsValideICSalesLine(var SalesLine: Record "Sales Line"): Boolean;
     var
         IsValid: Boolean;
         Item: Record Item;

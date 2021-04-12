@@ -233,7 +233,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         ISLrec.ChangeCompany(InventoryCompanyName);
                         if (SLrec.findset) then
                             repeat
-                                if SLrec.Type = SLrec.Type::Item then begin
+                                if SalesTruthMgt.IsValideICSalesLine(SLrec) then begin
                                     if ISLrec.Get(SLrec."Document Type", ICREC."No.", SLrec."Line No.") then begin
                                         // UPdata
                                         ISLrec.Type := SLrec.Type::Item;
@@ -416,6 +416,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     end;
 
     var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         Text003: Label 'You cannot rename a %1.';
         ConfirmChangeQst: Label 'Do you want to change %1?', Comment = '%1 = a Field Caption like Currency Code';
