@@ -118,7 +118,6 @@ page 50104 Schedule
                     Visible = IsSimplePage;
                 }
 
-
                 field(Stair; Rec.Stair)
                 {
                     Caption = 'Extra';
@@ -291,6 +290,12 @@ page 50104 Schedule
                     ToolTip = 'Specifies the name of the contact person at the address that the items are shipped to.';
                     Visible = Not IsSimplePage;
                 }
+                field("Shipping Agent Code"; Rec."Shipping Agent Code")
+                {
+                    ApplicationArea = Suite;
+                    ToolTip = 'Specifies the code for the shipping agent who is transporting the items.';
+                    Visible = Not IsSimplePage;
+                }
 
                 /////////////////////////////////////////////
                 field("Sell-to Country/Region Code"; Rec."Sell-to Country/Region Code")
@@ -419,12 +424,6 @@ page 50104 Schedule
                 {
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the delivery conditions of the related shipment, such as free on board (FOB).';
-                    Visible = false;
-                }
-                field("Shipping Agent Code"; Rec."Shipping Agent Code")
-                {
-                    ApplicationArea = Suite;
-                    ToolTip = 'Specifies the code for the shipping agent who is transporting the items.';
                     Visible = false;
                 }
                 field("Shipping Agent Service Code"; Rec."Shipping Agent Service Code")
@@ -659,7 +658,9 @@ page 50104 Schedule
         CRMIntegrationManagement: Codeunit "CRM Integration Management";
         OfficeMgt: Codeunit "Office Management";
 
+
         SalesLine: Record "Sales Line";
+        EnvironmentInfo: Codeunit "Environment Information";
 
     begin
 
@@ -679,7 +680,11 @@ page 50104 Schedule
 
         IsSimplePage := true;
         if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then
-            Hyperlink('https://businesscentral.dynamics.com/uat?node=0000c3c7-8bc1-0000-1002-9900836bd2d2&page=50104&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx');
+            if EnvironmentInfo.IsSandbox() then
+                Hyperlink('https://businesscentral.dynamics.com/uat?node=0000c3c7-8bc1-0000-1002-9900836bd2d2&page=50104&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx')
+            else
+                if EnvironmentInfo.IsProduction() then Hyperlink('https://businesscentral.dynamics.com/?node=0000c3c7-8bc1-0000-1002-9900836bd2d2&page=50104&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx');
+
     end;
 
     var

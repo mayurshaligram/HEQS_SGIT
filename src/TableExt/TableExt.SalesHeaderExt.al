@@ -120,7 +120,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         {
             Caption = 'NeedCollectPayment';
             Description = 'Indicate whether need to collect payment';
-            Editable = false;
+            Editable = true;
         }
         field(50136; "Estimate Assembly Time(hour)"; Decimal)
         {
@@ -225,6 +225,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         rec.CALCFIELDS("Work Description");
                         ICrec."Work Description" := rec."Work Description";
                         ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
+                        ICrec."Shipping Agent Code" := rec."Shipping Agent Code";
                         ICrec.Status := Rec.Status;
                         ICREC.Modify();
                         SLrec.SetCurrentKey("Document No.");
