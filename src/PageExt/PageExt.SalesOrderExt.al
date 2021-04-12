@@ -174,6 +174,7 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 BOMComponent: Record "BOM Component";
                 TempLineNo: Integer;
             begin
+                // Delete Copied BOM line (the original COPY function didn't COPY)
                 if SalesLine.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
                     SalesLine.SetRange("Document Type", Rec."Document Type");
                     SalesLine.SetRange("Document No.", Rec."No.");
@@ -197,6 +198,17 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                             end;
                         until SalesLine.Next() = 0;
                     end;
+
+                    SalesLine.Reset();
+                    SalesLine.SetRange("Document Type", Rec."Document Type");
+                    SalesLine.SetRange("Document No.", Rec."No.");
+                    SalesLine.SetRange(Type, SalesLine.Type::Item);
+                    SalesLine.SetRange("BOM Item", false);
+                    if SalesLine.FindSet() then
+                        repeat
+                            if SalesTruthMgt.IsValideICSalesLine(SalesLine) then
+                                SalesLine.Modify(true);
+                        until SalesLine.Next() = 0;
                 end;
             end;
         }

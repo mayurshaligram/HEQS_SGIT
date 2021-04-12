@@ -182,6 +182,12 @@ page 50104 Schedule
                     ApplicationArea = Basic, Suite;
                     ToolTip = 'Specifies the Delivery Option.';
                 }
+
+                field(TripSequence; Rec.TripSequence)
+                {
+                    ApplicationArea = Basic, Suite;
+                    ToolTip = 'TripSequence.';
+                }
                 //////////////////////////////////////
 
 

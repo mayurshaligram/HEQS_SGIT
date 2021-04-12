@@ -171,6 +171,12 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Description = 'Assembly Item without BOM';
             Editable = false;
         }
+        field(50128; TripSequence; Integer)
+        {
+            Caption = 'TripSequence';
+            Description = 'TripSequence';
+            Editable = true;
+        }
     }
 
     trigger OnAfterInsert();

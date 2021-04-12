@@ -96,6 +96,12 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.Delete();
     end;
 
+    [EventSubscriber(ObjectType::Codeunit, 6620, 'OnCopySalesDocOnAfterCopySalesDocLines', '', false, false)]
+    local procedure CopySalesDocOnAfterCopySalesDocLines(FromDocType: Option; FromDocNo: Code[20]; FromDocOccurrenceNo: Integer; FromDocVersionNo: Integer; FromSalesHeader: Record "Sales Header"; IncludeHeader: Boolean; var ToSalesHeader: Record "Sales Header")
+    begin
+    end;
+
+
     [EventSubscriber(ObjectType::Codeunit, 5752, 'OnAfterGetSingleOutboundDoc', '', false, false)]
     local procedure AfterGetSingleOutboundDoc(var WarehouseShipmentHeader: Record "Warehouse Shipment Header");
     var
@@ -832,6 +838,7 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine.Insert();
         if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
             Error('Please Set Purchase Price Entry for item %1', Item."No.");
+
     end;
 
     local procedure InsertPurchaseLineWithoutPriceCheck(SalesLine: Record "Sales Line");
