@@ -146,6 +146,15 @@ page 50104 Schedule
                     ToolTip = 'Specifies the Delivery Vehicle No.';
                     Visible = NOT IsSimplePage;
                     Caption = 'Delivery Vehicle';
+
+                    trigger OnLookup(var Text: Text): Boolean;
+                    var
+                        Vehicle: Record Vehicle;
+                    begin
+                        Vehicle.Reset();
+                        if Page.RunModal(Page::"Vehicle Lookup", Vehicle) = Action::LookupOK then
+                            Rec."Vehicle NO" := FORMAT(Vehicle."No.");
+                    end;
                 }
                 field(IsScheduled; Rec.IsScheduled)
                 {

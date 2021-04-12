@@ -219,7 +219,8 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader."Ship-to Phone No." := RetailSalesHeader."Ship-to Phone No.";
         SalesHeader."Ship-to City" := RetailSalesHeader."Ship-to City";
         SalesHeader."Shipping Agent Code" := RetailSalesHeader."Shipping Agent Code";
-        ZoneCode."Order Price" := SalesHeader.Amount;
+
+        ZoneCode."Order Price" := RetailSalesHeader.Amount;
         if ZoneCode.Find('>') then
             SalesHeader.ZoneCode := ZoneCode.Code;
 

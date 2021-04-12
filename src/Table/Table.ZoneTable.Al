@@ -4,6 +4,7 @@ table 50104 ZoneTable
 
     Caption = 'Zone';
     DataCaptionFields = "Order Price", "Code", "Delivery Fee", "L1";
+
     LookupPageID = "Zone Lookup";
 
     fields

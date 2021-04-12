@@ -14,6 +14,22 @@ pageextension 50119 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     RunObject = Page Schedule;
                     ToolTip = 'Scheduling the Sales Order.';
                 }
+                action("Zone")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Zone';
+                    Image = PostedMemo;
+                    RunObject = Page "Zone Lookup";
+                    ToolTip = 'Price Zone';
+                }
+                action("Vehicle")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Vehicle';
+                    Image = PostedMemo;
+                    RunObject = Page "Vehicle Lookup";
+                    ToolTip = 'Vehicle Zone';
+                }
             }
         }
     }

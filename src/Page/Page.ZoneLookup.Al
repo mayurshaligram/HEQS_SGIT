@@ -5,7 +5,8 @@ page 50106 "Zone Lookup"
     PageType = List;
     SourceTable = ZoneTable;
     UsageCategory = Lists;
-    AdditionalSearchTerms = 'Zone';
+    ApplicationArea = All;
+    AdditionalSearchTerms = 'Zone, ZoneTable';
     layout
     {
         area(content)
