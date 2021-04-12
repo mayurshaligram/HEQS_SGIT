@@ -1,4 +1,4 @@
-pageextension 50148 "Bus.Manager Role Center_Ext" extends "Business Manager Role Center"
+pageextension 50119 "Bus.Manager Role Center_Ext" extends "Business Manager Role Center"
 {
     actions
     {

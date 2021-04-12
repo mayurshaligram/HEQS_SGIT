@@ -4,7 +4,7 @@ tableextension 50105 "Warehouse Shipment Line_Ext" extends "Warehouse Shipment L
     // Field Number not within the system requirement
     fields
     {
-        field(201; "Pick-up Item"; Boolean)
+        field(50100; "Pick-up Item"; Boolean)
         {
             Editable = false;
         }

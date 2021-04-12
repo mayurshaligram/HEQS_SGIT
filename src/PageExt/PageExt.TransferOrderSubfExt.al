@@ -1,4 +1,4 @@
-pageextension 50122 "Transfer Order Subform_Ext" extends "Transfer Order Subform"
+pageextension 50113 "Transfer Order Subform_Ext" extends "Transfer Order Subform"
 {
     Caption = 'Transfer Order Subform_Ext';
     layout

@@ -1,5 +1,5 @@
 #pragma implicitwith disable
-page 50146 Schedule
+page 50104 Schedule
 {
     ApplicationArea = Basic, Suite, Assembly;
     Caption = 'Schedule';
@@ -660,6 +660,7 @@ page 50146 Schedule
         OfficeMgt: Codeunit "Office Management";
 
         SalesLine: Record "Sales Line";
+
     begin
 
         if UserMgt.GetSalesFilter <> '' then begin
@@ -677,9 +678,8 @@ page 50146 Schedule
         Rec.CopySellToCustomerFilter;
 
         IsSimplePage := true;
-
         if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then
-            Hyperlink('https://businesscentral.dynamics.com/UAT?page=50146&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx');
+            Hyperlink('https://businesscentral.dynamics.com/uat?node=0000c3c7-8bc1-0000-1002-9900836bd2d2&page=50104&company=HEQS%20International%20Pty%20Ltd&dc=0&bookmark=35%3bJAAAAACLAQAAAAJ7%2f0kATgBUADEAMAAxADAAMAAx');
     end;
 
     var

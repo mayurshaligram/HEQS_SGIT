@@ -1,4 +1,4 @@
-pageextension 50130 "Sales Order Subform_Ext" extends "Sales Order Subform"
+pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
 {
     layout
     {

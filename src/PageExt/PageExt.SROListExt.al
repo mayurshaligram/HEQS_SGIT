@@ -1,4 +1,4 @@
-pageextension 50112 SROListExt extends "Sales Return Order List"
+pageextension 50110 SROListExt extends "Sales Return Order List"
 {
     layout
     {

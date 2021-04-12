@@ -5,7 +5,7 @@ tableextension 50106 "Warehouse Activity Header_Ext" extends "Warehouse Activity
 
     fields
     {
-        field(21; "New Sorting Method"; Enum "Before Whse. Activity Sorting Method")
+        field(50100; "New Sorting Method"; Enum "Before Whse. Activity Sorting Method")
         {
             Caption = 'New Sorting Method';
 
@@ -15,7 +15,7 @@ tableextension 50106 "Warehouse Activity Header_Ext" extends "Warehouse Activity
                     NewSortWhseDoc;
             end;
         }
-        field(22; "Sorting Field 1"; enum "Sorting Field")
+        field(50101; "Sorting Field 1"; enum "Sorting Field")
         {
             Caption = 'Sorting Field 1';
             trigger OnValidate()
@@ -24,7 +24,7 @@ tableextension 50106 "Warehouse Activity Header_Ext" extends "Warehouse Activity
                     SortingField;
             end;
         }
-        field(23; "Sorting Field 2"; enum "Sorting Field")
+        field(50102; "Sorting Field 2"; enum "Sorting Field")
         {
             Caption = 'Sorting Field 2';
             trigger OnValidate()
@@ -33,7 +33,7 @@ tableextension 50106 "Warehouse Activity Header_Ext" extends "Warehouse Activity
                     SortingField;
             end;
         }
-        field(24; "Sorting Field 3"; enum "Sorting Field")
+        field(50103; "Sorting Field 3"; enum "Sorting Field")
         {
             Caption = 'Sorting Field 3';
             trigger OnValidate()

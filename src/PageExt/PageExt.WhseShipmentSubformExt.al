@@ -1,4 +1,4 @@
-pageextension 50124 "Whse. Shipment Subform Ext" extends "Whse. Shipment Subform"
+pageextension 50115 "Whse. Shipment Subform Ext" extends "Whse. Shipment Subform"
 {
     layout
     {

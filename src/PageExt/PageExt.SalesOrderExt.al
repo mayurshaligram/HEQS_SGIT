@@ -200,10 +200,10 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 end;
             end;
         }
-        modify(Post)
-        {
-            Visible = false;
-        }
+        // modify(Post)
+        // {
+        //     Visible = false;
+        // }
         modify(PostAndSend)
         {
             Visible = false;

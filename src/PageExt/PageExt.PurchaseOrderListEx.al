@@ -1,4 +1,4 @@
-pageextension 50114 "Purchase Order List_Ext" extends "Purchase Order List"
+pageextension 50111 "Purchase Order List_Ext" extends "Purchase Order List"
 {
     trigger OnOpenPage();
     begin

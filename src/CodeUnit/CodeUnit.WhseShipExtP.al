@@ -1,4 +1,4 @@
-codeunit 50109 WhseShipPExtMgt
+codeunit 50108 WhseShipPExtMgt
 {
     procedure PostShipmentInInventory(WhseShipment: Record "Warehouse Shipment Header");
     var
@@ -16,7 +16,7 @@ codeunit 50109 WhseShipPExtMgt
         InventorySalesLine: Record "Sales Line";
         RetailSalesLine: Record "Sales Line";
         RetailPurchaseHeader: Record "Purchase Header";
-        RetallPurchaseLine: Record "Purchase Line";
+        RetailPurchaseLine: Record "Purchase Line";
 
         Continue: Boolean;
     begin
@@ -34,7 +34,24 @@ codeunit 50109 WhseShipPExtMgt
             RetailSalesOrder.SetRange("Automate Purch.Doc No.", InventorySalesHeader."External Document No.");
             RetailSalesOrder.FindSet();
 
-            // InventorySalesLine.SetRange("Document Type", );
+            RetailPurchaseHeader.Reset();
+            RetailPurchaseHeader.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+            RetailPurchaseHeader.SetRange("No.", InventorySalesHeader."External Document No.");
+            RetailPurchaseHeader.FindSet();
+
+            InventorySalesLine.SetRange("Document Type", InventorySalesHeader."Document Type");
+            InventorySalesLine.SetRange("Document No.", InventorySalesHeader."No.");
+            // if InventorySalesLine.FindSet() then
+            //     repeat
+            //         RetailPurchaseLine.Reset();
+            //         RetailPurchaseLine.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+            //         RetailPurchaseLine.Get(InventorySalesHeader."Document Type", RetailPurchaseHeader."No.", InventorySalesLine."Line No.");
+            //         RetailPurchaseLine."Quantity Received" := InventorySalesLine."Quantity Shipped";
+            //         RetailPurchaseLine."Qty. to Receive" := RetailPurchaseLine."Qty. to Receive" - RetailPurchaseLine."Quantity Received";
+            //         RetailPurchaseLine."Qty. to Invoice" := InventorySalesLine."Qty. to Invoice";
+            //         RetailPurchaseLine.Modify();
+
+            //     until InventorySalesLine.Next() = 0;
 
 
             InventorySalesHeader."External Document No." := '';
@@ -45,7 +62,6 @@ codeunit 50109 WhseShipPExtMgt
 
             SessionID := 50;
             StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
-
         end;
     end;
 }

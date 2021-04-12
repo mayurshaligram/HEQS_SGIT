@@ -1,19 +1,4 @@
-enum 50145 "Delivery Option"
-{
-    Extensible = true;
 
-    value(0; " ")
-    {
-    }
-    value(1; Pickup)
-    {
-    }
-    value(2; Delivery)
-    {
-
-    }
-
-}
 tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 {
     fields
@@ -236,6 +221,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         ICrec."Ship-to Address" := rec."Ship-to Address";
                         ICrec.Ship := rec.ship;
                         ICrec."Work Description" := rec."Work Description";
+                        ICrec."Location Code" := Rec."Location Code";
                         rec.CALCFIELDS("Work Description");
                         ICrec."Work Description" := rec."Work Description";
                         ICrec."Document Date" := DT2DATE(system.CurrentDateTime);

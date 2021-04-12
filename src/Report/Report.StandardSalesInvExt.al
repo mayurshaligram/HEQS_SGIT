@@ -1,4 +1,4 @@
-report 50106 "Standard Sales - Inv.Ext"
+report 50100 "Standard Sales - Inv.Ext"
 {
     Caption = 'Sales - Invoice';
     EnableHyperlinks = true;

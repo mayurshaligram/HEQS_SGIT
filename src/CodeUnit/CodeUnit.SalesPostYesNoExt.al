@@ -9,7 +9,7 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
     trigger OnRun()
     var
 
-
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
         SalesLine: Record "Sales Line";
         WarehouseRequest: Record "Warehouse Request";
         TempInteger: Integer;
@@ -18,6 +18,10 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         InventorySaleOrder: Record "Sales Header";
         Temp: Text;
         TempType: Enum "Sales Document Type";
+
+        RetailSalesLine: Record "Sales Line";
+        InventorySalesHeader: Record "Sales Header";
+        InventorySalesLine: Record "Sales Line";
     begin
         // OnBeforeOnRun(Rec);
 
@@ -32,7 +36,25 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         TempInteger := 37;
         // message('OnBeforeActionCreating');
         // ReleaseSalesDoc.PerformManualRelease(Rec);
+
+        // InventorySalesHeader.Reset();
+        // InventorySalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        // InventorySalesHeader.SetRange(RetailSalesHeader, Rec."No.");
+        // InventorySalesHeader.FindSet();
+
+        // InventorySalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        // InventorySalesLine.SetRange("Document Type", InventorySalesHeader."Document Type");
+        // InventorySalesLine.SetRange("Document No.", InventorySalesHeader."No.");
+        // if InventorySalesLine.FindSet() then begin
+        //     RetailSalesLine.Reset();
+        //     RetailSalesLine.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+        //     RetailSalesLine.Get(Rec."Document Type", Rec."No.", InventorySalesLine."Line No.");
+        //     RetailSalesLine.Validate("Qty. to Ship", InventorySalesLine."Quantity Shipped");
+        //     RetailSalesLine.Modify();
+        // end;
         Rec.Status := Rec.Status::Released;
+
+
         Rec.Modify();
 
         SalesHeader.Copy(Rec);
@@ -41,6 +63,19 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         InventorySaleOrder.Get(TempType, Temp);
         InventorySaleOrder."External Document No." := Rec."Automate Purch.Doc No.";
         InventorySaleOrder.Modify();
+
+        // InventorySalesHeader.Reset();
+        // InventorySalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        // InventorySalesHeader.SetRange(RetailSalesHeader, Rec."No.");
+        // InventorySalesHeader.FindSet();
+
+        // if InventorySalesLine.FindSet() then begin
+        //     RetailSalesLine.Reset();
+        //     RetailSalesLine.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+        //     RetailSalesLine.Get(Rec."Document Type", Rec."No.", InventorySalesLine."Line No.");
+        //     RetailSalesLine."Qty. to Invoice" := InventorySalesLine."Qty. to Invoice";
+        //     RetailSalesLine.Modify();
+        // end;
     end;
 
     var
