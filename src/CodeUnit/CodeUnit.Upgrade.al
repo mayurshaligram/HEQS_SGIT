@@ -2,6 +2,9 @@ codeunit 50110 ZoneUpgrade
 {
     Subtype = Upgrade;
 
+    var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+
     trigger OnCheckPreconditionsPerCompany()
     begin
         // Code to make sure company is OK to upgrade.
@@ -44,10 +47,31 @@ codeunit 50110 ZoneUpgrade
             ZoneTable.L3 := 60;
             ZoneTable.Insert();
         end;
+
+        DeletePilloW();
     end;
 
     trigger OnValidateUpgradePerCompany()
     begin
         // Code to make sure that upgrade was successful for each company
+    end;
+
+
+
+    local procedure DeletePilloW();
+    var
+        BOMComponent: Record "BOM Component";
+        Item: Record Item;
+    begin
+        // Delete the item pillow in all the original trading company
+        BOMComponent.Reset();
+        BOMComponent.SetRange("No.", '7050012');
+        if BOMComponent.FindSet() then
+            repeat
+                BOMComponent.Delete()
+            until BOMComponent.Next() = 0;
+
+        if Item.Get(7050012) then
+            Item.Delete();
     end;
 }
