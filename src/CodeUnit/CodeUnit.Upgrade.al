@@ -47,8 +47,6 @@ codeunit 50110 ZoneUpgrade
             ZoneTable.L3 := 60;
             ZoneTable.Insert();
         end;
-
-        DeletePilloW();
     end;
 
     trigger OnValidateUpgradePerCompany()
@@ -58,20 +56,5 @@ codeunit 50110 ZoneUpgrade
 
 
 
-    local procedure DeletePilloW();
-    var
-        BOMComponent: Record "BOM Component";
-        Item: Record Item;
-    begin
-        // Delete the item pillow in all the original trading company
-        BOMComponent.Reset();
-        BOMComponent.SetRange("No.", '7050012');
-        if BOMComponent.FindSet() then
-            repeat
-                BOMComponent.Delete()
-            until BOMComponent.Next() = 0;
 
-        if Item.Get(7050012) then
-            Item.Delete();
-    end;
 }

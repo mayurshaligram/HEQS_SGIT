@@ -94,6 +94,20 @@ pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
                     CurrPage.Update();
                 end;
             }
+            action("Quick Fix")
+            {
+                AccessByPermission = TableData Item = R;
+                ApplicationArea = Basic, Suite;
+                Caption = 'Quick Fix';
+                Image = Delete;
+                ToolTip = 'Quick Fix BOM Sales line.';
+
+                trigger OnAction()
+                begin
+                    Rec.SetView('where ("BOM Item" = filter (= false))');
+                    CurrPage.Update();
+                end;
+            }
         }
     }
 

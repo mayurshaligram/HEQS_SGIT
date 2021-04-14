@@ -338,6 +338,23 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
 
             }
         }
+        addbefore("Create Inventor&y Put-away/Pick")
+        {
+            action("Quick Fix")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Quick Fix';
+                Image = PostOrder;
+                Promoted = true;
+                PromotedCategory = Process;
+                Visible = Not IsInventoryCompany;
+
+                trigger OnAction();
+                begin
+                    SalesTruthMgt.QuickFix(Rec);
+                end;
+            }
+        }
     }
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';

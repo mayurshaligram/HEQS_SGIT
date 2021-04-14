@@ -5,6 +5,41 @@ codeunit 50101 "Sales Truth Mgt"
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+    procedure QuickFix(var SalesHeader: Record "Sales Header");
+    var
+        Item: Record Item;
+        SalesLine: Record "Sales Line";
+        BOMSalesLine: Record "Sales Line";
+        BOMComponent: Record "BOM Component";
+        TempLineNo: Integer;
+    begin
+        if SalesLine.CurrentCompany <> InventoryCompany() then begin
+            SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+            SalesLine.SetRange("Document No.", SalesHeader."No.");
+            SalesLine.SetRange(Type, SalesLine.Type::Item);
+            SalesLine.SetRange("BOM Item", false);
+
+            if SalesLine.FindSet() then begin
+                repeat
+                    TempLineNo := SalesLine."Line No.";
+                    Item.Get(SalesLine."No.");
+                    if Item.Type = Item.Type::Inventory then begin
+                        BOMComponent.SetRange("Parent Item No.", Item."No.");
+                        if BOMComponent.FindSet() then
+                            repeat
+                                TempLineNo += 10000;
+                                BOMSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo);
+                                BOMSalesLine."BOM Item" := true;
+                                BOMSalesLine."Main Item Line" := SalesLine."Line No.";
+                                BOMSalesLine.Modify();
+                            until BOMComponent.Next() = 0;
+                    end;
+                until SalesLine.Next() = 0;
+            end;
+
+        end;
+    end;
+
     procedure IsRetailSalesHeader(var RetailSalesHeader: Record "Sales Header"): Boolean;
     var
         TempSalesLine: Record "Sales Line";
@@ -78,8 +113,8 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine: Record "Purchase Line";
     begin
         SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
-        PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
-        PurchaseLine.Delete();
+        if PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.") then
+            PurchaseLine.Delete();
     end;
 
     local procedure DeleteICSalesLine(var SalesLine: Record "Sales Line");
@@ -101,6 +136,40 @@ codeunit 50101 "Sales Truth Mgt"
     begin
     end;
 
+    [EventSubscriber(ObjectType::Table, 36, 'OnAfterSelltoCustomerNoOnAfterValidate', '', false, false)]
+    local procedure AfterSelltoCustomerNoOnAfterValidate(var SalesHeader: Record "Sales Header"; var xSalesHeader: Record "Sales Header")
+    var
+        SalesLine: Record "Sales Line";
+        TempLineNo: Integer;
+        Item: Record Item;
+        BOMComponent: Record "BOM Component";
+        BOMSalesLine: Record "Sales Line";
+    begin
+        if SalesLine.CurrentCompany <> InventoryCompany() then begin
+            SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+            SalesLine.SetRange("Document No.", SalesHeader."No.");
+            SalesLine.SetRange(Type, SalesLine.Type::Item);
+            SalesLine.SetRange("BOM Item", false);
+
+            if SalesLine.FindSet() then begin
+                repeat
+                    TempLineNo := SalesLine."Line No.";
+                    Item.Get(SalesLine."No.");
+                    if Item.Type = Item.Type::Inventory then begin
+                        BOMComponent.SetRange("Parent Item No.", Item."No.");
+                        if BOMComponent.FindSet() then
+                            repeat
+                                TempLineNo += 10000;
+                                BOMSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo);
+                                BOMSalesLine."BOM Item" := true;
+                                BOMSalesLine."Main Item Line" := SalesLine."Line No.";
+                                BOMSalesLine.Modify();
+                            until BOMComponent.Next() = 0;
+                    end;
+                until SalesLine.Next() = 0;
+            end;
+        end;
+    end;
 
     [EventSubscriber(ObjectType::Codeunit, 5752, 'OnAfterGetSingleOutboundDoc', '', false, false)]
     local procedure AfterGetSingleOutboundDoc(var WarehouseShipmentHeader: Record "Warehouse Shipment Header");
@@ -208,6 +277,8 @@ codeunit 50101 "Sales Truth Mgt"
         TempAssemblyItem: Text[2000];
         TempAssemblyItemWithoutBOM: Text[2000];
         WarehouseRequest: Record "Warehouse Request";
+
+        TempLine: Integer;
     begin
         TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
@@ -237,7 +308,7 @@ codeunit 50101 "Sales Truth Mgt"
         if RetailSalesLine.FindSet() then
             repeat
                 if IsValideICSalesLine(RetailSalesLine) then begin
-                    SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No.");
+                    SalesLine.Get(SalesHeader."Document Type", SalesHeader."No.", RetailSalesLine."Line No." - TempLine);
                     // RetailSalesLineToICSalesLineCopy(SalesLine, RetailSalesLine);
                     SalesLine."Location Code" := RetailSalesLine."Location Code";
                     SalesLine."BOM Item" := RetailSalesLine."BOM Item";
@@ -261,7 +332,9 @@ codeunit 50101 "Sales Truth Mgt"
                     if SalesLine.NeedAssemble = true then
                         TempAssemble := true;
                     SalesLine.Modify();
-                end;
+                end
+                else
+                    TempLine += 10000;
             until RetailSalesLine.Next() = 0;
         SalesHeader."Estimate Assembly Time(hour)" := TempAssembleHour;
         // SalesHeader.Note := GetWorkDescription(RetailSalesHeader);
