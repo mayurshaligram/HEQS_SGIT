@@ -35,6 +35,7 @@ codeunit 50101 "Sales Truth Mgt"
                             until BOMComponent.Next() = 0;
                     end;
                 until SalesLine.Next() = 0;
+
             end;
 
         end;
@@ -95,8 +96,8 @@ codeunit 50101 "Sales Truth Mgt"
         BOMSalesLine.SetRange("Main Item Line", SalesLine."Line No.");
         if BOMSalesLine.FindSet() then
             repeat
-                BOMPurchaseLine.Get(BOMSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", BOMSalesLine."Line No.");
-                BOMPurchaseLine.Delete();
+                if BOMPurchaseLine.Get(BOMSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", BOMSalesLine."Line No.") then
+                    BOMPurchaseLine.Delete();
                 if ExistIC then begin
                     BOMICSalesLine.ChangeCompany(InventoryCompany());
                     BOMICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", BOMSalesLine."Line No.");
@@ -168,6 +169,17 @@ codeunit 50101 "Sales Truth Mgt"
                     end;
                 until SalesLine.Next() = 0;
             end;
+
+            SalesLine.Reset();
+            SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+            SalesLine.SetRange("Document No.", SalesHeader."No.");
+            SalesLine.SetRange(Type, SalesLine.Type::Item);
+            SalesLine.SetRange("BOM Item", false);
+            if SalesLine.FindSet() then
+                repeat
+                    if IsValideICSalesLine(SalesLine) then
+                        SalesLine.Modify(true);
+                until SalesLine.Next() = 0;
         end;
     end;
 

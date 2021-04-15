@@ -1,4 +1,4 @@
-pageextension 50118 ItemCardExt extends "Item Card"
+pageextension 50119 ItemCardExt extends "Item Card"
 {
     layout
     {

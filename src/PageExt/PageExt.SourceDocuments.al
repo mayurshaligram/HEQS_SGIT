@@ -1,14 +1,12 @@
-pageextension 50114 "Source Documents Ext" extends "Source Documents"
+pageextension 50115 "Source Documents Ext" extends "Source Documents"
 {
     layout
     {
-        addafter("Source No.")
+        addafter("Shipment Date")
         {
-            field("Original SO"; Rec."Original SO")
+            field("Original SO59989"; Rec."Original SO")
             {
-                Visible = Not IsInventory;
-                ApplicationArea = Warehouse;
-                ToolTip = 'Specifies the number of the Original SO document that the entry originates from.';
+                ApplicationArea = All;
             }
         }
     }

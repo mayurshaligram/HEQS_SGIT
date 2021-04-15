@@ -1,4 +1,4 @@
-pageextension 50103 "Warehouse Pick_Ext" extends "Warehouse Pick"
+pageextension 50104 "Warehouse Pick_Ext" extends "Warehouse Pick"
 {
     Caption = 'Warehouse Pick_Ext';
     layout

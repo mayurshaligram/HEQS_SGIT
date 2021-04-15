@@ -50,18 +50,28 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             Description = 'Developing Internal Only';
             Editable = false;
         }
+        field(50108; Sequence; Integer)
+        {
+            Description = 'Sequence the view the line';
+            Editable = true;
+        }
     }
     trigger OnBeforeInsert();
     var
         LastSalesLine: Record "Sales Line";
+        SalesLine: RecordRef;
+        MyFieldRef: FieldRef;
+
     begin
         LastSalesLine.Reset();
         LastSalesLine.SetRange("Document Type", Rec."Document Type");
         LastSalesLine.SetRange("Document No.", Rec."Document No.");
         if LastSalesLine.FindLast() then
             Rec."Line No." := LastSalesLine."Line No." + 10000
+
         else
             "Line No." := 10000;
+
     end;
 
     trigger OnAfterInsert();

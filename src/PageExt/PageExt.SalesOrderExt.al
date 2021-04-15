@@ -1,4 +1,4 @@
-pageextension 50102 "Sales Order_Ext" extends "Sales Order"
+pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 {
     layout
     {
@@ -62,6 +62,11 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then
                     Error('View Only Please Change the Attribute, at %1 Scheduling Section', SalesTruthMgt.InventoryCompany());
             end;
+        }
+
+        modify("External Document No.")
+        {
+            Editable = false;
         }
 
 
@@ -345,8 +350,8 @@ pageextension 50102 "Sales Order_Ext" extends "Sales Order"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Quick Fix';
                 Image = PostOrder;
-                Promoted = true;
-                PromotedCategory = Process;
+                // Promoted = true;
+                // PromotedCategory = Process;
                 Visible = Not IsInventoryCompany;
 
                 trigger OnAction();

@@ -1,4 +1,4 @@
-pageextension 50104 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
+pageextension 50105 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
 {
     actions
     {

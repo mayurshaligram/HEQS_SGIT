@@ -1,7 +1,18 @@
-pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
+pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
 {
     layout
     {
+        addafter("No.")
+        {
+            field(Sequence; Rec.Sequence)
+            {
+                Caption = 'Sequence';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specified the sequnce view of the line';
+                Visible = false;
+                Editable = true;
+            }
+        }
         addafter(Quantity)
         {
             field(NeedAssemble; Rec.NeedAssemble)
@@ -60,6 +71,14 @@ pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
                 Rec.AssemblyHour := Rec.UnitAssembleHour * Rec.Quantity;
             end;
         }
+        modify("Line No.")
+        {
+            Editable = false;
+        }
+        modify("Line Amount")
+        {
+            Editable = false;
+        }
     }
 
     actions
@@ -94,20 +113,6 @@ pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
                     CurrPage.Update();
                 end;
             }
-            action("Quick Fix")
-            {
-                AccessByPermission = TableData Item = R;
-                ApplicationArea = Basic, Suite;
-                Caption = 'Quick Fix';
-                Image = Delete;
-                ToolTip = 'Quick Fix BOM Sales line.';
-
-                trigger OnAction()
-                begin
-                    Rec.SetView('where ("BOM Item" = filter (= false))');
-                    CurrPage.Update();
-                end;
-            }
         }
     }
 
@@ -115,6 +120,8 @@ pageextension 50117 "Sales Order Subform_Ext" extends "Sales Order Subform"
 
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
+
+        Sequence: Integer;
 
     trigger OnOpenPage();
     begin

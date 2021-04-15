@@ -143,21 +143,25 @@ tableextension 50102 "Item_Ext" extends "Item"
     trigger OnBeforeModify()
     var
         IsValid: Boolean;
+        user: Record User;
     begin
-        IsValid := false;
-        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then begin
-            if (Rec.Type = Rec.Type::Inventory) and (Rec."Unit Cost" <> xRec."Unit Cost") then
-                IsValid := true;
+        user.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Karen Huang' then begin
+            IsValid := false;
+            if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then begin
+                if (Rec.Type = Rec.Type::Inventory) and (Rec."Unit Cost" <> xRec."Unit Cost") then
+                    IsValid := true;
 
-            if Rec.Type = Rec.Type::Service then
-                IsValid := true;
+                if Rec.Type = Rec.Type::Service then
+                    IsValid := true;
 
-            if Rec.Token = true then begin
-                IsValid := true;
+                if Rec.Token = true then begin
+                    IsValid := true;
+                end;
+
+                if IsValid = false then
+                    Error('Please only creat new service item in current trading company , for other type item creation or modification please go to HEQS International.');
             end;
-
-            if IsValid = false then
-                Error('Please only creat new service item in current trading company , for other type item creation or modification please go to HEQS International.');
         end;
     end;
 
@@ -173,9 +177,14 @@ tableextension 50102 "Item_Ext" extends "Item"
     // end;
 
     trigger OnBeforeDelete()
+    var
+        User: Record User;
     begin
-        if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
-            Error('Please only edit items in HEQS International Pty Ltd');
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Karen Huang' then begin
+            if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+                Error('Please only edit items in HEQS International Pty Ltd');
+        end;
     end;
 
     trigger OnAfterInsert()

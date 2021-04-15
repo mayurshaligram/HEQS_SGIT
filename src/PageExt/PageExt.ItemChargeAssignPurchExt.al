@@ -1,4 +1,4 @@
-pageextension 50107 "ItemChargeAssign(Purch)_Ext" extends "Item Charge Assignment (Purch)"
+pageextension 50108 "ItemChargeAssign(Purch)_Ext" extends "Item Charge Assignment (Purch)"
 {
     Editable = true;
     // layout

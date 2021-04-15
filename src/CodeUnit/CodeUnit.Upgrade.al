@@ -1,4 +1,4 @@
-codeunit 50110 ZoneUpgrade
+codeunit 50109 ZoneUpgrade
 {
     Subtype = Upgrade;
 

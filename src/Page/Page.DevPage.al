@@ -1,4 +1,4 @@
-page 50109 "DevPage"
+page 50105 "DevPage"
 {
     Caption = 'DevPage';
     Editable = true;
@@ -40,14 +40,17 @@ page 50109 "DevPage"
                                     WarehouseJournal.Delete();
                                 until WarehouseJournal.Next() = 0;
                             DeletePilloW();
-                        end;
+                        end
 
-                        if Password = LineFixPassword then begin
-                            Message('This for line discount fix');
-                            LineFix();
-                            Message('This for delete item 7030003 and 7030013');
-                            DeleteItem();
-                        end;
+                        else
+                            if Password = LineFixPassword then begin
+                                Message('This for line discount fix');
+                                LineFix();
+                                Message('This for delete item 7030003 and 7030013');
+                                DeleteItem();
+                            end;
+                        if Password = ExternalMovingPassword then
+                            ExternalMoving();
                     end;
 
                 }
@@ -59,11 +62,13 @@ page 50109 "DevPage"
         Password: Code[20];
         Correct: Code[20];
         LineFixPassword: Code[20];
+        ExternalMovingPassword: Code[20];
 
     trigger OnOpenPage();
     begin
         Correct := 'asfgsfga';
-        LineFixPassword := '326689'
+        LineFixPassword := '3ttq43asfg';
+        ExternalMovingPassword := '326690';
     end;
 
     local procedure DeletePilloW();
@@ -96,7 +101,7 @@ page 50109 "DevPage"
                 BOMComponent.Delete()
             until BOMComponent.Next() = 0;
 
-        if Item.Get(7050012) then
+        if Item.Get(7030003) then
             Item.Delete();
 
         BOMComponent.Reset();
@@ -106,7 +111,7 @@ page 50109 "DevPage"
                 BOMComponent.Delete()
             until BOMComponent.Next() = 0;
 
-        if Item.Get(7050012) then
+        if Item.Get(7030013) then
             Item.Delete();
     end;
 
@@ -116,12 +121,34 @@ page 50109 "DevPage"
         SalesHeader: Record "Sales Header";
     begin
         SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101007');
-        SalesLine.SetRange("Document Type", SalesLine."Document Type"::Quote);
+        SalesLine.SetRange("Document Type", SalesLine."Document Type"::Order);
         SalesLine.SetRange("Document No.", 'FSO101007');
         SalesLIne.SetRange("No.", '7020009');
         if SalesLine.FindSet() then begin
             SalesLine."Line Discount %" := 0;
             SalesLine.Modify();
+        end;
+    end;
+
+    local procedure ExternalMoving();
+    var
+        SalesHeader: Record "Sales Header";
+        TempText: Text;
+        OtherCompanyRecord: Record Company;
+    begin
+        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
+            OtherCompanyRecord.Reset();
+            if OtherCompanyRecord.Find('-') then
+                repeat
+                    if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
+                        SalesHeader.ChangeCompany(OtherCompanyRecord.Name);
+                        if SalesHeader."External Document No." <> '' then begin
+                            SalesHeader."Your Reference" := SalesHeader."External Document No.";
+                            SalesHeader."External Document No." := '';
+                            SalesHeader.Modify();
+                        end;
+                    end;
+                until OtherCompanyRecord.Next() = 0;
         end;
     end;
 }
