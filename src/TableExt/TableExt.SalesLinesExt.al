@@ -61,16 +61,17 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         LastSalesLine: Record "Sales Line";
         SalesLine: RecordRef;
         MyFieldRef: FieldRef;
-
+        TempLine: Integer;
     begin
-        LastSalesLine.Reset();
-        LastSalesLine.SetRange("Document Type", Rec."Document Type");
-        LastSalesLine.SetRange("Document No.", Rec."Document No.");
-        if LastSalesLine.FindLast() then
-            Rec."Line No." := LastSalesLine."Line No." + 10000
-
-        else
-            "Line No." := 10000;
+        if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
+            LastSalesLine.Reset();
+            LastSalesLine.SetRange("Document Type", Rec."Document Type");
+            LastSalesLine.SetRange("Document No.", Rec."Document No.");
+            if LastSalesLine.FindLast() then
+                Rec."Line No." := LastSalesLine."Line No." + 10000
+            else
+                "Line No." := 10000;
+        end;
 
     end;
 
@@ -193,6 +194,7 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
     end;
 
     var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         Text003: Label 'There is not enough space to explode the BOM.';
         ToSalesLine: Record "Sales Line";

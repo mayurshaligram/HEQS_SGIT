@@ -206,9 +206,14 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         ReleaseSalesDoc: Codeunit "Release Sales Document";
         TextList: List of [Text];
 
+
         ICSalesOrder: Record "Sales Header";
+        WhseRequest: Record "Warehouse Request";
     begin
-        if Rec.CurrentCompany <> InventoryCompanyName then
+        if Rec.CurrentCompany <> InventoryCompanyName then begin
+
+
+
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then begin
                 if POrecord.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") then begin
                     UpdatePurchaseHeader(POrecord);
@@ -218,6 +223,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                 SORecord.ChangeCompany(InventoryCompanyName);
                 SORecord.SetCurrentKey("External Document No.");
                 SORecord.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+
                 if (SORecord.findset) then
                     repeat
                         ICrec.ChangeCompany(InventoryCompanyName);
@@ -228,6 +234,14 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         ICrec.Ship := rec.ship;
                         ICrec."Work Description" := rec."Work Description";
                         ICrec."Location Code" := Rec."Location Code";
+
+                        WhseRequest.Reset();
+                        WhseRequest.ChangeCompany(SalesTruthMgt.InventoryCompany());
+                        WhseRequest.SetRange("Source No.", ICrec."No.");
+                        // if WhseRequest.FindSet() then begin
+                        //     WhseRequest."Location Code" := ICrec."Location Code";
+                        //     WhseRequest.Modify();
+                        // end;
                         rec.CALCFIELDS("Work Description");
                         ICrec."Work Description" := rec."Work Description";
                         ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
@@ -283,6 +297,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                     //     until (SLrec.Next() = 0);
                     until (SORecord.next() = 0);
             end;
+        end;
     end;
 
     trigger OnAfterDelete();

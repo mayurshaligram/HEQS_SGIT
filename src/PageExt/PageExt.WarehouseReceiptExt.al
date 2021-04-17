@@ -49,21 +49,22 @@ pageextension 50110 "Warehouse Receipt Ext" extends "Warehouse Receipt"
 
                 Continue := false;
                 If Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
-                    InventorySalesHeader.Get(InventorySalesHeader."Document Type"::"Return Order", SourceDocument);
+                    if InventorySalesHeader.Get(InventorySalesHeader."Document Type"::"Return Order", SourceDocument) then begin
 
-                    RetailSalesOrder.Reset();
-                    RetailSalesOrder.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
-                    RetailSalesOrder.SetRange("Automate Purch.Doc No.", InventorySalesHeader."External Document No.");
-                    RetailSalesOrder.FindSet();
+                        RetailSalesOrder.Reset();
+                        RetailSalesOrder.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+                        RetailSalesOrder.SetRange("Automate Purch.Doc No.", InventorySalesHeader."External Document No.");
+                        RetailSalesOrder.FindSet();
 
-                    InventorySalesHeader."External Document No." := '';
-                    InventorySalesHeader.Modify();
+                        InventorySalesHeader."External Document No." := '';
+                        InventorySalesHeader.Modify();
 
-                    RetailSalesOrder."External Document No." := InventorySalesHeader."No.";
-                    RetailSalesOrder.Modify();
+                        RetailSalesOrder."External Document No." := InventorySalesHeader."No.";
+                        RetailSalesOrder.Modify();
 
-                    SessionID := 51;
-                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
+                        SessionID := 51;
+                        StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
+                    end;
                 end;
             end;
         }

@@ -142,11 +142,14 @@ page 50105 "DevPage"
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         SalesHeader.ChangeCompany(OtherCompanyRecord.Name);
-                        if SalesHeader."External Document No." <> '' then begin
-                            SalesHeader."Your Reference" := SalesHeader."External Document No.";
-                            SalesHeader."External Document No." := '';
-                            SalesHeader.Modify();
-                        end;
+                        if SalesHeader.FindSet() then
+                            repeat
+                                if SalesHeader."External Document No." <> '' then begin
+                                    SalesHeader."Your Reference" := SalesHeader."External Document No.";
+                                    SalesHeader."External Document No." := '';
+                                    SalesHeader.Modify();
+                                end;
+                            until SalesHeader.Next() = 0;
                     end;
                 until OtherCompanyRecord.Next() = 0;
         end;

@@ -2,6 +2,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 {
     layout
     {
+
         addlast("Shipping and Billing")
         {
             field(Delivery; Rec.Delivery)
@@ -79,10 +80,66 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             trigger OnBeforeAction();
             var
                 Text1: Label 'Please release the current Sales Order in at "%1"';
+                Text2: Label 'Please provide the location code for the Sales Line';
+                Text3: Label 'Please provide the location code for the Sales Order';
+                Text4: Label 'There BOM component Inconsistency for the Sales Line, Please report to administrator.';
+                SalesLine: Record "Sales Line";
+                MainSalesLine: Record "Sales Line";
+                TempLineNo: Integer;
+                Item: Record Item;
+                BOMComponent: Record "BOM Component";
+                BOMSalesLine: Record "Sales Line";
+                CorrectMainSalesLine: Record "Sales Line";
             begin
+                SalesLine.Reset();
+                SalesLine.SetRange("Document No.", Rec."No.");
+                SalesLine.SetRange("Document Type", Rec."Document Type");
+                if SalesLine.FindSet() then
+                    repeat
+                        if SalesTruthMgt.IsValideICSalesLine(SalesLine) and (SalesLine."Location Code" = '') then
+                            Error(Text2);
+                    until Salesline.Next() = 0;
+                if Rec."Location Code" = '' then begin
+                    SalesLine.Reset();
+                    SalesLine.SetRange("Document No.", Rec."No.");
+                    SalesLine.SetRange("Document Type", Rec."Document Type");
+                    if SalesLine.FindSet() then
+                        Rec."Location Code" := SalesLine."Location Code";
+                    Rec.Modify();
+                end;
+
+                // BOM Examination
+                if MainSalesLine.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
+                    MainsalesLine.SetRange("Document Type", Rec."Document Type");
+                    MainSalesLine.SetRange("Document No.", Rec."No.");
+                    MainSalesLine.SetRange(Type, MainSalesLine.Type::Item);
+                    MainSalesLine.SetRange("BOM Item", false);
+
+                    if MainSalesLine.FindSet() then begin
+                        repeat
+                            TempLineNo := MainSalesLine."Line No.";
+                            Item.Get(MainSalesLine."No.");
+                            if Item.Type = Item.Type::Inventory then begin
+                                BOMComponent.SetRange("Parent Item No.", Item."No.");
+                                if BOMComponent.FindSet() then
+                                    repeat
+                                        TempLineNo += 10000;
+                                        BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo);
+                                        if BOMSalesLine."No." <> BOMComponent."No." then begin
+                                            CorrectMainSalesLine := MainSalesLine;
+                                            MainSalesLine.Delete(true);
+                                            CorrectMainSalesLine.Insert(true);
+                                        end;
+                                    until BOMComponent.Next() = 0;
+                            end;
+                        until MainSalesLine.Next() = 0;
+                    end;
+                end;
+
                 SalesTruthMgt.RequirFieldTesting(Rec);
                 if SalesTruthMgt.IsICSalesHeader(Rec) then Error(Text1, Rec."Sell-to Customer Name");
             end;
+
 
             trigger OnAfterAction()
             var
@@ -128,21 +185,21 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         }
         modify("Create &Warehouse Shipment")
         {
-            trigger OnBeforeAction();
-            // var
-            //     WhseShipLine: Record "Warehouse Shipment Line";
-            begin
-                if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
-                    Message('The message is from the OnBeforeAction');
-                    Rec.Status := Rec.Status::Open;
-                    // WhseShipLine.Reset();
-                    // WhseShipLine.SetRange("Source No.", Rec."No.");
-                    // if WhseShipLine.FindSet() then
-                    //     WhseShipLine.Delete();
-                    Rec.RecreateSalesLinesExt(Rec."Sell-to Customer Name");
-                    Rec.Status := Rec.Status::Released;
-                end;
-            end;
+            // trigger OnBeforeAction();
+            // // var
+            // //     WhseShipLine: Record "Warehouse Shipment Line";
+            // begin
+            //     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
+            //         Message('The message is from the OnBeforeAction');
+            //         Rec.Status := Rec.Status::Open;
+            //         // WhseShipLine.Reset();
+            //         // WhseShipLine.SetRange("Source No.", Rec."No.");
+            //         // if WhseShipLine.FindSet() then
+            //         //     WhseShipLine.Delete();
+            //         Rec.RecreateSalesLinesExt(Rec."Sell-to Customer Name");
+            //         Rec.Status := Rec.Status::Released;
+            //     end;
+            // end;
 
             trigger OnAfterAction();
             var
@@ -266,6 +323,8 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     TempItem: Record Item;
                     IsValideIC: Boolean;
                     Text1: Label 'Please only post invoice in the retail company %1';
+
+                    PostedPurchaseInvoice: Record "Purch. Inv. Header";
                 // Only the Sales Header associated with more then one inventory item sale line could be pass
                 begin
                     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
@@ -280,26 +339,26 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                         until TempSalesLine.Next() = 0;
 
                     if IsValideIC = false then Error('Please Only use the normal Posting');
-                    SessionId := 51;
 
-                    InventorySalesOrder.Reset();
-                    InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
-                    InventorySalesOrder.SetRange("Document Type", Rec."Document Type");
-                    InventorySalesOrder.SetRange(RetailSalesHeader, Rec."No.");
-                    if InventorySalesOrder.FindLast() then
-                        StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
-                                                   'HEQS International Pty Ltd', InventorySalesOrder);
 
-                    InventorySalesOrder.Reset();
                     PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
-                    PostedSalesInvoiceHeader.FindLast();
+                    if PostedSalesInvoiceHeader.FindLast() then begin
+                        VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
 
-                    VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
-                    TempText := Format(VendorInvoiceNo);
-                    TempNum := TempText.Substring(7);
-                    Evaluate(TempInteger, TempNum);
-                    TempInteger += 1;
-                    VendorInvoiceNo := 'INTPSI' + Format(TempInteger);
+                        TempText := Format(VendorInvoiceNo);
+                        TempNum := TempText.Substring(7);
+                        Evaluate(TempInteger, TempNum);
+                        TempInteger += 1;
+                        VendorInvoiceNo := 'INTPSI' + Format(TempInteger);
+                    end
+                    else
+                        VendorInvoiceNo := 'INTPSI100000';
+
+                    PostedPurchaseInvoice.Reset();
+                    if PostedPurchaseInvoice.FindLast() then
+                        if VendorInvoiceNo = PostedPurchaseInvoice."Vendor Invoice No." then
+                            Error('The Vendor Invoice No. %1 already in Post Invoice %2', VendorInvoiceNo, PostedPurchaseInvoice."No.");
+
                     // InventorySalesOrder.SetRange("External Document No.", PurchaseHeader."No.");
                     PurchaseHeader.Reset();
                     PurchaseHeader.SetRange("Sales Order Ref", Rec."No.");
@@ -337,7 +396,15 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
                     // Post Purchase Order Invoice
                     // Post Intercompany Sales Order Invoice
+                    SessionId := 51;
+                    InventorySalesOrder.Reset();
+                    InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
+                    InventorySalesOrder.SetRange("Document Type", Rec."Document Type");
+                    InventorySalesOrder.SetRange(RetailSalesHeader, Rec."No.");
 
+                    if InventorySalesOrder.FindLast() then
+                        StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                                                   'HEQS International Pty Ltd', InventorySalesOrder);
 
                 end;
 
@@ -352,7 +419,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 Image = PostOrder;
                 // Promoted = true;
                 // PromotedCategory = Process;
-                Visible = Not IsInventoryCompany;
+                // Visible = Not IsInventoryCompany;
 
                 trigger OnAction();
                 begin
@@ -367,21 +434,33 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
 
+        IsPei: Boolean;
+
     trigger OnAfterGetRecord();
     var
         IsICSalesHeader: Boolean;
+        User: Record User;
     begin
         IsInventoryCompany := false;
         If Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
             IsInventoryCompany := true;
         IsICSalesHeader := SalesTruthMgt.IsICSalesHeader(Rec);
-
+        user.Get(Database.UserSecurityId());
+        if User."Full Name" = 'Pei Xu' then IsPei := true;
         if IsICSalesHeader then begin
             Currpage.Editable(false);
         end;
 
-
+        if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
+            Rec.Status := Rec.Status::Open;
+            Rec.Modify();
+            SalesTruthMgt.QuickFix(Rec);
+            Rec.Status := Rec.Status::Released;
+            Rec.Modify();
+            CurrPage.Update();
+        end;
     end;
+
 
     procedure RunInboxTransactions(var ICInboxTransaction: Record "IC Inbox Transaction")
     var

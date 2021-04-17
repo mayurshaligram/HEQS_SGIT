@@ -37,7 +37,12 @@ pageextension 50109 "Purchase Lines Subform_Ext" extends "Purchase Order Subform
                 ToolTip = 'View BOM Sales line.';
 
                 trigger OnAction()
+                var
+                    PurchaseHeader: Record "Purchase Header";
                 begin
+                    PurchaseHeader.Reset();
+                    PurchaseHeader.Get(Rec."Document Type", Rec."Document No.");
+                    SalesTruthMgt.BOMAssignPurchase(PurchaseHeader);
                     Rec.Reset();
                     CurrPage.Update();
                 end;
@@ -51,7 +56,12 @@ pageextension 50109 "Purchase Lines Subform_Ext" extends "Purchase Order Subform
                 ToolTip = 'Hide BOM Sales line.';
 
                 trigger OnAction()
+                var
+                    PurchaseHeader: Record "Purchase Header";
                 begin
+                    PurchaseHeader.Reset();
+                    PurchaseHeader.Get(Rec."Document Type", Rec."Document No.");
+                    SalesTruthMgt.BOMAssignPurchase(PurchaseHeader);
                     Rec.SetView('where ("BOM Item" = filter (= false))');
                     CurrPage.Update();
                 end;
