@@ -72,7 +72,6 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
             else
                 "Line No." := 10000;
         end;
-
     end;
 
     trigger OnAfterInsert();

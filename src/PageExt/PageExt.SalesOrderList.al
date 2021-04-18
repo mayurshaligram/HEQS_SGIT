@@ -96,8 +96,10 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     IsValideIC: Boolean;
                     Text1: Label 'Please only post invoice in the retail company %1';
                     PostedPurchaseInvoice: Record "Purch. Inv. Header";
-                // Only the Sales Header associated with more then one inventory item sale line could be pass
+                    // Only the Sales Header associated with more then one inventory item sale line could be pass
+                    Shipped: Boolean;
                 begin
+                    Shipped := false;
                     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
                         Error(Text1, Rec."Sell-to Customer Name");
                     IsValideIC := false;
@@ -107,9 +109,16 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                         repeat
                             TempItem.Get(TempSalesLine."No.");
                             if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
+                            if TempSalesLine."Quantity Shipped" <> 0 then Shipped := true;
+                        ////////
+                        /// 
+                        ///  Test the Sales line  has Quantity to Shpment
+                        ///     
+                        /// //
                         until TempSalesLine.Next() = 0;
 
                     if IsValideIC = false then Error('Please Only use the normal Posting');
+                    if Shipped = false then Error('This Order has nothing to post');
 
 
                     PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
@@ -127,26 +136,18 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
 
                     PostedPurchaseInvoice.Reset();
                     if PostedPurchaseInvoice.FindLast() then
-                        if VendorInvoiceNo = PostedPurchaseInvoice."Vendor Invoice No." then
-                            Error('The Vendor Invoice No. %1 already in Post Invoice %2', VendorInvoiceNo, PostedPurchaseInvoice."No.");
+                        if VendorInvoiceNo = PostedPurchaseInvoice."Vendor Invoice No." then begin
+                            VendorInvoiceNo := VendorInvoiceNo + '*';
+                        end;
 
-                    // InventorySalesOrder.SetRange("External Document No.", PurchaseHeader."No.");
+
                     PurchaseHeader.Reset();
                     PurchaseHeader.SetRange("Sales Order Ref", Rec."No.");
                     if PurchaseHeader.FindSet() and (VendorInvoiceNo <> '') then begin
                         PurchaseHeader."Due Date" := Rec."Due Date";
 
-                        // PurchaseHeader."Vendor Invoice No." := InventorySalesOrder."No.";
                         PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
                         PurchaseHeader.Modify();
-
-                        // RetailSalesLine.SetRange("Document No.", Rec."No.");
-                        // if RetailSalesLine.FindSet() then
-                        //     repeat
-                        //         RetailSalesLine."Quantity Shipped" := RetailSalesLine."Qty. to Ship";
-                        //         RetailSalesLine."Qty. to Ship" := 0;
-                        //         RetailSalesLine.Modify();
-                        //     until RetailSalesLine.Next() = 0;
 
                         PurchaseLine.Reset();
                         PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
@@ -165,8 +166,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
 
 
                     Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
-                    // Post Purchase Order Invoice
-                    // Post Intercompany Sales Order Invoice
+
                     SessionId := 51;
                     InventorySalesOrder.Reset();
                     InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
@@ -191,15 +191,21 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
     var
         SalesHeader: Record "Sales Header";
         SalesPostExt: Codeunit "Sales-Post (Yes/No) Ext";
+
+        SessionID: Integer;
+        OK: Boolean;
+
     begin
         if SalesHeader.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
             SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
             if SalesHeader.FindSet() then
                 repeat
                     if SalesHeader."External Document No." <> '' then begin
-                        SalesPostExt.Run(SalesHeader);
-                        SalesHeader."External Document No." := '';
-                        SalesHeader.Modify();
+                        // SalesHeader."External Document No." := '';
+                        OK := STARTSESSION(SessionId, CODEUNIT::RetailBatchPostShipment);
+                        if OK = false then
+                            ERROR('The session was not started successfully.');
+                        // SalesHeader.Modify();
                     end;
                 until SalesHeader.Next() = 0;
         end;

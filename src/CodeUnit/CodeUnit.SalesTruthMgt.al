@@ -27,6 +27,10 @@ codeunit 50101 "Sales Truth Mgt"
         WhseShipLine: Record "Warehouse Shipment Line";
         PostWhseShipLine: Record "Posted Whse. Shipment Line";
         TempPrice: Decimal;
+
+        PurchaseLine: Record "Purchase Line";
+        ICSalesHeader: Record "Sales Header";
+        RetailSalesLine: Record "Sales Line";
     begin
         if SalesLine.CurrentCompany <> InventoryCompany() then begin
             SalesLine.SetRange("Document Type", SalesHeader."Document Type");
@@ -71,6 +75,26 @@ codeunit 50101 "Sales Truth Mgt"
                         SalesLine.Modify(true);
                     until SalesLine.Next() = 0;
             end;
+
+            SalesLine.Reset();
+            SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+            SalesLine.SetRange("Document No.", SalesHeader."No.");
+            SalesLine.SetRange(Type, SalesLine.Type::Item);
+            if SalesLine.FindSet() then
+                repeat
+                    if SalesLine."Unit Price" = 0 then begin
+                        if ICSalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.") = false then
+                            exit;
+
+                        PurchaseLine.Reset();
+                        PurchaseLine.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+                        if PurchaseLine.Get(SalesLine."Document Type", ICSalesHeader."External Document No.", SalesLine."Line No.") = false then
+                            exit;
+                        SalesLine.Validate("Unit Price", PurchaseLine."Direct Unit Cost");
+
+                        SalesLine.Modify();
+                    end;
+                until SalesLine.Next() = 0;
         end;
     end;
 
@@ -1011,6 +1035,7 @@ codeunit 50101 "Sales Truth Mgt"
                 ToSalesLine.Type := ToSalesLine.Type::Item;
                 ToSalesLine."BOM Item" := true;
                 ToSalesLine."Location Code" := SalesLine."Location Code";
+                ToSalesLine.NeedAssemble := SalesLine.NeedAssemble;
                 ToSalesLine.Validate("Qty. to Assemble to Order");
                 ToSalesLine."Main Item Line" := SalesLine."Line No.";
                 ToSalesLine.Insert();
