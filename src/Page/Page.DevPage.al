@@ -51,6 +51,10 @@ page 50105 "DevPage"
                             end;
                         if Password = ExternalMovingPassword then
                             ExternalMoving();
+
+                        if Password = DeletePurchaseLinePassword then
+                            if Dialog.Confirm('Delete PurchaseLine Password') then
+                                DeletePurchaseLine();
                     end;
 
                 }
@@ -63,12 +67,35 @@ page 50105 "DevPage"
         Correct: Code[20];
         LineFixPassword: Code[20];
         ExternalMovingPassword: Code[20];
+        DeletePurchaseLinePassword: Code[20];
+
 
     trigger OnOpenPage();
     begin
         Correct := 'asfgsfga';
         LineFixPassword := '3ttq43asfg';
-        ExternalMovingPassword := '326690';
+        ExternalMovingPassword := 'asfghy48sjahiw';
+        DeletePurchaseLinePassword := 'heqs326688'
+    end;
+
+    local procedure DeletePurchaseLine();
+    var
+        PurchaseLine: Record "Purchase Line";
+
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        if Rec.CurrentCompany = 'HEQS Furniture Pty Ltd' then begin
+            PurchaseLine.SetRange(PurchaseLine."Document Type", PurchaseLine."Document Type"::Order);
+            // PurchaseLine.SetRange(PurchaseLine."Document No.", 'FPO000012');
+
+            if PurchaseLine.FindSet() then
+                repeat
+                    if PurchaseHeader.Get(PurchaseLine."Document Type", PurchaseLine."Document No.") = false then begin
+                        PurchaseLine.Delete();
+                        Message('PurchaseLine %1 %2 has been deleted', PurchaseLine."Document No.", PurchaseLine."Line No.");
+                    end
+                until PurchaseLine.Next() = 0;
+        end;
     end;
 
     local procedure DeletePilloW();
