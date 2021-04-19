@@ -69,8 +69,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         {
             Editable = false;
         }
-
-
     }
 
     actions
@@ -125,8 +123,13 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                 if BOMComponent.FindSet() then
                                     repeat
                                         TempLineNo += 10000;
-                                        BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo);
-                                        if BOMSalesLine."No." <> BOMComponent."No." then begin
+                                        if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) then
+                                            if BOMSalesLine."No." <> BOMComponent."No." then begin
+                                                CorrectMainSalesLine := MainSalesLine;
+                                                MainSalesLine.Delete(true);
+                                                CorrectMainSalesLine.Insert(true);
+                                            end;
+                                        if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) = false then begin
                                             CorrectMainSalesLine := MainSalesLine;
                                             MainSalesLine.Delete(true);
                                             CorrectMainSalesLine.Insert(true);

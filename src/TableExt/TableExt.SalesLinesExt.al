@@ -112,19 +112,52 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
     var
         Item: Record Item;
         IsItemLine: Boolean;
+        LastSalesLine: Record "Sales Line";
+        LastLineNo: Integer;
+        NewSalesLine: Record "Sales Line";
     begin
-        IsItemLine := false;
+        if (Rec."No." <> xRec."No.") and (Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany()) then begin
+            Message('No has changed.');
+            LastSalesLine.Reset();
+            LastSalesLine.SetRange("Document Type", LastSalesLine."Document Type"::Order);
+            LastSalesLine.SetRange("Document No.", Rec."Document No.");
+            if LastSalesLine.FindLast() then
+                LastLineNo := LastSalesLine."Line No.";
+            NewSalesLine := Rec;
+            SalesTruthMgt.DeleteBOMSalesLine(Rec);
 
-        if (Rec.Type = Rec.Type::Item) then begin
-            Item.Get(Rec."No.");
-            if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+            // NewSalesLine."Line No." := LastLineNo + 10000;
+            // NewSalesLine.Insert(true);
+        end
+        else begin
+            IsItemLine := false;
+
+            if (Rec.Type = Rec.Type::Item) then begin
+                Item.Get(Rec."No.");
+                if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+            end;
+
+            if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
+
+            if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
+                if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
+                    OnUpdatePurchICBOM(Rec);
+            end;
         end;
+    end;
 
-        if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
-
-        if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
-            if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
-                OnUpdatePurchICBOM(Rec);
+    local procedure ChangeLineItemNo(var SalesLine: Record "Sales Line");
+    var
+        PreviousLine: Record "Sales Line";
+        NewSalesLine: Record "Sales Line";
+    begin
+        if SalesLine.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
+            NewSalesLine := SalesLine;
+            PreviousLine := SalesLine;
+            if PreviousLine.Get(PreviousLine."Document Type", PreviousLine."Document No.", PreviousLine."Line No.") then begin
+                SalesLine.Delete(true);
+                NewSalesLine.Insert(true);
+            end;
         end;
     end;
 

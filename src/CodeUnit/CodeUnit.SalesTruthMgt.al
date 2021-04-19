@@ -165,7 +165,7 @@ codeunit 50101 "Sales Truth Mgt"
         exit(IsICSalesHeader);
     end;
 
-    local procedure DeleteBOMSalesLine(Var SalesLine: Record "Sales Line");
+    procedure DeleteBOMSalesLine(Var SalesLine: Record "Sales Line");
     var
         BOMSalesLine: Record "Sales Line";
         SalesHeader: Record "Sales Header";
@@ -427,7 +427,7 @@ codeunit 50101 "Sales Truth Mgt"
 
 
     [EventSubscriber(ObjectType::Table, 37, 'OnDeleteBOMPurchIC', '', false, false)]
-    local procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
+    procedure DeleteBOM_Purch_IC(var SalesLine: Record "Sales Line");
     var
         ICSalesHeader: Record "Sales Header";
         ExistIC: Boolean;
@@ -440,8 +440,10 @@ codeunit 50101 "Sales Truth Mgt"
         end;
         DeleteBOMSalesLine(SalesLine);
         DeletePurchaseLine(SalesLine);
-        if ExistIC then
+        if ExistIC then begin
             DeleteICSalesLine(SalesLine);
+            UpdateICSalesHeader(SalesLine);
+        end;
     end;
 
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
@@ -860,7 +862,7 @@ codeunit 50101 "Sales Truth Mgt"
 
 
     [EventSubscriber(ObjectType::Table, 37, 'onInsertPurchICBOM', '', false, false)]
-    local procedure InsertPurchICBOM(var SalesLine: Record "Sales Line");
+    procedure InsertPurchICBOM(var SalesLine: Record "Sales Line");
     begin
         if SalesLine.CurrentCompany = InventoryCompanyName then
             ExplodeBOM(SalesLine);

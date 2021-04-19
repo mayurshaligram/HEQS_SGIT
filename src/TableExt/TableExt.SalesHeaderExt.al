@@ -307,10 +307,16 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         POrecord: Record "Purchase Header";
         SORecord: Record "Sales Header";
         icrec: Record "sales Header";
+
+        PurchaseLine: Record "Purchase Line";
     begin
         if rec.CurrentCompany <> InventoryCompanyName then
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then begin
                 // Action 1 PO 
+                PurchaseLine.SetRange("Document Type", PurchaseLine."Document Type");
+                PurchaseLine.SetRange("Document No.", Rec."Automate Purch.Doc No.");
+                if PurchaseLine.FindSet() then
+                    PurchaseLine.Delete();
                 if POrecord.Get(Porecord."Document Type"::Order, Rec."Automate Purch.Doc No.") then begin
                     POrecord.Delete();
                 end;

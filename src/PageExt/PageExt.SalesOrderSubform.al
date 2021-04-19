@@ -79,6 +79,13 @@ pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
         {
             Editable = false;
         }
+        modify("No.")
+        {
+            trigger OnAfterValidate();
+            begin
+                CurrPage.Update();
+            end;
+        }
     }
 
     actions
@@ -124,10 +131,23 @@ pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
         Sequence: Integer;
 
     trigger OnOpenPage();
+    var
+        Text1: Label 'Please release the current Sales Order in at "%1"';
+        Text2: Label 'Please provide the location code for the Sales Line';
+        Text3: Label 'Please provide the location code for the Sales Order';
+        Text4: Label 'There BOM component Inconsistency for the Sales Line, Please report to administrator.';
+        SalesLine: Record "Sales Line";
+        MainSalesLine: Record "Sales Line";
+        TempLineNo: Integer;
+        Item: Record Item;
+        BOMComponent: Record "BOM Component";
+        BOMSalesLine: Record "Sales Line";
+        CorrectMainSalesLine: Record "Sales Line";
     begin
         if Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
             Rec.SetView('where ("BOM Item" = filter (= false))');
             CurrPage.Update();
         end;
     end;
+
 }
