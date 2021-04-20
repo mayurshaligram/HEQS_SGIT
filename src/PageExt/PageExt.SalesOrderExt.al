@@ -129,11 +129,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                                 MainSalesLine.Delete(true);
                                                 CorrectMainSalesLine.Insert(true);
                                             end;
-                                        if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) = false then begin
-                                            CorrectMainSalesLine := MainSalesLine;
-                                            MainSalesLine.Delete(true);
-                                            CorrectMainSalesLine.Insert(true);
-                                        end;
+                                    // if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) = false then begin
+                                    //     CorrectMainSalesLine := MainSalesLine;
+                                    //     MainSalesLine.Delete(true);
+                                    //     CorrectMainSalesLine.Insert(true);
+                                    // end;
                                     until BOMComponent.Next() = 0;
                             end;
                         until MainSalesLine.Next() = 0;
@@ -484,4 +484,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         Commit();
         // REPORT.RunModal(REPORT::"Complete IC Inbox Action", RunReport, false, ICInboxTransaction);
     end;
+
+
 }
