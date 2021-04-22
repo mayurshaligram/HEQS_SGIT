@@ -96,6 +96,9 @@ page 50105 "DevPage"
                         if Password = Release25Password then
                             if DIalog.Confirm('Release 25') then
                                 Release25();
+                        if Password = 'SUPER' then
+                            if Dialog.Confirm('Super Task you sure?') then
+                                HOTFIX.Run();
                     end;
 
                 }
@@ -104,6 +107,7 @@ page 50105 "DevPage"
 
     }
     var
+        HOTFIX: Codeunit HotFix;
         Password: Code[20];
         Correct: Code[20];
         LineFixPassword: Code[20];
@@ -147,7 +151,7 @@ page 50105 "DevPage"
         AutoPurchaseFixedPassword := 'heqs32fhfg6688';
         DeleteAllSalesLineForCertainOrderPassword := 'heqsvbe326688';
         DeleteAllICPassword := 'heqs326asfg689';
-        Release25Password := 'heqs326688';
+        Release25Password := 'heqs326sdf688';
     end;
 
     local procedure DeletePurchaseLine();

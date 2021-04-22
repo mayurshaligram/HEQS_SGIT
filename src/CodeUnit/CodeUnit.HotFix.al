@@ -1,5 +1,8 @@
 codeunit 50112 "HotFix"
 {
+    var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+
     trigger OnRun();
     var
         CompanyRecord: Record Company;
@@ -16,15 +19,29 @@ codeunit 50112 "HotFix"
     var
         SalesHeader: Record "Sales Header";
         SalesLine: Record "Sales Line";
+        TempStatus: Enum "Sales Document Status";
+        PurchaseHeader: Record "Purchase Header";
     begin
         SalesHeader.Reset();
         SalesHeader.ChangeCompany(CompanyRecord.Name);
         SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
         if SalesHeader.FindSet() then
             repeat
+                TempStatus := SalesHeader.Status;
+                SalesHeader.Status := SalesHeader.Status::Open;
+                PurchaseHeader.Get(SalesHeader."Document Type", SalesHeader."Automate Purch.Doc No.");
+                PurchaseHeader.Status := PurchaseHeader.Status::Open;
+                SalesHeader.Modify();
+                PurchaseHeader.Modify();
                 BOMCorrection(SalesHeader);
+                SalesTruthMgt.QuickFix(SalesHeader);
+                SalesHeader.Status := TempStatus;
+                PurchaseHeader.Status := TempStatus;
+                SalesHeader.Modify();
             until SalesHeader.Next() = 0;
     end;
+
+
 
     local procedure BOMCorrection(var SalesHeader: Record "Sales Header");
     var
@@ -33,7 +50,7 @@ codeunit 50112 "HotFix"
         SalesLine.Reset();
         SalesLine.ChangeCompany(SalesHeader.CurrentCompany());
         SalesLine.SetRange("Document Type", SalesHeader."Document Type"::Order);
-        SalesLine.SetRange("No.", SalesHeader."No.");
+        SalesLine.SetRange("Document No.", SalesHeader."No.");
         if SalesLine.FindSet() then
             repeat
                 Correction(SalesLine);
@@ -60,9 +77,12 @@ codeunit 50112 "HotFix"
             Item.Get(SalesLine."No.");
             if Item.Type = Item.Type::Inventory then
                 CheckBOM(SalesLine, Item)
+            // else is service
+            else
+                DeleteConsecutiveBOM(SalesLine);
         end
         else
-            BOMSupplement(SalesLine);
+            DeleteICSalesLine(SalesLine);
     end;
 
     local procedure CheckBOM(var SalesLine: Record "Sales Line"; var Item: Record Item);
@@ -70,7 +90,7 @@ codeunit 50112 "HotFix"
         BOMComponent: Record "BOM Component";
         TempLineNo: Integer;
         BOMSalesLine: Record "Sales Line";
-        CorrectSalesLine
+        CorrectSalesLine: Record "Sales Line";
     begin
         TempLineNo := SalesLine."Line No.";
         BOMComponent.Reset();
@@ -82,20 +102,67 @@ codeunit 50112 "HotFix"
                 if BOMSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) then
                     if BOMSalesLine."No." <> BOMComponent."No." then begin
                         CorrectSalesLine := SalesLine;
-                        MainSalesLine.Delete(true);
-                        CorrectMainSalesLine.Insert(true);
+                        SalesLine.Delete(true);
+                        CorrectSalesLine.Insert(true);
                     end;
             until BOMComponent.Next() = 0;
     end;
 
-    local procedure BOMSupplement(var SalesLine: Record "Sales Line")
+    local procedure DeleteConsecutiveBOM(var SalesLine: Record "Sales Line");
+    var
+        TempLineNo: Integer;
+        ConsecutiveLine: Record "Sales Line";
     begin
+        DeleteICSalesLine(SalesLine);
+        TempLineNo := SalesLine."Line No." + 10000;
+        if ConsecutiveLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) then
+            repeat
+                if ConsecutiveLine."BOM Item" = false then
+                    DeleteFlowLine(ConsecutiveLine)
+                else
+                    TempLineNo += 10000;
+                if ConsecutiveLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) = false then exit;
+            until ConsecutiveLine."BOM Item" = false;
+    end;
 
+    local procedure DeleteFlowLine(var SalesLine: Record "Sales Line")
+    var
+        SalesHeader: Record "Sales Header";
+        purchaseLine: Record "Purchase Line";
+    begin
+        SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
+        PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
+        PurchaseLine.Delete();
+
+        DeleteICSalesLine(SalesLine);
+    end;
+
+    local procedure DeleteICSalesLine(var SalesLine: Record "Sales Line");
+    var
+        ICSalesLine: Record "Sales Line";
+        ICSalesHeader: Record "Sales Header";
+    begin
+        ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        ICSalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
+        ICSalesHeader.SetRange(RetailSalesHeader, SalesLine."No.");
+        if ICSalesHeader.FindSet() then begin
+            if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", SalesLine."Line No.") then
+                ICSalesLine.Delete();
+        end;
     end;
 
     // Quick Fix International
     local procedure Task2();
+    var
+        SalesHeader: Record "Sales Header";
+        TempStatus: Enum "Sales Document Status";
     begin
-
+        TempStatus := SalesHeader.Status;
+        SalesHeader.Status := SalesHeader.Status::Open;
+        SalesHeader.Modify();
+        SalesTruthMgt.QuickFix(SalesHeader);
+        SalesHeader.Status := TempStatus;
+        SalesHeader.Modify();
     end;
 }
