@@ -24,6 +24,7 @@ page 50105 "DevPage"
                         WarehouseJournal: Record "Warehouse Journal Line";
                         WarehouseEntry: Record "Warehouse Entry";
                         InputWindow: Dialog;
+                        SalesHeader: Record "Sales Header";
                     begin
                         if Password = Correct then begin
                             Message('Password Correct.');
@@ -75,6 +76,23 @@ page 50105 "DevPage"
                         if Password = ReleaseReOpenPassword then
                             if Dialog.Confirm('Release Reopen all the sales Header to fix BOM') then
                                 ReleaseReOpen();
+                        if Password = HardReleaseAndPost25Password then
+                            if Dialog.Confirm('Start the function to hardrelease 25') then
+                                HardReleaseAndPost25();
+                        if Password = DeleteSalesLinePassword then
+                            if Dialog.Confirm('Start the function to delete the salesline for 25') then
+                                DeleteSalesLine();
+                        if Password = AutoPurchaseFixedPassword then
+                            if Dialog.Confirm('Start the function to AutoPurchaseHeader for 85') then
+                                AutoPurchaseFixed();
+                        if Password = DeleteAllSalesLineForCertainOrderPassword then
+                            if Dialog.Confirm('Start delete all sales line for sales order 27') then begin
+                                SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101027');
+                                DeleteAllSalesLineForCertainOrder(SalesHeader);
+                            end;
+                        if Password = DeleteAllICPassword then
+                            if Dialog.Confirm(('Start Delte ic ')) then
+                                DeleteAllIC();
                     end;
 
                 }
@@ -98,6 +116,11 @@ page 50105 "DevPage"
         DeleteAllWhseShipmentLinePassword: Code[20];
         QuickFixPassword: Code[20];
         ReleaseReOpenPassword: Code[20];
+        HardReleaseAndPost25Password: Code[20];
+        DeleteSalesLinePassword: Code[20];
+        AutoPurchaseFixedPassword: Code[20];
+        DeleteAllSalesLineForCertainOrderPassword: Code[20];
+        DeleteAllICPassword: Code[20];
 
     trigger OnOpenPage();
     begin
@@ -107,15 +130,19 @@ page 50105 "DevPage"
         DeletePurchaseLinePassword := 'jbcv2bjbvoi';
         TurnWarehouseRequestReleasePassword := 'adsf2tg';
 
-        ReleaseWhseRequesPassword := 'heqs326689';
-        DeleteAllWhseShipmentLinePassword := 'heqs326690';
+        ReleaseWhseRequesPassword := 'heq24t2ggd26689';
+        DeleteAllWhseShipmentLinePassword := 'heqsg2g42g326690';
         // International
-        GiveBackExternalPassword := 'heqs326688';
+        GiveBackExternalPassword := 'heq2g24gds326688';
         // Retail 
-        ReleaseReOpenPassword := 'RO';
+        ReleaseReOpenPassword := 'R24gsg24O';
         // International
-        QuickFixPassword := 'qqq';
-
+        QuickFixPassword := 'q224gg42g4qq';
+        HardReleaseAndPost25Password := '252asfg5';
+        DeleteSalesLinePassword := 'heqs326688asg';
+        AutoPurchaseFixedPassword := 'heqs32fhfg6688';
+        DeleteAllSalesLineForCertainOrderPassword := 'heqs326688';
+        DeleteAllICPassword := 'heqs326689';
     end;
 
     local procedure DeletePurchaseLine();
@@ -457,6 +484,206 @@ page 50105 "DevPage"
                     SalesHeader.Status := SalesHeader.Status::Released;
                     SalesHeader.Modify();
                 until SalesHeader.Next() = 0;
+    end;
+
+    local procedure HardReleaseAndPost25();
+    var
+        SalesHeader: Record "Sales Header";
+    begin
+        if SalesHeader.CurrentCompany() = 'HEQS Furniture Pty Ltd' then begin
+            SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101025');
+            SalesHeader.Status := SalesHeader.Status::Released;
+            SalesHeader.Modify();
+        end;
+    end;
+
+    local procedure DeleteSalesLine();
+    var
+        SalesLine: Record "Sales Line";
+        NewSalesLine: Record "Sales Line";
+        PurchaseLine: Record "Purchase Line";
+        NewPurchaseLine: Record "Purchase Line";
+        ICSalesLine: Record "Sales Line";
+        NewICSalesLine: Record "Sales Line";
+    begin
+        if SalesLine.CurrentCompany() = 'HEQS Furniture Pty Ltd' then begin
+            // Deleted Sales Line
+            SalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 40000);
+            NewSalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 30000);
+            SalesLine.Delete();
+            NewSalesLine."No." := '1220002- P1 OF 1';
+            NewSalesLine."Unit of Measure Code" := 'PIECES';
+            NewSalesLine."Line No." := 40000;
+            // NewSalesLine.Quantity := 1;
+            // NewSalesLine."Qty. to Ship" := 1;
+            // NewSalesLine."Qty. to Invoice" := 1;
+            // NewSalesLine."Quantity (Base)" := 1;
+            // NewSalesLine."Outstanding Qty. (Base)" := 1;
+            // NewSalesLine."Qty. to Invoice (Base)" := 1;
+            // NewSalesLine."Qty. to Ship (Base)" := 1;
+            NewSalesLine.Insert();
+            // Deleted Purchase Line
+            PurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 40000);
+            NewPurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 40000);
+            PurchaseLine.Delete();
+            NewPurchaseLine."No." := '1220002- P1 OF 1';
+            NewPurchaseLine."Unit of Measure Code" := 'PIECES';
+            NewPurchaseLine."Line No." := 40000;
+            // NewPurchaseLine.Quantity := 1;
+            // NewPurchaseLine."Qty. to Receive" := 1;
+            // NewPurchaseLine."Qty. to Invoice" := 1;
+            // NewPurchaseLine."Quantity (Base)" := 1;
+            NewPurchaseLine.Insert();
+            // Deleted ICSales Line
+            ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+            ICSalesLine.Get(ICSalesLine."Document Type"::Order, 'INT101142', 40000);
+            ICSalesLine := NewSalesLine;
+            ICSalesLine."Document No." := 'INT101142';
+            ICSalesLine.Modify();
+
+
+            SalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 60000);
+            NewSalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 50000);
+            SalesLine.Delete();
+            NewSalesLine."No." := '4030035- B1 OF 1';
+            NewSalesLine."Unit of Measure Code" := 'BOX';
+            NewSalesLine."Line No." := 60000;
+            // NewSalesLine.Quantity := 1;
+            // NewSalesLine."Qty. to Ship" := 1;
+            // NewSalesLine."Qty. to Invoice" := 1;
+            // NewSalesLine."Quantity (Base)" := 1;
+            // NewSalesLine."Outstanding Qty. (Base)" := 1;
+            // NewSalesLine."Qty. to Invoice (Base)" := 1;
+            // NewSalesLine."Qty. to Ship (Base)" := 1;
+            NewSalesLine.Insert();
+            // Deleted Purchase Line
+            PurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 60000);
+            NewPurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 50000);
+            PurchaseLine.Delete();
+            NewPurchaseLine."No." := '4030035- B1 OF 1';
+            NewPurchaseLine."Unit of Measure Code" := 'BOX';
+            NewSalesLine."Line No." := 60000;
+            // NewPurchaseLine.Quantity := 1;
+            // NewPurchaseLine."Qty. to Receive" := 1;
+            // NewPurchaseLine."Qty. to Invoice" := 1;
+            // NewPUrchaseLine."Quantity (Base)" := 1;
+            NewPurchaseLine.Insert();
+            // Deleted ICSales Line
+            ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+            ICSalesLine.Get(ICSalesLine."Document Type"::Order, 'INT101142', 60000);
+            ICSalesLine := NewSalesLine;
+            ICSalesLine."Document No." := 'INT101142';
+            ICSalesLine.Modify();
+
+            SalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 80000);
+            NewSalesLine.Get(SalesLine."Document Type"::Order, 'FSO101025', 70000);
+            SalesLine.Delete();
+            NewSalesLine."No." := '4010065- B1 OF 1';
+            NewSalesLine."Line No." := 80000;
+            // NewSalesLine.Quantity := 1;
+            // NewSalesLine."Qty. to Ship" := 1;
+            // NewSalesLine."Qty. to Invoice" := 1;
+            // NewSalesLine."Quantity (Base)" := 1;
+            // NewSalesLine."Outstanding Qty. (Base)" := 1;
+            // NewSalesLine."Qty. to Invoice (Base)" := 1;
+            // NewSalesLine."Qty. to Ship (Base)" := 1;
+            NewSalesLine.Insert();
+            // Deleted Purchase Line
+            PurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 80000);
+            NewPurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000025', 70000);
+            PurchaseLine.Delete();
+            NewPurchaseLine."No." := '4010065- B1 OF 1';
+            NewPurchaseLine."Line No." := 80000;
+            // NewPurchaseLine.Quantity := 1;
+            // NewPurchaseLine."Qty. to Receive" := 1;
+            // NewPurchaseLine."Qty. to Invoice" := 1;
+            // NewPurchaseLine."Quantity (Base)" := 1;
+            NewPurchaseLine.Insert();
+            // Deleted ICSales Line
+            ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+            ICSalesLine.Get(ICSalesLine."Document Type"::Order, 'INT101142', 80000);
+            ICSalesLine := NewSalesLine;
+            ICSalesLine."Document No." := 'INT101142';
+            ICSalesLine.Modify();
+        end;
+    end;
+
+    local procedure AutoPurchaseFixed();
+    var
+        SalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        if SalesHeader.CurrentCompany = 'Iflow Network Pty Ltd' then begin
+            SalesHeader.Get(SalesHeader."Document Type"::Order, 'IFSO101285');
+            SalesHeader."Automate Purch.Doc No." := 'IFPO100285';
+            SalesHeader.Modify();
+        end;
+    end;
+
+    local procedure DeleteAllSalesLineForCertainOrder(var SalesHeader: Record "Sales Header");
+    var
+        SalesLine: Record "Sales Line";
+        PurchaseLine: Record "Purchase Line";
+
+        ICSalesHeader: Record "Sales Header";
+        ICSalesLine: Record "Sales Line";
+    begin
+        SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+        SalesLine.SetRange("Document No.", SalesHeader."No.");
+        if SalesLine.FindSet() then
+            repeat
+                SalesLine.Delete()
+            until SalesLine.Next() = 0;
+
+        PurchaseLine.SetRange("Document Type", SalesHeader."Document Type");
+        PurchaseLine.SetRange("Document No.", SalesHeader."Automate Purch.Doc No.");
+        if PurchaseLine.FindSet() then
+            repeat
+                PurchaseLine.Delete()
+            until PurchaseLine.Next() = 0;
+
+        // ICSalesHeader.Reset();
+        // ICSalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        // ICSalesHeader.SetRange(RetailSalesHeader, SalesHeader."No.");
+        // ICSalesLine.Reset();
+        // ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        // ICSalesLine.SetRange("Document Type", SalesHeader."Document Type");
+        // ICSalesLine.SetRange("Document No.", ICSalesHeader."No.");
+        // if ICSalesLine.FindSet() then
+        //     repeat
+        //         ICSalesLine.Delete()
+        //     until ICSalesLine.Next() = 0;
+    end;
+
+    local procedure DeleteAllIC()
+    var
+        ICSalesHeader: Record "Sales Header";
+        ICSalesLine: Record "Sales Line";
+    begin
+        ICSalesLine.SetRange("Document Type", ICSalesHeader."Document Type"::Order);
+        ICSalesLine.SetRange("Document No.", 'INT101098');
+        if ICSalesLine.FindSet() then
+            repeat
+                ICSalesLine.Delete()
+            until ICSalesLine.Next() = 0;
+    end;
+
+    local procedure Release25();
+    var
+        SalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+        ICSalesHeader: Record "Sales Header";
+    begin
+        SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101025');
+        PurchaseHeader.Get(SalesHeader."Document Type"::Order, 'FPO000025');
+        ICSalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        ICSalesHeader.Get(ICSalesHeader."Document Type", 'INT101142');
+        SalesHeader.Status := SalesHeader.Status::Released;
+        PurchaseHeader.Status := PurchaseHeader.Status::Released;
+        ICSalesHeader.Status := ICSalesHeader.Status::Released;
+        SalesHeader.Modify();
+        PurchaseHeader.Modify();
+        ICSalesHeader.Modify();
     end;
 }
 

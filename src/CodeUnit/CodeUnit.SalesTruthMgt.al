@@ -82,18 +82,23 @@ codeunit 50101 "Sales Truth Mgt"
             SalesLine.SetRange(Type, SalesLine.Type::Item);
             if SalesLine.FindSet() then
                 repeat
-                    if SalesLine."Unit Price" = 0 then begin
-                        if ICSalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.") = false then
-                            exit;
+                    // if SalesLine."Unit Price" = 0 then begin
+                    if ICSalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.") = false then
+                        exit;
 
-                        PurchaseLine.Reset();
-                        PurchaseLine.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
-                        if PurchaseLine.Get(SalesLine."Document Type", ICSalesHeader."External Document No.", SalesLine."Line No.") = false then
-                            exit;
-                        SalesLine.Validate("Unit Price", PurchaseLine."Direct Unit Cost");
-
-                        SalesLine.Modify();
-                    end;
+                    PurchaseLine.Reset();
+                    PurchaseLine.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+                    if PurchaseLine.Get(SalesLine."Document Type", ICSalesHeader."External Document No.", SalesLine."Line No.") = false then
+                        exit;
+                    SalesLine.Validate("Unit Price", PurchaseLine."Direct Unit Cost");
+                    SalesLine."Unit of Measure Code" := PurchaseLine."Unit of Measure Code";
+                    RetailSalesLine.Reset();
+                    RetailSalesLine.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+                    if RetailSalesLine.Get(SalesLine."Document Type", ICSalesHeader.RetailSalesHeader, SalesLine."Line No.") = false then
+                        exit;
+                    SalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
+                    SalesLine.Modify();
+                // end;
                 until SalesLine.Next() = 0;
         end;
     end;
@@ -767,6 +772,7 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader: Record "Sales Header";
         TempSalesLine: Record "Sales Line";
         ICSalesLine: Record "Sales Line";
+        PurchaseLine: Record "Purchase Line";
     begin
         Item.Get(SalesLine."No.");
         if Item.Type = Item.Type::Service then
@@ -776,6 +782,8 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader.SetRange("External Document No.", SalesHeader."Automate Purch.Doc No.");
         if ICSalesHeader.FindSet() = false then exit;
 
+        PurchaseLine.SetRange("Document Type", SalesLine."Document Type");
+        PurchaseLine.SetRange("Document No.", SalesHeader."Automate Purch.Doc No.");
         TempSalesLine.SetRange("Document Type", SalesLine."Document Type");
         TempSalesLine.SetRange("Document No.", SalesLine."Document No.");
         if TempSalesLine.FindSet() then begin
@@ -787,8 +795,10 @@ codeunit 50101 "Sales Truth Mgt"
                     Item.Get(TempSalesLine."No.");
                     if Item.Type <> Item.Type::Service then
                         ICSalesLine.ChangeCompany('HEQS International Pty Ltd');
-                    if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", TempSalesLine."Line No.") = false then
-                        CreateICSalesLine(TempSalesLine)
+                    if ICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", TempSalesLine."Line No.") = false then begin
+                        if PurchaseLine.Get(ICSalesHeader."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") = true then
+                            CreateICSalesLine(TempSalesLine)
+                    end
                     else begin
                         // ICSalesLine.Validate("No.", TempSalesLine."No.");
                         ICSalesLine."No." := TempSalesLine."No.";
@@ -804,6 +814,8 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."Main Item Line" := TempSalesLine."Main Item Line";
                         ICSalesLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
                         ICSalesLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
+                        if PurchaseLine.Get(TempSalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", TempSalesLine."Line No.") then
+                            ICSalesLine."Unit Price" := PurchaseLine."Direct Unit Cost";
                         // ICSalesLine."Unit Price" := TempSalesLine."Unit Price";
                         ICSalesLine.Type := SalesLine.Type;
                         ICSalesLine."Quantity (Base)" := ICSalesLine."Quantity (Base)";
@@ -814,6 +826,7 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."Qty. to Invoice" := SalesLine."Qty. to Invoice";
                         ICSalesLine."Line Amount" := SalesLine."Line Amount";
                         ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
+                        ICSalesLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
                         ICSalesLine.Modify();
                     end;
 
@@ -911,8 +924,8 @@ codeunit 50101 "Sales Truth Mgt"
                 ToTransferLine."Line No." := NextLineNo;
 
                 Item.Get(BOMComponent."No.");
-                // ToTransferLine.Validate("Unit of Measure Code", BOMComponent."Unit of Measure Code");
-                ToTransferLine.Validate(Quantity, TransferLine.Quantity * BOMComponent."Quantity per");
+                ToTransferLine."Unit of Measure Code" := BOMComponent."Unit of Measure Code";
+                ToTransferLine.Quantity := TransferLine.Quantity * BOMComponent."Quantity per";
 
                 if TransferHeader."Shipment Date" <> TransferLine."Shipment Date" then
                     ToTransferLine.Validate("Shipment Date", TransferLine."Shipment Date");

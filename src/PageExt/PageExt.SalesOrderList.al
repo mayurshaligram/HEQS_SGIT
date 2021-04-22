@@ -201,11 +201,13 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
             if SalesHeader.FindSet() then
                 repeat
                     if SalesHeader."External Document No." <> '' then begin
-                        // SalesHeader."External Document No." := '';
+
                         OK := STARTSESSION(SessionId, CODEUNIT::RetailBatchPostShipment);
                         if OK = false then
                             ERROR('The session was not started successfully.');
+                        // SalesHeader."External Document No." := '';
                         // SalesHeader.Modify();
+
                     end;
                 until SalesHeader.Next() = 0;
         end;

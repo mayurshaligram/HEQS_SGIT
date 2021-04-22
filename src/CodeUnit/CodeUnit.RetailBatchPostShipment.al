@@ -1,6 +1,6 @@
 codeunit 50111 RetailBatchPostShipment
 {
-    trigger OnRun()
+    trigger OnRun();
     var
         SalesHeader: Record "Sales Header";
     begin

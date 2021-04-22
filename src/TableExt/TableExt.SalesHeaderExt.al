@@ -6,37 +6,22 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         modify("Prepayment %")
         {
             trigger OnBeforeValidate();
-            var
-                SalesLine: Record "Sales Line";
             begin
-                SalesLine.SetRange("Document Type", Rec."Document Type");
-                SalesLine.SetRange("Document No.", Rec."No.");
-                if SalesLine.FindSet() then
-                    repeat
-                        if SalesLine."BOM Item" = true then begin
-                            SalesLine.Token := true;
-                            SalesLine.Modify();
-                        end;
-                    until SalesLine.Next() = 0;
+                TokenValidate();
             end;
-
-
+        }
+        modify("Shipment Date")
+        {
+            trigger OnBeforeValidate();
+            begin
+                TokenValidate();
+            end;
         }
         modify("Shipping Agent Code")
         {
             trigger OnBeforeValidate();
-            var
-                SalesLine: Record "Sales Line";
             begin
-                SalesLine.SetRange("Document Type", Rec."Document Type");
-                SalesLine.SetRange("Document No.", Rec."No.");
-                if SalesLine.FindSet() then
-                    repeat
-                        if SalesLine."BOM Item" = true then begin
-                            SalesLine.Token := true;
-                            SalesLine.Modify();
-                        end;
-                    until SalesLine.Next() = 0;
+                TokenValidate();
             end;
         }
 
@@ -406,6 +391,20 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         Exit(mytext);
     end;
 
+    procedure TokenValidate();
+    var
+        SalesLine: Record "Sales Line";
+    begin
+        SalesLine.SetRange("Document Type", Rec."Document Type");
+        SalesLine.SetRange("Document No.", Rec."No.");
+        if SalesLine.FindSet() then
+            repeat
+                if SalesLine."BOM Item" = true then begin
+                    SalesLine.Token := true;
+                    SalesLine.Modify();
+                end;
+            until SalesLine.Next() = 0;
+    end;
 
 
 

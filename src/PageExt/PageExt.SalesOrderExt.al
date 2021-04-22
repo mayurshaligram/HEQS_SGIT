@@ -445,6 +445,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
     var
         IsICSalesHeader: Boolean;
         User: Record User;
+        TempStatus: Enum "Sales Document Status";
     begin
         IsInventoryCompany := false;
         If Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
@@ -456,11 +457,14 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             Currpage.Editable(false);
         end;
 
+        if IsPei then CurrPage.Editable(true);
+
         if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
+            TempStatus := Rec.Status;
             Rec.Status := Rec.Status::Open;
             Rec.Modify();
             SalesTruthMgt.QuickFix(Rec);
-            Rec.Status := Rec.Status::Released;
+            Rec.Status := TempStatus;
             Rec.Modify();
             CurrPage.Update();
         end;
