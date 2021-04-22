@@ -19,9 +19,11 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
     trigger OnBeforeDelete()
     var
         ParentPurchaseHeader: Record "Purchase Header";
+        User: Record User;
     begin
+        user.Get(Database.UserSecurityId());
         ParentPurchaseHeader.Get(Rec."Document Type", Rec."Document No.");
-        if ParentPurchaseHeader."Sales Order Ref" <> '' then
+        if (ParentPurchaseHeader."Sales Order Ref" <> '') and (User."Full Name" <> 'Pei Xu') then
             Error('Please Change the Purchase Order Information in %1', ParentPurchaseHeader."Sales Order Ref");
     end;
 

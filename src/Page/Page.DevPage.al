@@ -93,6 +93,9 @@ page 50105 "DevPage"
                         if Password = DeleteAllICPassword then
                             if Dialog.Confirm(('Start Delte ic ')) then
                                 DeleteAllIC();
+                        if Password = Release25Password then
+                            if DIalog.Confirm('Release 25') then
+                                Release25();
                     end;
 
                 }
@@ -121,6 +124,7 @@ page 50105 "DevPage"
         AutoPurchaseFixedPassword: Code[20];
         DeleteAllSalesLineForCertainOrderPassword: Code[20];
         DeleteAllICPassword: Code[20];
+        Release25Password: Code[20];
 
     trigger OnOpenPage();
     begin
@@ -141,8 +145,9 @@ page 50105 "DevPage"
         HardReleaseAndPost25Password := '252asfg5';
         DeleteSalesLinePassword := 'heqs326688asg';
         AutoPurchaseFixedPassword := 'heqs32fhfg6688';
-        DeleteAllSalesLineForCertainOrderPassword := 'heqs326688';
-        DeleteAllICPassword := 'heqs326689';
+        DeleteAllSalesLineForCertainOrderPassword := 'heqsvbe326688';
+        DeleteAllICPassword := 'heqs326asfg689';
+        Release25Password := 'heqs326688';
     end;
 
     local procedure DeletePurchaseLine();
@@ -677,7 +682,7 @@ page 50105 "DevPage"
         SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101025');
         PurchaseHeader.Get(SalesHeader."Document Type"::Order, 'FPO000025');
         ICSalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
-        ICSalesHeader.Get(ICSalesHeader."Document Type", 'INT101142');
+        ICSalesHeader.Get(ICSalesHeader."Document Type"::Order, 'INT101142');
         SalesHeader.Status := SalesHeader.Status::Released;
         PurchaseHeader.Status := PurchaseHeader.Status::Released;
         ICSalesHeader.Status := ICSalesHeader.Status::Released;

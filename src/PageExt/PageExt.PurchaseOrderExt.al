@@ -107,6 +107,8 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
         WorkDescription: Text;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
+        IsPei: Boolean;
+
     procedure GetWorkDescription(): Text
     var
         TypeHelper: Codeunit "Type Helper";
@@ -120,7 +122,10 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
     trigger OnAfterGetRecord()
     var
         IsAutomatePurchHeader: Boolean;
+        User: Record User;
+
     begin
+        user.Get(Database.UserSecurityId());
         WorkDescription := GetWorkDescription;
 
         IsAutomatePurchHeader := false;
@@ -129,5 +134,8 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
 
         if IsAutomatePurchHeader then
             Currpage.Editable(false);
+
+        if User."Full Name" = 'Pei Xu' then IsPei := true;
+        if IsPei then CurrPage.Editable(true);
     end;
 }
