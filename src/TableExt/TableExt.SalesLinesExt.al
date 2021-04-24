@@ -99,6 +99,9 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
 
     trigger OnBeforeModify();
     begin
+        if Rec.Type <> xRec.Type then begin
+            Error('Please delete this line, and recreat the different line');
+        end;
         if Rec.Token = false then begin
             if Rec.Type = Rec.Type::Item then
                 if Rec."BOM Item" = true then
@@ -174,12 +177,17 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
     end;
 
     trigger OnBeforeDelete();
+    var
+        User: Record User;
     begin
-        if (Rec.Token = false) and (Rec.CurrentCompany <> InventoryCompanyName) then
-            if Rec.Type = Rec.Type::Item then
-                if Rec."BOM Item" = true then
-                    Error('Please Only Edit Main Item, Bom is managed by system only');
-        Rec.Token := false;
+        user.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Pei Xu' then begin
+            if (Rec.Token = false) and (Rec.CurrentCompany <> InventoryCompanyName) then
+                if Rec.Type = Rec.Type::Item then
+                    if Rec."BOM Item" = true then
+                        Error('Please Only Edit Main Item, Bom is managed by system only');
+            Rec.Token := false;
+        end;
     end;
 
     trigger OnAfterDelete();

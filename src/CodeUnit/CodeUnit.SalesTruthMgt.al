@@ -198,8 +198,8 @@ codeunit 50101 "Sales Truth Mgt"
                     BOMPurchaseLine.Delete();
                 if ExistIC then begin
                     BOMICSalesLine.ChangeCompany(InventoryCompany());
-                    BOMICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", BOMSalesLine."Line No.");
-                    BOMICSalesLine.Delete();
+                    if BOMICSalesLine.Get(ICSalesHeader."Document Type", ICSalesHeader."No.", BOMSalesLine."Line No.") then
+                        BOMICSalesLine.Delete();
                 end;
 
                 BOMSalesLine.Delete();
@@ -509,7 +509,11 @@ codeunit 50101 "Sales Truth Mgt"
                         TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
                     else
                         TempAssemblyItem := TempAssemblyItem + 'No' + '\';
-                    TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\';
+                    if (Text.StrLen(TempDeliveryItem) + Text.StrLen(TempDeliveryItem) + Text.StrLen(SalesLine.Description) + 5) < 1995 then
+                        TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\'
+                    else
+                        if (Text.StrLen(TempDeliveryItem) + 3 < 2000) then
+                            TempDeliveryItem := TempDeliveryItem + '.';
                     if SalesLine."BOM Item" = false then begin
                         TempDeliveryItemWithoutBOM := TempDeliveryItemWithoutBOM + Format(SalesLine.Quantity) + '*' + SalesLine.Description + '\';
                         if RetailSalesLine.NeedAssemble then
@@ -651,7 +655,12 @@ codeunit 50101 "Sales Truth Mgt"
                     TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
                 else
                     TempAssemblyItem := TempAssemblyItem + 'No' + '\';
-                TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + ICSalesLine.Description + '\';
+                if (Text.StrLen(TempDeliveryItem) + Text.StrLen(TempDeliveryItem) + Text.StrLen(ICSalesLine.Description) + 5) < 1900 then
+                    TempDeliveryItem := TempDeliveryItem + Format(ICSalesLine.Quantity) + '*' + ICSalesLine.Description + '\'
+                else
+                    if (Text.StrLen(TempDeliveryItem) + 3 < 2000) then
+                        TempDeliveryItem := TempDeliveryItem + '.';
+                // TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + ICSalesLine.Description + '\';
                 if ICSalesLine."BOM Item" = false then begin
                     TempDeliveryItemWithoutBOM := TempDeliveryItemWithoutBOM + Format(ICSalesLine.Quantity) + '*' + ICSalesLine.Description + '\';
                     if ICSalesLine.NeedAssemble then

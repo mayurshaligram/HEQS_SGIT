@@ -137,7 +137,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Description = 'Price Level Zone Code';
             Editable = false;
         }
-        field(50131; "Assembly Item"; Text[200])
+        field(50131; "Assembly Item"; Text[2000])
 
         {
             Caption = 'Assembly Item';
@@ -194,6 +194,7 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
 
         ICSalesOrder: Record "Sales Header";
         WhseRequest: Record "Warehouse Request";
+        NewWhseRequest: Record "Warehouse Request";
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then begin
 
@@ -218,20 +219,27 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         ICrec."Ship-to Address" := rec."Ship-to Address";
                         ICrec.Ship := rec.ship;
                         ICrec."Work Description" := rec."Work Description";
-                        ICrec."Location Code" := Rec."Location Code";
+                        if ICrec."Location Code" <> Rec."Location Code" then begin
+                            ICrec."Location Code" := Rec."Location Code";
+                            WhseRequest.Reset();
+                            WhseRequest.ChangeCompany(SalesTruthMgt.InventoryCompany());
+                            WhseRequest.SetRange("Source No.", ICrec."No.");
+                            if WhseRequest.FindSet() then begin
+                                NewWhseRequest.Reset();
+                                NewWhseRequest.ChangeCompany(SalesTruthMgt.InventoryCompany());
+                                NewWhseRequest := WhseRequest;
+                                NewWhseRequest."Location Code" := ICrec."Location Code";
+                                WhseRequest.Delete();
+                                NewWhseRequest.Insert();
+                            end;
+                        end;
 
-                        WhseRequest.Reset();
-                        WhseRequest.ChangeCompany(SalesTruthMgt.InventoryCompany());
-                        WhseRequest.SetRange("Source No.", ICrec."No.");
-                        // if WhseRequest.FindSet() then begin
-                        //     WhseRequest."Location Code" := ICrec."Location Code";
-                        //     WhseRequest.Modify();
-                        // end;
                         rec.CALCFIELDS("Work Description");
                         ICrec."Work Description" := rec."Work Description";
                         ICrec."Document Date" := DT2DATE(system.CurrentDateTime);
                         ICrec."Shipping Agent Code" := rec."Shipping Agent Code";
                         ICrec.Status := Rec.Status;
+                        ICrec.Delivery := Rec.Delivery;
                         ICREC.Modify();
                         SLrec.SetCurrentKey("Document No.");
                         SLrec.SetRange("Document No.", rec."No.");

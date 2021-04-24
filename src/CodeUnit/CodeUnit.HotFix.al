@@ -112,17 +112,22 @@ codeunit 50112 "HotFix"
     var
         TempLineNo: Integer;
         ConsecutiveLine: Record "Sales Line";
+        Tag: Boolean;
     begin
+        Tag := false;
         DeleteICSalesLine(SalesLine);
         TempLineNo := SalesLine."Line No." + 10000;
         if ConsecutiveLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) then
             repeat
+                Tag := false;
                 if ConsecutiveLine."BOM Item" = false then
                     DeleteFlowLine(ConsecutiveLine)
                 else
                     TempLineNo += 10000;
-                if ConsecutiveLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) = false then exit;
-            until ConsecutiveLine."BOM Item" = false;
+                if ConsecutiveLine.Get(SalesLine."Document Type", SalesLine."Document No.", TempLineNo) then
+                    if ConsecutiveLine."BOM Item" = true then
+                        Tag := true
+            until Tag;
     end;
 
     local procedure DeleteFlowLine(var SalesLine: Record "Sales Line")
@@ -130,9 +135,9 @@ codeunit 50112 "HotFix"
         SalesHeader: Record "Sales Header";
         purchaseLine: Record "Purchase Line";
     begin
-        SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.");
-        PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.");
-        PurchaseLine.Delete();
+        if SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.") then
+            if PurchaseLine.Get(SalesLine."Document Type", SalesHeader."Automate Purch.Doc No.", SalesLine."Line No.") then
+                PurchaseLine.Delete();
 
         DeleteICSalesLine(SalesLine);
     end;

@@ -7,7 +7,7 @@ page 50105 "DevPage"
     UsageCategory = Lists;
     ApplicationArea = All;
     AdditionalSearchTerms = 'DevPage';
-    Permissions = TableData 7312 = rimd;
+    Permissions = TableData 112 = rimd;
 
     layout
     {
@@ -26,79 +26,88 @@ page 50105 "DevPage"
                         InputWindow: Dialog;
                         SalesHeader: Record "Sales Header";
                     begin
-                        if Password = Correct then begin
-                            Message('Password Correct.');
-                            // Delete all the WarehouseEntry in the Batch NSWWIJ
-                            WarehouseEntry.Reset();
-                            WarehouseJournal.Reset();
-                            // WarehouseJournal.SetRange(Quantity, 0);
-                            if WarehouseEntry.FindSet() then
-                                repeat
-                                    WarehouseEntry.Delete();
-                                until WarehouseEntry.Next() = 0;
-                            if WarehouseJournal.FindSet() then
-                                repeat
-                                    WarehouseJournal.Delete();
-                                until WarehouseJournal.Next() = 0;
-                            DeletePilloW();
-                        end
+                        // if Password = 'Heqs326688' then
+                        if Dialog.Confirm('GiveAUD') then
+                            GiveAUD();
+                        // if Password = Correct then begin
+                        //     Message('Password Correct.');
+                        //     // Delete all the WarehouseEntry in the Batch NSWWIJ
+                        //     WarehouseEntry.Reset();
+                        //     WarehouseJournal.Reset();
+                        //     // WarehouseJournal.SetRange(Quantity, 0);
+                        //     if WarehouseEntry.FindSet() then
+                        //         repeat
+                        //             WarehouseEntry.Delete();
+                        //         until WarehouseEntry.Next() = 0;
+                        //     if WarehouseJournal.FindSet() then
+                        //         repeat
+                        //             WarehouseJournal.Delete();
+                        //         until WarehouseJournal.Next() = 0;
+                        //     DeletePilloW();
+                        // end
 
-                        else
-                            if Password = LineFixPassword then begin
-                                Message('This for line discount fix');
-                                LineFix();
-                                Message('This for delete item 7030003 and 7030013');
-                                DeleteItem();
-                            end;
-                        if Password = ExternalMovingPassword then
-                            ExternalMoving();
+                        // else
+                        //     if Password = LineFixPassword then begin
+                        //         Message('This for line discount fix');
+                        //         LineFix();
+                        //         Message('This for delete item 7030003 and 7030013');
+                        //         DeleteItem();
+                        //     end;
+                        // if Password = ExternalMovingPassword then
+                        //     ExternalMoving();
 
-                        if Password = DeletePurchaseLinePassword then
-                            if Dialog.Confirm('Delete PurchaseLine Password') then
-                                DeletePurchaseLine();
+                        // if Password = DeletePurchaseLinePassword then
+                        //     if Dialog.Confirm('Delete PurchaseLine Password') then
+                        //         DeletePurchaseLine();
 
-                        if Password = TurnWarehouseRequestReleasePassword then
-                            if Dialog.Confirm('Delete PurchaseLine Password') then
-                                TurnWarehouseRequestRelease();
+                        // if Password = TurnWarehouseRequestReleasePassword then
+                        //     if Dialog.Confirm('Delete PurchaseLine Password') then
+                        //         TurnWarehouseRequestRelease();
 
-                        if Password = GiveBackExternalPassword then
-                            if Dialog.Confirm('Give Back to external password') then
-                                GiveBackExternal();
-                        if Password = ReleaseWhseRequesPassword then
-                            if Dialog.Confirm('Release Whse Request') then
-                                ReleaseWhseRequest();
-                        if Password = DeleteAllWhseShipmentLinePassword then
-                            if Dialog.Confirm('Delete all whse shipment line') then
-                                DeleteAllWhseShipmentLine();
-                        if Password = QuickFixPassword then
-                            if Dialog.Confirm('Quick Fix all the sales header') then
-                                QuickFix();
-                        if Password = ReleaseReOpenPassword then
-                            if Dialog.Confirm('Release Reopen all the sales Header to fix BOM') then
-                                ReleaseReOpen();
-                        if Password = HardReleaseAndPost25Password then
-                            if Dialog.Confirm('Start the function to hardrelease 25') then
-                                HardReleaseAndPost25();
-                        if Password = DeleteSalesLinePassword then
-                            if Dialog.Confirm('Start the function to delete the salesline for 25') then
-                                DeleteSalesLine();
-                        if Password = AutoPurchaseFixedPassword then
-                            if Dialog.Confirm('Start the function to AutoPurchaseHeader for 85') then
-                                AutoPurchaseFixed();
-                        if Password = DeleteAllSalesLineForCertainOrderPassword then
-                            if Dialog.Confirm('Start delete all sales line for sales order 27') then begin
-                                SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101027');
-                                DeleteAllSalesLineForCertainOrder(SalesHeader);
-                            end;
-                        if Password = DeleteAllICPassword then
-                            if Dialog.Confirm(('Start Delte ic ')) then
-                                DeleteAllIC();
-                        if Password = Release25Password then
-                            if DIalog.Confirm('Release 25') then
-                                Release25();
-                        if Password = 'SUPER' then
-                            if Dialog.Confirm('Super Task you sure?') then
-                                HOTFIX.Run();
+                        // if Password = GiveBackExternalPassword then
+                        //     if Dialog.Confirm('Give Back to external password') then
+                        //         GiveBackExternal();
+                        // if Password = ReleaseWhseRequesPassword then
+                        //     if Dialog.Confirm('Release Whse Request') then
+                        //         ReleaseWhseRequest();
+                        // if Password = DeleteAllWhseShipmentLinePassword then
+                        //     if Dialog.Confirm('Delete all whse shipment line') then
+                        //         DeleteAllWhseShipmentLine();
+                        // if Password = QuickFixPassword then
+                        //     if Dialog.Confirm('Quick Fix all the sales header') then
+                        //         QuickFix();
+                        // if Password = ReleaseReOpenPassword then
+                        //     if Dialog.Confirm('Release Reopen all the sales Header to fix BOM') then
+                        //         ReleaseReOpen();
+                        // if Password = HardReleaseAndPost25Password then
+                        //     if Dialog.Confirm('Start the function to hardrelease 25') then
+                        //         HardReleaseAndPost25();
+                        // if Password = DeleteSalesLinePassword then
+                        //     if Dialog.Confirm('Start the function to delete the salesline for 25') then
+                        //         DeleteSalesLine();
+                        // if Password = AutoPurchaseFixedPassword then
+                        //     if Dialog.Confirm('Start the function to AutoPurchaseHeader for 85') then
+                        //         AutoPurchaseFixed();
+                        // if Password = DeleteAllSalesLineForCertainOrderPassword then
+                        //     if Dialog.Confirm('Start delete all sales line for sales order 27') then begin
+                        //         SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101027');
+                        //         DeleteAllSalesLineForCertainOrder(SalesHeader);
+                        //     end;
+                        // if Password = DeleteAllICPassword then
+                        //     if Dialog.Confirm(('Start Delte ic ')) then
+                        //         DeleteAllIC();
+                        // if Password = Release25Password then
+                        //     if Dialog.Confirm('Release the FSO101007') then
+                        //         release07();
+                        // if Password = 'SUPER' then
+                        //     if Dialog.Confirm('Super Task you sure?') then
+                        //         HOTFIX.Run();
+                        // if Password = 'Delete60' then
+                        //     if Dialog.Confirm('Delete 60') then
+                        //         Delete60();
+                        // if Password = ChangeBillingAddressPassword then
+                        //     if Dialog.Confirm('Change Billing Address') then
+                        //         ChangeBillingAddress();
                     end;
 
                 }
@@ -106,7 +115,59 @@ page 50105 "DevPage"
         }
 
     }
+    // trigger OnAfterGetCurrRecord();
+    // begin
+    //     ChangeWarehouseRequest();
+    // end;
+
+    local procedure GiveAUD();
     var
+        SalesHeader: Record "Sales Header";
+    begin
+        SalesHeader.Reset();
+        SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        if SalesHeader.FindSet() then
+            repeat
+                SalesHeader."Currency Code" := 'AUD';
+                SalesHeader."Currency Factor" := 1;
+                SalesHeader.Modify();
+            until SalesHeader.Next() = 0;
+    end;
+
+    local procedure ChangeWarehouseRequest();
+    var
+        NewWhseRequest: Record "Warehouse Request";
+        WhseRequest: Record "Warehouse Request";
+        SalesHeader: Record "Sales Header";
+    begin
+        SalesHeader.Reset();
+        SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        if SalesHeader.FindSet() then begin
+            WhseRequest.Reset();
+            WhseRequest.SetRange("Source No.", SalesHeader."No.");
+            if WhseRequest.FindSet() then begin
+                if WhseRequest."Location Code" <> SalesHeader."Location Code" then begin
+                    NewWhseRequest := WhseRequest;
+                    WhseRequest.Delete();
+                    NewWhseRequest."Location Code" := SalesHeader."Location Code";
+                    NewWhseRequest.Insert();
+                end;
+            end;
+        end;
+    end;
+
+    local procedure ChangeBillingAddress();
+    var
+        TargetInvoice: Record "Sales Invoice Header";
+    begin
+        TargetInvoice.ChangeCompany('HEQS Furniture Pty Ltd');
+        TargetInvoice.Get('FPSI103042');
+        TargetInvoice."Ship-to Name" := 'Helena Read';
+        TargetInvoice.Modify();
+    end;
+
+    var
+        ChangeBillingAddressPassword: Code[20];
         HOTFIX: Codeunit HotFix;
         Password: Code[20];
         Correct: Code[20];
@@ -132,6 +193,7 @@ page 50105 "DevPage"
 
     trigger OnOpenPage();
     begin
+        ChangeBillingAddressPassword := 'ChangeBilling';
         Correct := 'asfgsfga';
         LineFixPassword := '3ttq43asfg';
         ExternalMovingPassword := 'asfghy48sjahiw';
@@ -693,6 +755,28 @@ page 50105 "DevPage"
         SalesHeader.Modify();
         PurchaseHeader.Modify();
         ICSalesHeader.Modify();
+    end;
+
+    local procedure release07();
+    var
+        SalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+        ICSalesHeader: Record "Sales Header";
+    begin
+        SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101007');
+        SalesHeader.Status := SalesHeader.Status::Released;
+        SalesHeader.Modify();
+        PurchaseHeader.Get(PurchaseHeader."Document Type"::Order, 'FPO000057');
+        PurchaseHeader.Status := PurchaseHeader.Status::Released;
+        PurchaseHeader.Modify();
+    end;
+
+    local procedure Delete60();
+    var
+        SalesLine: Record "Sales Line";
+    begin
+        SalesLine.Get(SalesLine."Document Type"::Order, 'FSO101060', 40000);
+        SalesLine.Delete();
     end;
 }
 
