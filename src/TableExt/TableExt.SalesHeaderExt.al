@@ -196,15 +196,11 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         WhseRequest: Record "Warehouse Request";
         NewWhseRequest: Record "Warehouse Request";
     begin
-        if Rec.CurrentCompany <> InventoryCompanyName then begin
-
-
-
+        if (Rec.CurrentCompany <> InventoryCompanyName) and (Rec."Automate Purch.Doc No." <> '') then begin
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then begin
                 if POrecord.Get(Rec."Document Type", Rec."Automate Purch.Doc No.") then begin
                     UpdatePurchaseHeader(POrecord);
                 end;
-
                 // Action 2 SO
                 SORecord.ChangeCompany(InventoryCompanyName);
                 SORecord.SetCurrentKey("External Document No.");

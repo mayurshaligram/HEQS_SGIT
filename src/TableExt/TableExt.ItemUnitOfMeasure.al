@@ -1,5 +1,6 @@
-tableextension 50111 BOMComponentExt extends "BOM Component"
+tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
 {
+
     trigger OnBeforeInsert();
     var
         User: Record User;
@@ -11,24 +12,21 @@ tableextension 50111 BOMComponentExt extends "BOM Component"
         end;
     end;
 
-    trigger OnAfterInsert()
+    trigger OnAfterInsert();
     var
-        TempText: Text;
-        RetailBOMComponent: Record "BOM Component";
-        LastRetailBomComponent: Record "BOM Component";
+        ItemUOM: Record "Item Unit of Measure";
         OtherCompanyRecord: Record Company;
-        TempLine: Integer;
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
             if OtherCompanyRecord.Find('-') then
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-                        RetailBOMComponent.Reset();
-                        RetailBOMComponent.ChangeCompany(OtherCompanyRecord.Name);
-                        if RetailBOMComponent.Get(Rec."Parent Item No.", Rec."Line No.") = false then begin
-                            RetailBOMComponent := Rec;
-                            RetailBOMComponent.Insert();
+                        ItemUOM.Reset();
+                        ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                        if ItemUOM.Get(Rec."Item No.", Rec.Code) = false then begin
+                            ItemUOM := Rec;
+                            ItemUOM.Insert();
                         end;
                     end;
                 until OtherCompanyRecord.Next() = 0;
@@ -46,37 +44,41 @@ tableextension 50111 BOMComponentExt extends "BOM Component"
         end;
     end;
 
-
-    trigger OnAfterModify()
+    trigger OnAfterModify();
     var
-        TempText: Text;
-        RetailBOMComponent: Record "BOM Component";
-        LastRetailBomComponent: Record "BOM Component";
+        ItemUOM: Record "Item Unit of Measure";
         OtherCompanyRecord: Record Company;
-        TempLine: Integer;
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
             if OtherCompanyRecord.Find('-') then
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-                        LastRetailBomComponent.ChangeCompany(OtherCompanyRecord.Name);
-                        LastRetailBomComponent.FindLast();
-                        RetailBOMComponent.Reset();
-                        RetailBOMComponent.ChangeCompany(OtherCompanyRecord.Name);
-                        if RetailBOMComponent.Get(Rec."Parent Item No.", "Line No.") then begin
-                            RetailBOMComponent := Rec;
-                            RetailBOMComponent.Modify();
+                        ItemUOM.Reset();
+                        ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                        if ItemUOM.Get(Rec."Item No.", Rec.Code) = true then begin
+                            ItemUOM := Rec;
+                            ItemUOM.Modify();
                         end;
                     end;
                 until OtherCompanyRecord.Next() = 0;
         end;
     end;
 
-    trigger OnAfterDelete()
+    trigger OnBeforeDelete();
     var
-        TempText: Text;
-        RetailBOMComponent: Record "BOM Component";
+        User: Record User;
+    begin
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Karen Huang' then begin
+            if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+                Error('Please only edit items in HEQS International Pty Ltd');
+        end;
+    end;
+
+    trigger OnAfterDelete();
+    var
+        ItemUOM: Record "Item Unit of Measure";
         OtherCompanyRecord: Record Company;
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
@@ -84,12 +86,17 @@ tableextension 50111 BOMComponentExt extends "BOM Component"
             if OtherCompanyRecord.Find('-') then
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-                        RetailBOMComponent.Reset();
-                        RetailBOMComponent.ChangeCompany(OtherCompanyRecord.Name);
-                        if RetailBOMComponent.Get(Rec."Parent Item No.", Rec."Line No.") = true then
-                            RetailBOMComponent.Delete();
+                        ItemUOM.Reset();
+                        ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                        if ItemUOM.Get(Rec."Item No.", Rec.Code) = true then begin
+                            ItemUOM.Delete();
+                        end;
                     end;
                 until OtherCompanyRecord.Next() = 0;
         end;
     end;
+
+
+
+
 }

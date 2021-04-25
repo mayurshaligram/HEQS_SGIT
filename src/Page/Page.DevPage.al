@@ -27,8 +27,8 @@ page 50105 "DevPage"
                         SalesHeader: Record "Sales Header";
                     begin
                         // if Password = 'Heqs326688' then
-                        if Dialog.Confirm('GiveAUD') then
-                            GiveAUD();
+                        if Dialog.Confirm('RemoveLink') then
+                            RemoveLink();
                         // if Password = Correct then begin
                         //     Message('Password Correct.');
                         //     // Delete all the WarehouseEntry in the Batch NSWWIJ
@@ -119,6 +119,17 @@ page 50105 "DevPage"
     // begin
     //     ChangeWarehouseRequest();
     // end;
+    local procedure RemoveLink();
+    var
+        SalesHeader: Record "Sales Header";
+    begin
+        if SalesHeader.CurrentCompany() = 'HEQS Wholesale Pty Ltd' then begin
+            SalesHeader.Get(SalesHeader."Document Type"::Order, 'WSO100005');
+            SalesHeader."Automate Purch.Doc No." := '';
+            SalesHeader.Modify();
+        end;
+
+    end;
 
     local procedure GiveAUD();
     var

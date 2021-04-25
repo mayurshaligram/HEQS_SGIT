@@ -1113,22 +1113,23 @@ codeunit 50101 "Sales Truth Mgt"
         PurchaseLine.Init();
         PurchaseLine."Document Type" := SalesLine."Document Type";
         PurchaseLine."Document No." := SalesHeader."Automate Purch.Doc No.";
-        PurchaseLine."Line No." := SalesLine."Line No.";
-        PurchaseLine.Type := SalesLine.Type;
-        if PurchaseHeader.Get(PurchaseLine."Document Type", PurchaseLine."Document No.") then begin
-            if PurchaseHeader."Currency Factor" = 0 then begin
-                PurchaseHeader."Currency Factor" := 1;
-                PurchaseHeader.Modify();
+        if SalesHeader."Automate Purch.Doc No." <> '' then begin
+            PurchaseLine."Line No." := SalesLine."Line No.";
+            PurchaseLine.Type := SalesLine.Type;
+            if PurchaseHeader.Get(PurchaseLine."Document Type", PurchaseLine."Document No.") then begin
+                if PurchaseHeader."Currency Factor" = 0 then begin
+                    PurchaseHeader."Currency Factor" := 1;
+                    PurchaseHeader.Modify();
+                end;
+
             end;
-
+            PurchaseLine.Validate("No.", SalesLine."No.");
+            PurchaseLine."BOM Item" := SalesLine."BOM Item";
+            PurchaseLine.Validate(Quantity, SalesLine.Quantity);
+            PurchaseLine.Insert();
+            if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
+                Error('Please Set Purchase Price Entry for item %1', Item."No.");
         end;
-        PurchaseLine.Validate("No.", SalesLine."No.");
-        PurchaseLine."BOM Item" := SalesLine."BOM Item";
-        PurchaseLine.Validate(Quantity, SalesLine.Quantity);
-        PurchaseLine.Insert();
-        if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
-            Error('Please Set Purchase Price Entry for item %1', Item."No.");
-
     end;
 
     local procedure InsertPurchaseLineWithoutPriceCheck(SalesLine: Record "Sales Line");
