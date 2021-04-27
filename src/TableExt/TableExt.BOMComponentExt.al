@@ -73,6 +73,17 @@ tableextension 50111 BOMComponentExt extends "BOM Component"
         end;
     end;
 
+    trigger OnBeforeDelete();
+    var
+        User: Record User;
+    begin
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Karen Huang' then begin
+            if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
+                Error('Please only edit items in HEQS International Pty Ltd');
+        end;
+    end;
+
     trigger OnAfterDelete()
     var
         TempText: Text;

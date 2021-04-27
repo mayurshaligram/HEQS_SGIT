@@ -43,8 +43,14 @@ pageextension 50111 SROListExt extends "Sales Return Order List"
                     TempSalesLine: Record "Sales Line";
                     TempItem: Record Item;
                     IsValideIC: Boolean;
+                    SalesHeader: Record "Sales Header";
+                    SalesTruthMgt: Codeunit "Sales Truth Mgt";
                 // Only the Sales Header associated with more then one inventory item sale line could be pass
                 begin
+                    // if SalesHeader.FindSet() then
+                    //     repeat
+                    //         SalesTruthMgt.AutoPost(SalesHeader);
+                    //     until SalesHeader.Next() = 0;
                     IsValideIC := false;
                     TempSalesLine.SetRange("Document No.", Rec."No.");
                     TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);

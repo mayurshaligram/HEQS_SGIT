@@ -98,85 +98,13 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     PostedPurchaseInvoice: Record "Purch. Inv. Header";
                     // Only the Sales Header associated with more then one inventory item sale line could be pass
                     Shipped: Boolean;
+                    SalesHeader: Record "Sales Header";
                 begin
-                    Shipped := false;
-                    if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
-                        Error(Text1, Rec."Sell-to Customer Name");
-                    IsValideIC := false;
-                    TempSalesLine.SetRange("Document No.", Rec."No.");
-                    TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
-                    if TempSalesLine.FindSet() then
+                    CurrPage.SetSelectionFilter(SalesHeader);
+                    if SalesHeader.FindSet() then
                         repeat
-                            TempItem.Get(TempSalesLine."No.");
-                            if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
-                            if TempSalesLine."Quantity Shipped" <> 0 then Shipped := true;
-                        ////////
-                        /// 
-                        ///  Test the Sales line  has Quantity to Shpment
-                        ///     
-                        /// //
-                        until TempSalesLine.Next() = 0;
-
-                    if IsValideIC = false then Error('Please Only use the normal Posting');
-                    if Shipped = false then Error('This Order has nothing to post');
-
-
-                    PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
-                    if PostedSalesInvoiceHeader.FindLast() then begin
-                        VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
-
-                        TempText := Format(VendorInvoiceNo);
-                        TempNum := TempText.Substring(7);
-                        Evaluate(TempInteger, TempNum);
-                        TempInteger += 1;
-                        VendorInvoiceNo := 'INTPSI' + Format(TempInteger);
-                    end
-                    else
-                        VendorInvoiceNo := 'INTPSI100000';
-
-                    PostedPurchaseInvoice.Reset();
-                    if PostedPurchaseInvoice.FindLast() then
-                        if VendorInvoiceNo = PostedPurchaseInvoice."Vendor Invoice No." then begin
-                            VendorInvoiceNo := VendorInvoiceNo + '*';
-                        end;
-
-
-                    PurchaseHeader.Reset();
-                    PurchaseHeader.SetRange("Sales Order Ref", Rec."No.");
-                    if PurchaseHeader.FindSet() and (VendorInvoiceNo <> '') then begin
-                        PurchaseHeader."Due Date" := Rec."Due Date";
-
-                        PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
-                        PurchaseHeader.Modify();
-
-                        PurchaseLine.Reset();
-                        PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
-                        if PurchaseLine.FindSet() then
-                            repeat
-                                PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
-                                PurchaseLine.Modify();
-                            until PurchaseLine.Next() = 0;
-
-                        NoSeries.ChangeCompany(SalesTruthMgt.InventoryCompany());
-                        NoSeries.Get('S-INV+');
-                        PurchaseHeader."Vendor Invoice No." := VendorInvoiceNo;
-                        PurchaseHeader.Modify();
-                        Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
-                    end;
-
-
-                    Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
-
-                    SessionId := 51;
-                    InventorySalesOrder.Reset();
-                    InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
-                    InventorySalesOrder.SetRange("Document Type", Rec."Document Type");
-                    InventorySalesOrder.SetRange(RetailSalesHeader, Rec."No.");
-
-                    if InventorySalesOrder.FindLast() then
-                        StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
-                                                   'HEQS International Pty Ltd', InventorySalesOrder);
-
+                            SalesTruthMgt.AutoPost(SalesHeader);
+                        until SalesHeader.Next() = 0;
                 end;
 
             }

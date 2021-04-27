@@ -27,8 +27,15 @@ page 50105 "DevPage"
                         SalesHeader: Record "Sales Header";
                     begin
                         // if Password = 'Heqs326688' then
-                        if Dialog.Confirm('RemoveLink') then
-                            RemoveLink();
+                        //     if Dialog.Confirm('Provide the Gen. Pro to PRSO100018') then begin
+                        //         SalesHeader.Get(SalesHeader."Document Type"::Order, SalesHeader."No.");
+                        //         SalesHeader.gen
+                        //     end;
+
+                        // if Password = 'Heqs326688' then
+                        // if Dialog.Confirm('RemoveLink') then
+                        //     RemoveLink();
+
                         // if Password = Correct then begin
                         //     Message('Password Correct.');
                         //     // Delete all the WarehouseEntry in the Batch NSWWIJ

@@ -12,6 +12,8 @@ pageextension 50121 PostedSalesInvoiceExt extends "Posted Sales Invoice"
         }
     }
 
+
+
     var
         IsSuper: Boolean;
 

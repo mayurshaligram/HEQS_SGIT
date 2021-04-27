@@ -331,7 +331,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     PostedPurchaseInvoice: Record "Purch. Inv. Header";
                     // Only the Sales Header associated with more then one inventory item sale line could be pass
                     Shipped: Boolean;
-
+                    SalesHeader: Record "Sales Header";
                 begin
                     Shipped := false;
                     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then

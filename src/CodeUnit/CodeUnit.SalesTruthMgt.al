@@ -1,5 +1,6 @@
 codeunit 50101 "Sales Truth Mgt"
 {
+    Permissions = TableData "Sales Invoice Header" = imd;
     EventSubscriberInstance = StaticAutomatic;
 
     var
@@ -17,6 +18,114 @@ codeunit 50101 "Sales Truth Mgt"
     /// 
     /// 
     /// //////////////////////////////////////////////////////////
+    procedure AutoPost(var SalesHeader: Record "Sales Header");
+    var
+        SalesLine: Record "Sales Line";
+        WarehouseRequest: Record "Warehouse Request";
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
+        InventorySalesOrder: Record "Sales Header";
+        SessionId: Integer;
+        PurchaseHeader: Record "Purchase Header";
+        PurchaseLine: Record "Purchase Line";
+        PostedSalesInvoiceHeader: Record "Sales Invoice Header";
+        NoSeries: Record "No. Series";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+        RetailSalesLine: Record "Sales Line";
+        VendorInvoiceNo: Code[20];
+        TempText: Text[20];
+        TempNum: Text[20];
+        TempInteger: Integer;
+        TempSalesLine: Record "Sales Line";
+        TempItem: Record Item;
+        IsValideIC: Boolean;
+        Text1: Label 'Please only post invoice in the retail company %1';
+
+        PostedPurchaseInvoice: Record "Purch. Inv. Header";
+        // Only the Sales Header associated with more then one inventory item sale line could be pass
+        Shipped: Boolean;
+    begin
+        Shipped := false;
+        if SalesHeader.CurrentCompany = InventoryCompany() then
+            Error(Text1, SalesHeader."Sell-to Customer Name");
+        IsValideIC := false;
+        TempSalesLine.SetRange("Document No.", SalesHeader."No.");
+        TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
+        if TempSalesLine.FindSet() then
+            repeat
+                TempItem.Get(TempSalesLine."No.");
+                if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
+                if TempSalesLine."Quantity Shipped" <> 0 then Shipped := true;
+            ////////
+            /// 
+            ///  Test the Sales line  has Quantity to Shpment
+            ///     
+            /// //
+            until TempSalesLine.Next() = 0;
+
+        if IsValideIC = false then Error('Please Only use the normal Posting');
+        if Shipped = false then Error('This Order has nothing to post');
+
+
+        PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
+        if PostedSalesInvoiceHeader.FindLast() then begin
+            VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
+
+            TempText := Format(VendorInvoiceNo);
+            TempNum := TempText.Substring(7);
+            Evaluate(TempInteger, TempNum);
+            TempInteger += 1;
+            VendorInvoiceNo := 'INTPSI' + Format(TempInteger);
+        end
+        else
+            VendorInvoiceNo := 'INTPSI100000';
+
+        PostedPurchaseInvoice.Reset();
+        if PostedPurchaseInvoice.FindLast() then
+            if VendorInvoiceNo = PostedPurchaseInvoice."Vendor Invoice No." then begin
+                VendorInvoiceNo := VendorInvoiceNo + '*';
+            end;
+
+
+        PurchaseHeader.Reset();
+        PurchaseHeader.SetRange("Sales Order Ref", SalesHeader."No.");
+        if PurchaseHeader.FindSet() and (VendorInvoiceNo <> '') then begin
+            PurchaseHeader."Due Date" := SalesHeader."Due Date";
+
+            PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
+            PurchaseHeader.Modify();
+
+            PurchaseLine.Reset();
+            PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+            if PurchaseLine.FindSet() then
+                repeat
+                    PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
+                    PurchaseLine.Modify();
+                until PurchaseLine.Next() = 0;
+
+            NoSeries.ChangeCompany(InventoryCompany());
+            NoSeries.Get('S-INV+');
+            PurchaseHeader."Vendor Invoice No." := VendorInvoiceNo;
+            PurchaseHeader.Modify();
+            Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
+        end;
+
+
+        Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", SalesHeader);
+
+        SessionId := 51;
+        InventorySalesOrder.Reset();
+        InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
+        InventorySalesOrder.SetRange("Document Type", SalesHeader."Document Type");
+        InventorySalesOrder.SetRange(RetailSalesHeader, SalesHeader."No.");
+
+        if InventorySalesOrder.FindLast() then
+            StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                                       'HEQS International Pty Ltd', InventorySalesOrder);
+
+
+
+    end;
+
     procedure QuickFix(var SalesHeader: Record "Sales Header");
     var
         Item: Record Item;
@@ -449,6 +558,62 @@ codeunit 50101 "Sales Truth Mgt"
             DeleteICSalesLine(SalesLine);
             UpdateICSalesHeader(SalesLine);
         end;
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, 80, 'OnBeforeDeleteAfterPosting', '', false, false)]
+    local procedure BeforeDeleteAfterPosting(var SalesHeader: Record "Sales Header"; var SalesInvoiceHeader: Record "Sales Invoice Header"; var SalesCrMemoHeader: Record "Sales Cr.Memo Header"; var SkipDelete: Boolean; CommitIsSuppressed: Boolean; EverythingInvoiced: Boolean)
+    begin
+        SalesInvoiceHeader.RetailSalesHeader := SalesHeader.RetailSalesHeader;
+        SalesInvoiceHeader."Ship-to City" := SalesHeader."Ship-to City";
+        SalesInvoiceHeader.ZoneCode := SalesHeader.ZoneCode;
+        SalesInvoiceHeader.TempDate := SalesHeader.TempDate;
+        SalesInvoiceHeader."Delivery Hour" := SalesHeader."Delivery Hour";
+        SalesInvoiceHeader."Delivery Item" := SalesHeader."Delivery Item";
+        SalesInvoiceHeader."Delivery without BOM Item" := SalesHeader."Delivery without BOM Item";
+        SalesInvoiceHeader."Assembly Item" := SalesInvoiceHeader."Assembly Item";
+        SalesInvoiceHeader."Assembly Item without BOM Item" := SalesInvoiceHeader."Assembly Item without BOM Item";
+        SalesInvoiceHeader.Stair := SalesHeader.Stair;
+
+
+        SalesInvoiceHeader."Sell-to Contact" := SalesHeader."Sell-to Contact";
+        SalesInvoiceHeader."Ship-to Phone No." := SalesHeader."Ship-to Phone No.";
+        SalesInvoiceHeader."Vehicle NO" := SalesHeader."Vehicle NO";
+        SalesInvoiceHeader.IsScheduled := SalesInvoiceHeader.IsScheduled;
+        SalesInvoiceHeader.Delivery := SalesInvoiceHeader.Delivery;
+        SalesInvoiceHeader.TripSequence := SalesHeader.TripSequence;
+
+
+        SalesInvoiceHeader.IsDeliveried := SalesHeader.IsDeliveried;
+        SalesInvoiceHeader.Cubage := SalesHeader.Cubage;
+        SalesInvoiceHeader."Sell-to Customer No." := SalesHeader."Sell-to Customer No.";
+        SalesInvoiceHeader."Sell-to Customer Name" := SalesInvoiceHeader."Sell-to Customer Name";
+        SalesInvoiceHeader.Driver := SalesInvoiceHeader.Driver;
+        SalesInvoiceHeader."Sell-to Post Code" := SalesHeader."Sell-to Post Code";
+
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader."Ship-to Code" := SalesHeader."Ship-to Code";
+        SalesInvoiceHeader."Ship-to Name" := SalesInvoiceHeader."Ship-to Name";
+        SalesInvoiceHeader."Ship-to Post Code" := SalesInvoiceHeader."Ship-to Post Code";
+        SalesInvoiceHeader."Ship-to Contact" := SalesHeader."Ship-to Contact";
+
+        SalesInvoiceHeader."Shipping Agent Code" := SalesHeader."Shipping Agent Code";
+        SalesInvoiceHeader."Sell-to Country/Region Code" := SalesHeader."Sell-to Country/Region Code";
+        SalesInvoiceHeader."Bill-to Customer No." := SalesHeader."Bill-to Customer No.";
+        SalesInvoiceHeader."Bill-to Name" := SalesHeader."Bill-to Name";
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
+        SalesInvoiceHeader.Note := SalesHeader.Note;
+        SalesInvoiceHeader.Modify();
     end;
 
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
