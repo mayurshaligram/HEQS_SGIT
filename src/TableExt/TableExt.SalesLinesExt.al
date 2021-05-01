@@ -98,14 +98,18 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
     end;
 
     trigger OnBeforeModify();
+    var
+        User: Record User;
     begin
+        User.Get(Database.UserSecurityId());
         if Rec.Type <> xRec.Type then begin
             Error('Please delete this line, and recreat the different line');
         end;
         if Rec.Token = false then begin
             if Rec.Type = Rec.Type::Item then
-                if Rec."BOM Item" = true then
-                    Error('Please Only Edit Main Item, Bom is managed by system only')
+                if User."Full Name" <> 'Pei Xu' then
+                    if Rec."BOM Item" = true then
+                        Error('Please Only Edit Main Item, Bom is managed by system only')
         end
         else
             Rec.Token := false;

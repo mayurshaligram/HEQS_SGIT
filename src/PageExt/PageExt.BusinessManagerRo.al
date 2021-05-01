@@ -38,6 +38,14 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     RunObject = Page "Vehicle Lookup";
                     ToolTip = 'Vehicle Zone';
                 }
+                action("Driver")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Driver';
+                    Image = PostedMemo;
+                    RunObject = Page "Driver Lookup";
+                    ToolTip = 'Driver';
+                }
             }
         }
     }

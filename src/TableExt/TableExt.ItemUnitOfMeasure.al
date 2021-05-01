@@ -14,6 +14,7 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
 
     trigger OnAfterInsert();
     var
+        Item: Record Item;
         ItemUOM: Record "Item Unit of Measure";
         OtherCompanyRecord: Record Company;
     begin
@@ -22,11 +23,15 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
             if OtherCompanyRecord.Find('-') then
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-                        ItemUOM.Reset();
-                        ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
-                        if ItemUOM.Get(Rec."Item No.", Rec.Code) = false then begin
-                            ItemUOM := Rec;
-                            ItemUOM.Insert();
+                        Item.Reset();
+                        Item.ChangeCompany(OtherCompanyRecord.Name);
+                        if Item.Get(Rec."Item No.") then begin
+                            ItemUOM.Reset();
+                            ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                            if ItemUOM.Get(Rec."Item No.", Rec.Code) = false then begin
+                                ItemUOM := Rec;
+                                ItemUOM.Insert();
+                            end;
                         end;
                     end;
                 until OtherCompanyRecord.Next() = 0;
@@ -46,6 +51,7 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
 
     trigger OnAfterModify();
     var
+        Item: Record Item;
         ItemUOM: Record "Item Unit of Measure";
         OtherCompanyRecord: Record Company;
     begin
@@ -54,11 +60,19 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
             if OtherCompanyRecord.Find('-') then
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
-                        ItemUOM.Reset();
-                        ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
-                        if ItemUOM.Get(Rec."Item No.", Rec.Code) = true then begin
-                            ItemUOM := Rec;
-                            ItemUOM.Modify();
+                        Item.Reset();
+                        Item.ChangeCompany(OtherCompanyRecord.Name);
+                        if Item.Get(Rec."Item No.") then begin
+                            ItemUOM.Reset();
+                            ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                            if ItemUOM.Get(Rec."Item No.", Rec.Code) = true then begin
+                                ItemUOM := Rec;
+                                ItemUOM.Modify();
+                            end
+                            else begin
+                                ItemUOM := Rec;
+                                ItemUOM.Insert();
+                            end;
                         end;
                     end;
                 until OtherCompanyRecord.Next() = 0;

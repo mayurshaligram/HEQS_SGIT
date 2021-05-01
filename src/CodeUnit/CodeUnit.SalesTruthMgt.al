@@ -65,7 +65,6 @@ codeunit 50101 "Sales Truth Mgt"
         if IsValideIC = false then Error('Please Only use the normal Posting');
         if Shipped = false then Error('This Order has nothing to post');
 
-
         PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
         if PostedSalesInvoiceHeader.FindLast() then begin
             VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
@@ -339,8 +338,17 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.Delete();
     end;
 
+    // [IntegrationEvent(false, false)]
+    // local procedure OnBeforeSendICDocument(var SalesHeader: Record "Sales Header"; var ModifyHeader: Boolean; var IsHandled: Boolean)
+    // begin
+    // end;
 
-
+    [EventSubscriber(ObjectType::Codeunit, 80, 'OnFinalizePostingOnBeforeCreateOutboxSalesTrans', '', false, false)]
+    local procedure FinalizePostingOnBeforeCreateOutboxSalesTrans(var SalesHeader: Record "Sales Header"; var IsHandled: Boolean; EverythingInvoiced: Boolean)
+    begin
+        if SalesHeader.CurrentCompany = InventoryCompany() then
+            IsHandled := true;
+    end;
 
     [EventSubscriber(ObjectType::Codeunit, 5764, 'OnAfterConfirmPost', '', false, false)]
     local procedure AfterConfirmPost(WhseShipmentLine: Record "Warehouse Shipment Line"; Invoice: Boolean)
@@ -1263,6 +1271,7 @@ codeunit 50101 "Sales Truth Mgt"
         IsMainItem: Boolean;
         PurchasePrice: Record "Purchase Price";
         PurchaseHeader: Record "Purchase Header";
+        User: Record User;
     begin
         if IsValideICSalesLine(SalesLine) = false then exit;
 
@@ -1292,8 +1301,10 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseLine."BOM Item" := SalesLine."BOM Item";
             PurchaseLine.Validate(Quantity, SalesLine.Quantity);
             PurchaseLine.Insert();
-            if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
-                Error('Please Set Purchase Price Entry for item %1', Item."No.");
+            User.Get(Database.UserSecurityId());
+            if User."Full Name" <> 'Pei Xu' then
+                if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
+                    Error('Please Set Purchase Price Entry for item %1', Item."No.");
         end;
     end;
 

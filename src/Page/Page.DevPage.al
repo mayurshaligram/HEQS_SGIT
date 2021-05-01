@@ -211,27 +211,40 @@ page 50105 "DevPage"
 
     trigger OnOpenPage();
     begin
-        ChangeBillingAddressPassword := 'ChangeBilling';
-        Correct := 'asfgsfga';
-        LineFixPassword := '3ttq43asfg';
-        ExternalMovingPassword := 'asfghy48sjahiw';
-        DeletePurchaseLinePassword := 'jbcv2bjbvoi';
-        TurnWarehouseRequestReleasePassword := 'adsf2tg';
+        ChainChangeBOM;
+    end;
 
-        ReleaseWhseRequesPassword := 'heq24t2ggd26689';
-        DeleteAllWhseShipmentLinePassword := 'heqsg2g42g326690';
-        // International
-        GiveBackExternalPassword := 'heq2g24gds326688';
-        // Retail 
-        ReleaseReOpenPassword := 'R24gsg24O';
-        // International
-        QuickFixPassword := 'q224gg42g4qq';
-        HardReleaseAndPost25Password := '252asfg5';
-        DeleteSalesLinePassword := 'heqs326688asg';
-        AutoPurchaseFixedPassword := 'heqs32fhfg6688';
-        DeleteAllSalesLineForCertainOrderPassword := 'heqsvbe326688';
-        DeleteAllICPassword := 'heqs326asfg689';
-        Release25Password := 'heqs326sdf688';
+    local procedure ChainChangeBOM();
+    var
+        SalesLine: Record "Sales Line";
+        PurchaseLine: Record "Purchase Line";
+        ICSalesLine: Record "Sales Line";
+    begin
+        SalesLine.Reset();
+        if SalesLine.CurrentCompany = 'HEQS Furniture Pty Ltd' then begin
+            SalesLine.Get(SalesLine."Document Type"::Order, 'FSO101103', 80000);
+            SalesLine."No." := '7010003 - B1 OF 1';
+            SalesLine.Quantity := 1;
+            SalesLine."Unit of Measure" := 'BOX';
+            SalesLine."Unit of Measure Code" := 'BOX';
+            SalesLine.Modify();
+
+            PurchaseLine.Get(PurchaseLine."Document Type"::Order, 'FPO000103', 80000);
+            PurchaseLine."No." := '7010003 - B1 OF 1';
+            PurchaseLine.Quantity := 1;
+            PurchaseLine."Unit of Measure" := 'BOX';
+            PurchaseLine."Unit of Measure Code" := 'BOX';
+            PurchaseLine.Modify();
+
+            ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+            ICSalesLine.Get(SalesLine."Document Type"::Order, 'INT101546', 80000);
+            ICSalesLine."No." := '7010003 - B1 OF 1';
+            ICSalesLine.Quantity := 1;
+            ICSalesLine."Unit of Measure" := 'BOX';
+            ICSalesLine."Unit of Measure Code" := 'BOX';
+            ICSalesLine.Modify();
+        end;
+
     end;
 
     local procedure DeletePurchaseLine();

@@ -6,6 +6,7 @@ page 50108 "Vehicle Lookup"
     SourceTable = Vehicle;
     UsageCategory = Lists;
     AdditionalSearchTerms = 'Vehicle';
+    ApplicationArea = All;
 
     layout
     {

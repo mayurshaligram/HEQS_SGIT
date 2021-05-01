@@ -74,7 +74,9 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
             var
                 PurchaseLine: Record "Purchase Line";
                 LocationCode: Code[10];
+                User: Record User;
             begin
+                User.Get(Database.UserSecurityId());
                 if (Rec.CurrentCompany = InventoryCompanyName) and (Rec."Sales Order Ref" = '') then begin
                     PurchaseLine.SetRange("BOM Item", true);
                     PurchaseLine.SetRange("Document Type", Rec."Document Type");
@@ -88,7 +90,8 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
                         until PurchaseLine.Next() = 0;
                 end
                 else
-                    Error('Please do release action in "%1", Sales Order: "%2"', Rec.CurrentCompany, Rec."Sales Order Ref");
+                    if User."Full Name" <> 'Pei Xu' then
+                        Error('Please do release action in "%1", Sales Order: "%2"', Rec.CurrentCompany, Rec."Sales Order Ref");
             end;
         }
         modify(Reopen)

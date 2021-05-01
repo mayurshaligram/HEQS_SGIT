@@ -192,6 +192,8 @@ tableextension 50102 "Item_Ext" extends "Item"
         TempText: Text;
         RetailItemRecord: Record Item;
         OtherCompanyRecord: Record Company;
+        ItemUOM: Record "Item Unit of Measure";
+        NewItemUOM: Record "Item Unit of Measure";
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
@@ -220,6 +222,10 @@ tableextension 50102 "Item_Ext" extends "Item"
         TempItemDiscGroup: Code[20];
         TempVendorNO: Code[20];
         TempVendorItemNo: Code[20];
+
+        ItemUOM: Record "Item Unit of Measure";
+        NewItemUOM: Record "Item Unit of Measure";
+        OriginalItemUOM: Record "Item Unit of Measure";
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
             OtherCompanyRecord.Reset();
@@ -250,6 +256,19 @@ tableextension 50102 "Item_Ext" extends "Item"
                         RetailItemRecord."Vendor Item No." := TempVendorNO;
                         RetailItemRecord."Vendor No." := TempVendorItemNo;
                         RetailItemRecord.Modify();
+
+                        if Rec."Base Unit of Measure" <> xRec."Base Unit of Measure" then begin
+                            ItemUOM.Reset();
+                            ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                            ItemUOM.SetRange("Item No.", Rec."No.");
+                            ItemUOM.SetRange(Code, Rec."Base Unit of Measure");
+                            if ItemUOM.Count = 0 then begin
+                                if OriginalItemUOM.Get(Rec."No.", Rec."Base Unit of Measure") then begin
+                                    ItemUOM := OriginalItemUOM;
+                                    ItemUOM.Insert();
+                                end;
+                            end;
+                        end;
                     end;
                 until OtherCompanyRecord.Next() = 0;
         end;

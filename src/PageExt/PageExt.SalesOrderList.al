@@ -62,6 +62,10 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         {
             Visible = Not IsInventoryCompany;
         }
+        modify(Release)
+        {
+            Visible = IsPei;
+        }
         addbefore(Post)
         {
             action("Auto Post Invoice")
@@ -114,6 +118,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
+        IsPei: Boolean;
 
     trigger OnOpenPage();
     var
@@ -122,8 +127,10 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
 
         SessionID: Integer;
         OK: Boolean;
-
+        User: Record User;
     begin
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" = 'Pei Xu' then IsPei := true;
         if SalesHeader.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
             SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
             if SalesHeader.FindSet() then

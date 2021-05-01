@@ -5,6 +5,7 @@ page 50107 "Driver Lookup"
     PageType = List;
     SourceTable = Driver;
     UsageCategory = Lists;
+    ApplicationArea = All;
     AdditionalSearchTerms = 'Driver';
 
     layout
