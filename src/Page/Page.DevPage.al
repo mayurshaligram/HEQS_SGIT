@@ -211,8 +211,9 @@ page 50105 "DevPage"
 
     trigger OnOpenPage();
     begin
-        Deletearbitaryauto;
+
     end;
+
 
     local procedure Deletearbitaryauto();
     var

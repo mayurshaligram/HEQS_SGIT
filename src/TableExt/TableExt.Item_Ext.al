@@ -274,6 +274,39 @@ tableextension 50102 "Item_Ext" extends "Item"
         end;
     end;
 
+    trigger OnAfterRename()
+    var
+        TempText: Text;
+        RetailItemRecord: Record Item;
+        OtherCompanyRecord: Record Company;
+        TempCost: Integer;
+        TempPrice: Integer;
+        TempShelfNo: Code[10];
+        TempStandardCost: Decimal;
+        TempIndirectCost: Decimal;
+        TempLastDirectCost: Decimal;
+        TempItemDiscGroup: Code[20];
+        TempVendorNO: Code[20];
+        TempVendorItemNo: Code[20];
+
+        ItemUOM: Record "Item Unit of Measure";
+        NewItemUOM: Record "Item Unit of Measure";
+        OriginalItemUOM: Record "Item Unit of Measure";
+    begin
+        if Rec.CurrentCompany = 'HEQS International Pty Ltd' then begin
+            OtherCompanyRecord.Reset();
+            if OtherCompanyRecord.Find('-') then
+                repeat
+                    if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
+                        RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
+                        if RetailItemRecord.Get(xRec."No.") then
+                            RetailItemRecord.Rename(Rec."No.");
+                    end;
+                until OtherCompanyRecord.Next() = 0;
+        end;
+    end;
+
+
     trigger OnAfterDelete()
     var
         TempText: Text;
