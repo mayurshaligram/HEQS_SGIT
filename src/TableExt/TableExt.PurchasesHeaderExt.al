@@ -9,7 +9,7 @@ tableextension 50101 "Purchase Header_Ext" extends "Purchase Header"
         }
         field(50101; "Sales Order Ref"; Text[20])
         {
-            Caption = 'Automate Purch.Doc No.';
+            Caption = 'Automate Sales.Doc No.';
             Editable = false;
         }
     }

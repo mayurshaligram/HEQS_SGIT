@@ -124,6 +124,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
     var
         SalesHeader: Record "Sales Header";
         SalesPostExt: Codeunit "Sales-Post (Yes/No) Ext";
+        PurchaseHeader: Record "Purchase Header";
 
         SessionID: Integer;
         OK: Boolean;
@@ -151,6 +152,20 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         if Rec.CurrentCompany = InventoryCompanyName then begin
             IsInventoryCompany := true;
         end;
+
+        // Check Empty Auto Purchase Order 
+        SalesHeader.Reset();
+        if SalesHeader.CurrentCompany = SalesTruthMgt.InventoryCompany() then
+            SalesHeader.SetRange("Automate Purch.Doc No.", '');
+        if SalesHeader.FindSet() then
+            repeat
+                PurchaseHeader.Reset();
+                PurchaseHeader.SetRange("Document Type", PurchaseHeader."Document Type"::Order);
+                PurchaseHeader.SetRange("Sales Order Ref", SalesHeader."No.");
+                if PurchaseHeader.FindSet() then
+                    SalesHeader."Automate Purch.Doc No." := PurchaseHeader."No.";
+                SalesHeader.Modify();
+            until SalesHeader.Next = 0;
 
         Rec.SetView('sorting (Rec."No.") order(descending)');
         Rec.SetRange("No.");

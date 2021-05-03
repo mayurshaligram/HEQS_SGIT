@@ -211,7 +211,16 @@ page 50105 "DevPage"
 
     trigger OnOpenPage();
     begin
-        ChainChangeBOM;
+        Deletearbitaryauto;
+    end;
+
+    local procedure Deletearbitaryauto();
+    var
+        SalesHeader: Record "Sales Header";
+    begin
+        SalesHeader.Get(SalesHeader."Document Type"::Order, 'IFSO101533');
+        SalesHeader."Automate Purch.Doc No." := '';
+        SalesHeader.Modify();
     end;
 
     local procedure ChainChangeBOM();
