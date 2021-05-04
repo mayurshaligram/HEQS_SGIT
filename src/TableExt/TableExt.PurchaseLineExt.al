@@ -7,6 +7,10 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
             Editable = false;
         }
     }
+    var
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+        PayableMgt: Codeunit PayableMgt;
+
     trigger OnBeforeModify()
     var
         ParentPurchaseHeader: Record "Purchase Header";
@@ -27,10 +31,16 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
             Error('Please Change the Purchase Order Information in %1', ParentPurchaseHeader."Sales Order Ref");
     end;
 
+    trigger OnAfterDelete()
+    begin
+        PayableMgt.PutPayableItem(Rec);
+    end;
+
     trigger OnAfterInsert()
     begin
         if Rec.CurrentCompany = 'HEQS International Pty Ltd' then
             ExplodeBOM();
+        PayableMgt.PutPayableItem(Rec);
     end;
 
     trigger OnAfterModify()
@@ -70,6 +80,7 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
                         until ToPurchaseLine.Next() = 0;
                 until FromBOMComp.Next() = 0;
         end;
+        PayableMgt.PutPayableItem(Rec);
     end;
 
     procedure ExplodeBOM()

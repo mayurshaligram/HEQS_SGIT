@@ -4,6 +4,7 @@ codeunit 50109 ZoneUpgrade
 
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
+        PayableMgt: Codeunit PayableMgt;
 
     trigger OnCheckPreconditionsPerCompany()
     begin
@@ -11,6 +12,28 @@ codeunit 50109 ZoneUpgrade
     end;
 
     trigger OnUpgradePerCompany()
+    var
+        Company: Record Company;
+    begin
+        LoadZoneTable();
+        if Company.Name = SalesTruthMgt.InventoryCompany() then
+            ClearPayable();
+        // LoadPayable();
+    end;
+
+    local procedure ClearPayable()
+    var
+        Payable: Record Payable;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.FindSet() then
+            repeat
+                Payable.Delete()
+            until Payable.Next() = 0;
+    end;
+
+    local procedure LoadZoneTable()
     var
         ZoneTable: Record ZoneTable;
     begin
@@ -48,6 +71,40 @@ codeunit 50109 ZoneUpgrade
             ZoneTable.Insert();
         end;
     end;
+
+    local procedure LoadPayable()
+    var
+        PurchaseHeader: Record "Purchase Header";
+        PurchaseLine: Record "Purchase Line";
+    begin
+        PurchaseHeader.Reset();
+        if PurchaseHeader.FindSet() then
+            repeat
+                if PurchaseHeader."Sales Order Ref" = '' then
+                    if NotContainPayable(PurchaseHeader) = false then begin
+                        PayableMgt.PurchaseHeaderInsertPayable(PurchaseHeader);
+
+                        PurchaseLine.Reset();
+                        PurchaseLine.SetRange("Document Type", PurchaseHeader."Document Type");
+                        PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+                        if PurchaseLine.FindSet() then
+                            PayableMgt.PutPayableItem(PurchaseLine);
+                    end;
+            until PurchaseHeader.Next() = 0;
+    end;
+
+    local procedure NotContainPayable(PurchaseHeader: Record "Purchase Header"): Boolean
+    var
+        Payable: Record Payable;
+        TempBoolean: Boolean;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.Get(PurchaseHeader."No.") then
+            TempBoolean := true;
+        exit(TempBoolean);
+    end;
+
 
     trigger OnValidateUpgradePerCompany()
     begin
