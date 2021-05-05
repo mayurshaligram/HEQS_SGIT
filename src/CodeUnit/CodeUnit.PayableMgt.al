@@ -18,7 +18,8 @@ codeunit 50113 PayableMgt
         // Payable."Amount Received Not Invoiced" := PurchaseHeader.recei
         // Payable."Date of Payment" := Rec."Due Date";
         Payable."Currency Code" := PurchaseHeader."Currency Code";
-        Payable.Company := PurchaseHeader."Buy-from Vendor Name";
+        Payable.Company := PurchaseHeader.CurrentCompany;
+        Payable.Vendor := PurchaseHeader."Buy-from Vendor Name";
         Payable."Amount Received Not Invoiced" := PurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
         Payable."Schedule Date" := PurchaseHeader."Due Date";
         Payable."Payment Method Code" := PurchaseHeader."Payment Method Code";
@@ -53,7 +54,8 @@ codeunit 50113 PayableMgt
         // Payable."Amount Received Not Invoiced" := PurchaseHeader.recei
         // Payable."Date of Payment" := Rec."Due Date";
         Payable."Currency Code" := PurchInvHeader."Currency Code";
-        Payable.Company := PurchInvHeader."Buy-from Vendor Name";
+        Payable.Company := PurchInvHeader.CurrentCompany;
+        Payable.Vendor := PurchInvHeader."Buy-from Vendor Name";
         Payable."USD" := PurchInvHeader."Remaining Amount";
         // Payable."Amount Received Not Invoiced" := PurchInvHeader."Amt. Rcd. Not Invoiced (LCY)";
         Payable."Schedule Date" := PurchInvHeader."Due Date";
@@ -94,7 +96,8 @@ codeunit 50113 PayableMgt
                     Payable."Amount Received Not Invoiced" := TempPurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
 
                     Payable."Currency Code" := TempPurchaseHeader."Currency Code";
-                    Payable.Company := TempPurchaseHeader."Buy-from Vendor Name";
+                    Payable.Company := TempPurchaseHeader.CurrentCompany;
+                    Payable.Vendor := TempPurchaseHeader."Buy-from Vendor Name";
                     Payable."Schedule Date" := TempPurchaseHeader."Due Date";
                     Payable."Payment Method Code" := TempPurchaseHeader."Payment Method Code";
                 end;
@@ -103,7 +106,6 @@ codeunit 50113 PayableMgt
                 until TempPurchaseLine.Next() = 0;
             end;
             Payable.Modify();
-
         end;
 
     end;
@@ -133,7 +135,8 @@ codeunit 50113 PayableMgt
                     Payable.USD := TempPurchInvHeader."Remaining Amount";
 
                     Payable."Currency Code" := TempPurchInvHeader."Currency Code";
-                    Payable.Company := TempPurchInvHeader."Buy-from Vendor Name";
+                    Payable.Company := TempPurchInvHeader.CurrentCompany;
+                    Payable.Vendor := TempPurchInvHeader."Buy-from Vendor Name";
                     Payable."Schedule Date" := TempPurchInvHeader."Due Date";
                     Payable."Payment Method Code" := TempPurchInvHeader."Payment Method Code";
                 end;

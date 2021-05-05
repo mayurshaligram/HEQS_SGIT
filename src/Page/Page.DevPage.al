@@ -236,7 +236,8 @@ page 50105 "DevPage"
         PurchaseHeader.SetRange("Document Type", PurchaseHeader."Document Type"::Invoice);
         if PurchaseHeader.FindSet() then
             repeat
-                PurchaseHeader.Delete(true);
+                if (PurchaseHeader."Buy-from Vendor Name" = 'HEQS International Pty Ltd') or (PurchaseHeader."Buy-from Vendor Name" = 'HEQS International') then
+                    PurchaseHeader.Delete(true);
             until PurchaseHeader.Next() = 0;
     end;
 

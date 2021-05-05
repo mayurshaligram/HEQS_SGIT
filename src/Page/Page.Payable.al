@@ -29,6 +29,11 @@ page 50110 Payable
                     ApplicationArea = All;
                     ToolTip = 'Specifies the Company';
                 }
+                field(Vendor; Rec.Vendor)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the Vendor';
+                }
                 field(Item; Rec.Item)
                 {
                     ApplicationArea = All;
