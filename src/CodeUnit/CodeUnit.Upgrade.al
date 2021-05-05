@@ -15,9 +15,9 @@ codeunit 50109 ZoneUpgrade
     var
         Company: Record Company;
     begin
-        LoadZoneTable();
-        if Company.Name = SalesTruthMgt.InventoryCompany() then
-            ClearPayable();
+        // LoadZoneTable();
+        // if Company.Name = SalesTruthMgt.InventoryCompany() then
+        //     ClearPayable();
         // LoadPayable();
     end;
 
@@ -85,6 +85,7 @@ codeunit 50109 ZoneUpgrade
                         PayableMgt.PurchaseHeaderInsertPayable(PurchaseHeader);
 
                         PurchaseLine.Reset();
+
                         PurchaseLine.SetRange("Document Type", PurchaseHeader."Document Type");
                         PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
                         if PurchaseLine.FindSet() then

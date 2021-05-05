@@ -25,12 +25,27 @@ page 50105 "DevPage"
                         WarehouseEntry: Record "Warehouse Entry";
                         InputWindow: Dialog;
                         SalesHeader: Record "Sales Header";
+                        PayableMgt: Record Payable;
                     begin
                         // if Password = 'Heqs326688' then
-                        //     if Dialog.Confirm('Provide the Gen. Pro to PRSO100018') then begin
-                        //         SalesHeader.Get(SalesHeader."Document Type"::Order, SalesHeader."No.");
-                        //         SalesHeader.gen
-                        //     end;
+                        if Password = '0' then
+                            if Dialog.Confirm('Clear all the payable') then begin
+                                ClearPayable;
+                            end;
+                        if Password = '1' then begin
+                            if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
+                                Error('Please only delete the retail company purchase invoice');
+                            if Dialog.Confirm('Clear This compant all purhchase invoice') then begin
+                                ClearPurchaseInvoice;
+                            end
+                        end;
+                        if Password = '2' then
+                            if Dialog.Confirm('Reload the Payable Table') then begin
+
+                                LoadPayable;
+                                LoadPayableForPurchInv;
+                            end;
+
 
                         // if Password = 'Heqs326688' then
                         // if Dialog.Confirm('RemoveLink') then
@@ -211,8 +226,118 @@ page 50105 "DevPage"
 
     trigger OnOpenPage();
     begin
-
     end;
+
+    local procedure ClearPurchaseInvoice()
+    var
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        PurchaseHeader.Reset();
+        PurchaseHeader.SetRange("Document Type", PurchaseHeader."Document Type"::Invoice);
+        if PurchaseHeader.FindSet() then
+            repeat
+                PurchaseHeader.Delete(true);
+            until PurchaseHeader.Next() = 0;
+    end;
+
+    local procedure ClearPayable()
+    var
+        Payable: Record Payable;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.FindSet() then
+            repeat
+                Payable.Delete()
+            until Payable.Next() = 0;
+    end;
+
+    var
+        PayableMgt: Codeunit PayableMgt;
+
+    local procedure LoadPayable()
+    var
+        PurchaseHeader: Record "Purchase Header";
+        SalesHeader: Record "Sales Header";
+        PurchaseLine: Record "Purchase Line";
+        OtherCompanyRecord: Record Company;
+
+    begin
+
+
+
+        if OtherCompanyRecord.Find('-') then
+            repeat
+                PurchaseHeader.Reset();
+                PurchaseHeader.ChangeCompany(OtherCompanyRecord.Name);
+                SalesHeader.Reset();
+                SalesHeader.ChangeCompany(OtherCompanyRecord.Name);
+                if PurchaseHeader.FindSet() then
+                    repeat
+                        if PurchaseHeader."Sales Order Ref" = '' then begin
+                            SalesHeader.SetRange("Document Type", PurchaseHeader."Document Type");
+                            SalesHeader.SetRange("Automate Purch.Doc No.", PurchaseHeader."No.");
+                            if SalesHeader.FindSet() = false then
+                                if NotContainPayable(PurchaseHeader) = false then begin
+                                    PayableMgt.PurchaseHeaderInsertPayable(PurchaseHeader);
+
+                                    PurchaseLine.Reset();
+                                    PurchaseLine.ChangeCompany(OtherCompanyRecord.Name);
+                                    PurchaseLine.SetRange("Document Type", PurchaseHeader."Document Type");
+                                    PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+                                    if PurchaseLine.FindSet() then
+                                        PayableMgt.PutPayableItem(PurchaseLine);
+                                end;
+                        end;
+                    until PurchaseHeader.Next() = 0;
+            until OtherCompanyRecord.Next() = 0;
+    end;
+
+
+    local procedure LoadPayableForPurchInv()
+    var
+        PurchInvHeader: Record "Purch. Inv. Header";
+        OtherCompanyRecord: Record Company;
+    begin
+        if OtherCompanyRecord.Find('-') then
+            repeat
+                PurchInvHeader.Reset();
+                PurchInvHeader.ChangeCompany(OtherCompanyRecord.Name);
+                if PurchInvHeader.FindSet() then
+                    repeat
+                        if NotContainPayableForPurchInv(PurchInvHeader) = false then begin
+                            PayableMgt.PurchInvHeaderInsertPayable(PurchInvHeader);
+                        end;
+
+                    until PurchInvHeader.Next() = 0;
+            until OtherCompanyRecord.Next() = 0;
+    end;
+
+
+    local procedure NotContainPayable(var PurchaseHeader: Record "Purchase Header"): Boolean
+    var
+        Payable: Record Payable;
+        TempBoolean: Boolean;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.Get(PurchaseHeader."No.") then
+            TempBoolean := true;
+        exit(TempBoolean);
+    end;
+
+    local procedure NotContainPayableForPurchInv(var PurchInvHeader: Record "Purch. Inv. Header"): Boolean
+    var
+        Payable: Record Payable;
+        TempBoolean: Boolean;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.Get(PurchInvHeader."No.") then
+            TempBoolean := true;
+        exit(TempBoolean);
+    end;
+
 
 
     local procedure Deletearbitaryauto();

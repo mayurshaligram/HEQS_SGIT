@@ -16,7 +16,7 @@ table 50106 Payable
         field(4; "Schedule Date"; Date)
         {
         }
-        field(5; "Source of Cash"; Enum "Source of Cash")
+        field(5; "Payment Method Code"; Code[10])
         {
 
         }
@@ -51,9 +51,38 @@ table 50106 Payable
             var
                 User: Record User;
             begin
-                User.Get(Database.UserSecurityId());
-                Rec."Director Approval" := User."Full Name";
+                if Approval = true then begin
+                    User.Get(Database.UserSecurityId());
+                    Rec."Director Approval" := User."Full Name";
+                end
+                else begin
+                    Rec."Director Approval" := '';
+                end;
             end;
+        }
+        field(13; "Amount Received Not Invoiced"; Decimal)
+        {
+
+        }
+        field(14; Company; Text[30])
+        {
+
+        }
+        field(15; "Currency Code"; Code[10])
+        {
+
+        }
+        field(16; "Source of Cash"; Enum "Source of Cash")
+        {
+
+        }
+        field(17; "Vendor Invoice No."; Code[35])
+        {
+
+        }
+        field(18; Vendor; Text[30])
+        {
+
         }
     }
 

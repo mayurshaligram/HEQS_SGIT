@@ -350,6 +350,27 @@ codeunit 50101 "Sales Truth Mgt"
             IsHandled := true;
     end;
 
+    //     [IntegrationEvent(false, false)]
+    // local procedure OnAfterPurchInvLineInsert(var PurchInvLine: Record "Purch. Inv. Line"; PurchInvHeader: Record "Purch. Inv. Header"; PurchLine: Record "Purchase Line"; ItemLedgShptEntryNo: Integer; WhseShip: Boolean; WhseReceive: Boolean; CommitIsSupressed: Boolean)
+    // begin
+    // end;
+
+    [EventSubscriber(ObjectType::Codeunit, 90, 'OnAfterPurchInvLineInsert', '', false, false)]
+    local procedure AfterPurchInvLineInsertvar(var PurchInvLine: Record "Purch. Inv. Line"; PurchInvHeader: Record "Purch. Inv. Header"; PurchLine: Record "Purchase Line"; ItemLedgShptEntryNo: Integer; WhseShip: Boolean; WhseReceive: Boolean; CommitIsSupressed: Boolean)
+    var
+        Payable: Record Payable;
+        PostedWhseReceiptHeader: Record "Posted Whse. Receipt Header";
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(InventoryCompany());
+        if Payable.Get(PurchLine."Document No.") then begin
+            Payable."Posted Invoice No" := PurchInvHeader."No.";
+            Payable."USD" := PurchInvHeader."Remaining Amount";
+            Payable.Modify();
+        end;
+    end;
+
     [EventSubscriber(ObjectType::Codeunit, 5764, 'OnAfterConfirmPost', '', false, false)]
     local procedure AfterConfirmPost(WhseShipmentLine: Record "Warehouse Shipment Line"; Invoice: Boolean)
     var

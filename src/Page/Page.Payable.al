@@ -19,26 +19,49 @@ page 50110 Payable
                     ApplicationArea = All;
                     ToolTip = 'Specifies the Document No. for the Payable';
                 }
+                field("Posted Invoice No"; Rec."Posted Invoice No")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the Posted Invoice No. if posted';
+                }
+                field(Company; Rec.Company)
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the Company';
+                }
                 field(Item; Rec.Item)
                 {
                     ApplicationArea = All;
                     ToolTip = 'Specifies the Items for the payable';
                     MultiLine = true;
                 }
-                field(AUD; Rec.AUD)
+                field("Currency Code"; Rec."Currency Code")
                 {
                     ApplicationArea = All;
+                    ToolTip = 'Specifies the currency code for the amount';
+                }
+                field(Amount; Rec."AUD")
+                {
+                    Caption = 'Amount';
+                    ApplicationArea = All;
                     ToolTip = 'Specifies the amount for AUD';
+                }
+                field("Amount Remaining"; Rec."USD")
+                {
+                    Caption = 'Amount Remaining';
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies Amount Remaining';
+                }
+                field("Amount Received Not Invoiced"; Rec."Amount Received Not Invoiced")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies Amount Remaining';
                 }
                 field("Schedule Date"; Rec."Schedule Date")
                 {
                     ApplicationArea = All;
                 }
-                field("Source of Cash"; Rec."Source of Cash")
-                {
-                    ApplicationArea = All;
-                }
-                field(USD; Rec.USD)
+                field("Source of Cash"; Rec."Payment Method Code")
                 {
                     ApplicationArea = All;
                 }
@@ -59,14 +82,11 @@ page 50110 Payable
                     ApplicationArea = All;
                     Editable = false;
                 }
-                field("Account Details"; Rec."Account Details")
-                {
-                    ApplicationArea = All;
-                }
-                field("Posted Invoice No"; Rec."Posted Invoice No")
-                {
-                    ApplicationArea = All;
-                }
+                // field("Account Details"; Rec."Account Details")
+                // {
+                //     ApplicationArea = All;
+                // }
+
             }
         }
 
