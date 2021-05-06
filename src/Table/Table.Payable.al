@@ -80,7 +80,7 @@ table 50106 Payable
         {
 
         }
-        field(18; Vendor; Text[30])
+        field(18; Vendor; Text[100])
         {
 
         }

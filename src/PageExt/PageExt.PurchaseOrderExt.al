@@ -9,7 +9,7 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
                 Caption = 'Work Description';
                 field(WorkDescription; WorkDescription)
                 {
-                    Editable = false;
+                    Editable = true;
                     ApplicationArea = Basic, Suite;
                     Importance = Additional;
                     MultiLine = true;

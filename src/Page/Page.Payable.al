@@ -24,6 +24,12 @@ page 50110 Payable
                     ApplicationArea = All;
                     ToolTip = 'Specifies the Posted Invoice No. if posted';
                 }
+                field("Vendor Invoice No."; Rec."Vendor Invoice No.")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Specifies the Vendor Invoice No.';
+
+                }
                 field(Company; Rec.Company)
                 {
                     ApplicationArea = All;

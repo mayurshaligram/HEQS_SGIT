@@ -8,7 +8,7 @@
 			"environmentType": "Sandbox",
 			"environmentName": "debug",
 			"server": "https://businesscentral.dynamics.com/",
-			"startupObjectId": 143,
+			"startupObjectId": 9305,
 			"startupObjectType": "Page",
 			"breakOnError": true,
 			"launchBrowser": true,

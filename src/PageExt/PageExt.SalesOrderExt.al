@@ -441,6 +441,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 
         IsPei: Boolean;
 
+
     trigger OnAfterGetRecord();
     var
         IsICSalesHeader: Boolean;

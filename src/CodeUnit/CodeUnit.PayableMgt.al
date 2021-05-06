@@ -20,6 +20,7 @@ codeunit 50113 PayableMgt
         Payable."Currency Code" := PurchaseHeader."Currency Code";
         Payable.Company := PurchaseHeader.CurrentCompany;
         Payable.Vendor := PurchaseHeader."Buy-from Vendor Name";
+        Payable."Vendor Invoice No." := PurchaseHeader."Vendor Invoice No.";
         Payable."Amount Received Not Invoiced" := PurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
         Payable."Schedule Date" := PurchaseHeader."Due Date";
         Payable."Payment Method Code" := PurchaseHeader."Payment Method Code";
@@ -56,6 +57,7 @@ codeunit 50113 PayableMgt
         Payable."Currency Code" := PurchInvHeader."Currency Code";
         Payable.Company := PurchInvHeader.CurrentCompany;
         Payable.Vendor := PurchInvHeader."Buy-from Vendor Name";
+        Payable."Vendor Invoice No." := PurchInvHeader."Vendor Invoice No.";
         Payable."USD" := PurchInvHeader."Remaining Amount";
         // Payable."Amount Received Not Invoiced" := PurchInvHeader."Amt. Rcd. Not Invoiced (LCY)";
         Payable."Schedule Date" := PurchInvHeader."Due Date";
@@ -97,6 +99,7 @@ codeunit 50113 PayableMgt
 
                     Payable."Currency Code" := TempPurchaseHeader."Currency Code";
                     Payable.Company := TempPurchaseHeader.CurrentCompany;
+                    Payable."Vendor Invoice No." := TempPurchaseHeader."Vendor Invoice No.";
                     Payable.Vendor := TempPurchaseHeader."Buy-from Vendor Name";
                     Payable."Schedule Date" := TempPurchaseHeader."Due Date";
                     Payable."Payment Method Code" := TempPurchaseHeader."Payment Method Code";
@@ -136,6 +139,7 @@ codeunit 50113 PayableMgt
 
                     Payable."Currency Code" := TempPurchInvHeader."Currency Code";
                     Payable.Company := TempPurchInvHeader.CurrentCompany;
+                    Payable."Vendor Invoice No." := TempPurchInvHeader."Vendor Invoice No.";
                     Payable.Vendor := TempPurchInvHeader."Buy-from Vendor Name";
                     Payable."Schedule Date" := TempPurchInvHeader."Due Date";
                     Payable."Payment Method Code" := TempPurchInvHeader."Payment Method Code";
