@@ -1086,6 +1086,8 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."Line Amount" := SalesLine."Line Amount";
                         ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
                         ICSalesLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
+                        if ICSalesLine."Document Type" = ICSalesLine."Document Type"::"Return Order" then
+                            ICSalesLine."Return Reason Code" := SalesLine."Return Reason Code";
                         ICSalesLine.Modify();
                     end;
 
