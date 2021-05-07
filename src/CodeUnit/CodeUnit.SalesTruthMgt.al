@@ -733,6 +733,9 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader."Ship-to Phone No." := RetailSalesHeader."Ship-to Phone No.";
         SalesHeader."Ship-to City" := RetailSalesHeader."Ship-to City";
         SalesHeader."Shipping Agent Code" := RetailSalesHeader."Shipping Agent Code";
+        // For Return Order, Also need to carry the same Reason Code
+        if SalesHeader."Document Type" = SalesHeader."Document Type"::"Return Order" then
+            SalesHeader."Reason Code" := RetailSalesHeader."Reason Code";
 
         ZoneCode."Order Price" := RetailSalesHeader.Amount;
         if ZoneCode.Find('>') then
@@ -1083,6 +1086,8 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."Line Amount" := SalesLine."Line Amount";
                         ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
                         ICSalesLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
+                        if ICSalesLine."Document Type" = ICSalesLine."Document Type"::"Return Order" then
+                            ICSalesLine."Return Reason Code" := SalesLine."Return Reason Code";
                         ICSalesLine.Modify();
                     end;
 
@@ -1451,6 +1456,8 @@ codeunit 50101 "Sales Truth Mgt"
             ICSalesLine."Qty. to Invoice" := SalesLine."Qty. to Invoice";
             ICSalesLine."Line Amount" := SalesLine."Line Amount";
             ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
+            if ICSalesLine."Document Type" = ICSalesLine."Document Type"::"Return Order" then
+                ICSalesLine."Return Reason Code" := SalesLine."Return Reason Code";
             ICSalesLine.Insert();
             // if ICSalesLine."Document Type" = ICSalesLine."Document Type"::Order then
             //     CreateWhseShipLine(ICSalesLine);

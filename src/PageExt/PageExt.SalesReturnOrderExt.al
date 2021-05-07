@@ -18,8 +18,16 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
                 ICInOutboxMgt: Codeunit ICInboxOutboxMgt;
                 ApprovalsMgmt: Codeunit "Approvals Mgmt.";
                 PurchaseHeader: Record "Purchase Header";
+
+                HasLineReasonCode: Boolean;
+                SalesLine: Record "Sales Line";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
+                    if Rec."Reason Code" = '' then
+                        Error('Please Provide Reason Code for this Return Order.');
+                    if ReasonCodeCheck(Rec) = false then
+                        Error('Please Provide Reason Code for the item line');
+
                     PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.");
                     ICSalesHeader.ChangeCompany(InventoryCompanyName);
                     ICSalesHeader.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
@@ -57,6 +65,22 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
         if IsICSalesHeader then begin
             Currpage.Editable(false);
         end;
+    end;
+
+    local procedure ReasonCodeCheck(SalesHeader: Record "Sales Header"): Boolean
+    var
+        TempBool: Boolean;
+        SalesLine: Record "Sales Line";
+    begin
+        TempBool := true;
+        SalesLine.SetRange("Document Type", SalesHeader."Document Type");
+        SalesLine.SetRange("Document No.", SalesHeader."No.");
+        if SalesLine.FindSet() then
+            repeat
+                if SalesLine."Return Reason Code" = '' then
+                    TempBool := false;
+            until SalesLine.Next() = 0;
+        exit(TempBool);
     end;
 
     //////////////////////////////////////////////////////////////////////////////////////
