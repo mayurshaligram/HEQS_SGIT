@@ -163,7 +163,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Editable = true;
         }
     }
-
     trigger OnAfterInsert();
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then
@@ -215,6 +214,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         ICrec."Ship-to Address" := rec."Ship-to Address";
                         ICrec.Ship := rec.ship;
                         ICrec."Work Description" := rec."Work Description";
+                        if ICrec."Document Type" = ICrec."Document Type"::"Return Order" then
+                            ICrec."Reason Code" := Rec."Reason Code";
                         if ICrec."Location Code" <> Rec."Location Code" then begin
                             ICrec."Location Code" := Rec."Location Code";
                             WhseRequest.Reset();

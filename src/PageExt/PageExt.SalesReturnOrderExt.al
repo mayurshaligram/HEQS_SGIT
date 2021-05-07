@@ -20,6 +20,8 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
                 PurchaseHeader: Record "Purchase Header";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
+                    if Rec."Reason Code" = '' then
+                        Error('Please Provide Reason Code for this Return Order.');
                     PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.");
                     ICSalesHeader.ChangeCompany(InventoryCompanyName);
                     ICSalesHeader.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
