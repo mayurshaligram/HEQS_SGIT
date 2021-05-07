@@ -225,7 +225,12 @@ page 50105 "DevPage"
         Release25Password: Code[20];
 
     trigger OnOpenPage();
+    var
+        User: Record User;
     begin
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" <> 'Pei Xu' then
+            Error('This page is for administrator only, Thank you. If have any concern about that please contact Pei');
     end;
 
     local procedure ClearPurchaseInvoice()

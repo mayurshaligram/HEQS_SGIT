@@ -338,6 +338,55 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesLine.Delete();
     end;
 
+    // OnBeforeCreateShptHeader(WhseShptHeader, "Warehouse Request", "Sales Line", IsHandled, Location, WhseShptLine, ActivitiesCreated, WhseHeaderCreated, RequestType);
+    [EventSubscriber(ObjectType::Report, 5753, 'OnBeforeCreateShptHeader', '', false, false)]
+    local procedure BeforeCreateShptHeader(var WarehouseShipmentHeader: Record "Warehouse Shipment Header"; var WarehouseRequest: Record "Warehouse Request"; SalesLine: Record "Sales Line"; var IsHandled: Boolean; Location: Record Location; var WhseShptLine: Record "Warehouse Shipment Line"; var ActivitiesCreated: Integer; var WhseHeaderCreated: Boolean; var RequestType: Option Receive,Ship);
+    var
+        SalesHeader: Record "Sales Header";
+        TempStatus: Enum "Sales Document Status";
+    begin
+        if (SalesLine.CurrentCompany = InventoryCompany()) and (SalesLine."Document Type" = SalesLine."Document Type"::Order) then begin
+            if SalesHeader.Get(SalesLine."Document Type", SalesLine."Document No.") then begin
+                TempStatus := SalesHeader.Status;
+                SalesHeader.Status := SalesHeader.Status::Open;
+                SalesHeader.Modify();
+                QuickFix(SalesHeader);
+                SalesHeader.Status := TempStatus;
+                SalesHeader.Modify();
+            end;
+        end;
+    end;
+
+    //     [IntegrationEvent(false, false)]
+    // local procedure OnBeforeWarehouseRequestOnAfterGetRecord(var WarehouseRequest: Record "Warehouse Request"; var WhseHeaderCreated: Boolean; var SkipRecord: Boolean; var BreakReport: Boolean; RequestType: Option Receive,Ship; var WhseReceiptHeader: Record "Warehouse Receipt Header"; var WhseShptHeader: Record "Warehouse Shipment Header"; OneHeaderCreated: Boolean)
+    // begin
+    // end;
+
+    [EventSubscriber(ObjectType::Report, 5753, 'OnBeforeWarehouseRequestOnAfterGetRecord', '', false, false)]
+    local procedure BeforeWarehouseRequestOnAfterGetRecord(var WarehouseRequest: Record "Warehouse Request"; var WhseHeaderCreated: Boolean; var SkipRecord: Boolean; var BreakReport: Boolean; RequestType: Option Receive,Ship; var WhseReceiptHeader: Record "Warehouse Receipt Header"; var WhseShptHeader: Record "Warehouse Shipment Header"; OneHeaderCreated: Boolean)
+    var
+        SalesHeader: Record "Sales Header";
+        TempStatus: Enum "Sales Document Status";
+    begin
+        if (WarehouseRequest.CurrentCompany = InventoryCompany()) then begin
+            SalesHeader.Reset();
+            SalesHeader.SetRange("No.", WarehouseRequest."Source No.");
+            if SalesHeader.FindSet() then begin
+                TempStatus := SalesHeader.Status;
+                SalesHeader.Status := SalesHeader.Status::Open;
+                SalesHeader.Modify();
+                QuickFix(SalesHeader);
+                SalesHeader.Status := TempStatus;
+                SalesHeader.Modify();
+            end;
+        end;
+    end;
+    // var
+
+    // begin
+
+    // end;
+
     // [IntegrationEvent(false, false)]
     // local procedure OnBeforeSendICDocument(var SalesHeader: Record "Sales Header"; var ModifyHeader: Boolean; var IsHandled: Boolean)
     // begin
@@ -591,7 +640,10 @@ codeunit 50101 "Sales Truth Mgt"
 
     [EventSubscriber(ObjectType::Codeunit, 80, 'OnBeforeDeleteAfterPosting', '', false, false)]
     local procedure BeforeDeleteAfterPosting(var SalesHeader: Record "Sales Header"; var SalesInvoiceHeader: Record "Sales Invoice Header"; var SalesCrMemoHeader: Record "Sales Cr.Memo Header"; var SkipDelete: Boolean; CommitIsSuppressed: Boolean; EverythingInvoiced: Boolean)
+    var
+        TempSalesInvoiceHeader: Record "Sales Invoice Header";
     begin
+        if TempSalesInvoiceHeader.Get(SalesInvoiceHeader."No.") = false then exit;
         SalesInvoiceHeader.RetailSalesHeader := SalesHeader.RetailSalesHeader;
         SalesInvoiceHeader."Ship-to City" := SalesHeader."Ship-to City";
         SalesInvoiceHeader.ZoneCode := SalesHeader.ZoneCode;
@@ -642,6 +694,7 @@ codeunit 50101 "Sales Truth Mgt"
         SalesInvoiceHeader.Note := SalesHeader.Note;
         SalesInvoiceHeader.NeedCollectPayment := SalesHeader.NeedCollectPayment;
         SalesInvoiceHeader.Note := SalesHeader.Note;
+
         SalesInvoiceHeader.Modify();
     end;
 
@@ -1397,6 +1450,7 @@ codeunit 50101 "Sales Truth Mgt"
             ICSalesLine."Qty. to Ship" := SalesLine."Qty. to Ship";
             ICSalesLine."Qty. to Invoice" := SalesLine."Qty. to Invoice";
             ICSalesLine."Line Amount" := SalesLine."Line Amount";
+            ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
             ICSalesLine.Insert();
             // if ICSalesLine."Document Type" = ICSalesLine."Document Type"::Order then
             //     CreateWhseShipLine(ICSalesLine);
