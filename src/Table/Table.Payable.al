@@ -84,6 +84,52 @@ table 50106 Payable
         {
 
         }
+        field(19; "Payment Period"; Enum "Payment Period")
+        {
+
+        }
+        field(20; "Bank Type"; Enum "Bank Type")
+        {
+
+        }
+        field(21; "AUD Amount"; Decimal)
+        {
+        }
+        field(22; "AUD Remaining Amount"; Decimal)
+        {
+
+        }
+        field(23; "AUD Rec Not Inv"; Decimal)
+        {
+
+        }
+        field(24; "USD Amount"; Decimal)
+        {
+        }
+        field(25; "USD Remaining Amount"; Decimal)
+        {
+        }
+        field(26; "USD Rec Not Inv"; Decimal)
+        {
+        }
+        field(27; "CAD Amount"; Decimal)
+        {
+        }
+        field(28; "CAD Remaining Amount"; Decimal)
+        {
+        }
+        field(29; "CAD Rec Not Inv"; Decimal)
+        {
+        }
+        field(30; "CNY Amount"; Decimal)
+        {
+        }
+        field(31; "CNY Remaining Amount"; Decimal)
+        {
+        }
+        field(32; "CNY Rec Not Inv"; Decimal)
+        {
+        }
     }
 
     keys

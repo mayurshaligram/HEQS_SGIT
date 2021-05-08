@@ -38,8 +38,10 @@ tableextension 50101 "Purchase Header_Ext" extends "Purchase Header"
     begin
         Payable.Reset();
         Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
-        if Payable.Get(Rec."No.") then
-            Payable."AUD" := Rec.Amount;
+        if Payable.Get(Rec."No.") then begin
+            Rec.CalcFields("Amount Including VAT");
+            Payable."AUD" := Rec."Amount Including VAT";
+        end
     end;
 
 

@@ -13,8 +13,11 @@ codeunit 50113 PayableMgt
         Payable.Reset();
         Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
         Payable."No." := PurchaseHeader."No.";
+        PurchaseHeader.CalcFields("Amount Including VAT");
+        PurchaseHeader.CalcFields("Amt. Rcd. Not Invoiced (LCY)");
         // CRUD Method for the Purchase Line determine the Item
-        Payable."AUD" := PurchaseHeader.Amount;
+        Payable."AUD" := PurchaseHeader."Amount Including VAT";
+
         // Payable."Amount Received Not Invoiced" := PurchaseHeader.recei
         // Payable."Date of Payment" := Rec."Due Date";
         Payable."Currency Code" := PurchaseHeader."Currency Code";
@@ -24,6 +27,7 @@ codeunit 50113 PayableMgt
         Payable."Amount Received Not Invoiced" := PurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
         Payable."Schedule Date" := PurchaseHeader."Due Date";
         Payable."Payment Method Code" := PurchaseHeader."Payment Method Code";
+        // AUD Cal
         Payable.Insert()
         // ? Payment Method Code
         // Payable."Source of Cash" := Rec."Payment Method Code";
@@ -50,8 +54,11 @@ codeunit 50113 PayableMgt
         Payable.Reset();
         Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
         Payable."No." := PurchInvHeader."No.";
+        Payable."Posted Invoice No" := PurchInvHeader."No.";
         // CRUD Method for the Purchase Line determine the Item
-        Payable."AUD" := PurchInvHeader.Amount;
+        PurchInvHeader.CalcFields("Amount Including VAT");
+        PurchInvHeader.CalcFields("Remaining Amount");
+        Payable."AUD" := PurchInvHeader."Amount Including VAT";
         // Payable."Amount Received Not Invoiced" := PurchaseHeader.recei
         // Payable."Date of Payment" := Rec."Due Date";
         Payable."Currency Code" := PurchInvHeader."Currency Code";
@@ -92,9 +99,9 @@ codeunit 50113 PayableMgt
                 TempPurchaseHeader.Reset();
                 TempPurchaseHeader.ChangeCompany(PurchaseLine.CurrentCompany);
                 if TempPurchaseHeader.Get(PurchaseLine."Document Type", PurchaseLine."Document No.") then begin
-                    TempPurchaseHeader.CalcFields(Amount);
+                    TempPurchaseHeader.CalcFields("Amount Including VAT");
                     TempPurchaseHeader.CalcFields("Amt. Rcd. Not Invoiced (LCY)");
-                    Payable."AUD" := TempPurchaseHeader.Amount;
+                    Payable."AUD" := TempPurchaseHeader."Amount Including VAT";
                     Payable."Amount Received Not Invoiced" := TempPurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
 
                     Payable."Currency Code" := TempPurchaseHeader."Currency Code";
@@ -132,9 +139,9 @@ codeunit 50113 PayableMgt
                 TempPurchInvHeader.Reset();
                 TempPurchInvHeader.ChangeCompany(PurchInvLine.CurrentCompany);
                 if TempPurchInvHeader.Get(PurchInvLine."Document No.") then begin
-                    TempPurchInvHeader.CalcFields(Amount);
+                    TempPurchInvHeader.CalcFields("Amount Including VAT");
                     TempPurchInvHeader.CalcFields("Remaining Amount");
-                    Payable."AUD" := TempPurchInvHeader.Amount;
+                    Payable."AUD" := TempPurchInvHeader."Amount Including VAT";
                     Payable.USD := TempPurchInvHeader."Remaining Amount";
 
                     Payable."Currency Code" := TempPurchInvHeader."Currency Code";
