@@ -9,7 +9,7 @@ pageextension 50111 SROListExt extends "Sales Return Order List"
                 Caption = 'Automate PurchOrder No.';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies the number of the automated generated purch return order no';
-                Visible = IsInventoryCompany;
+                Visible = Not IsInventoryCompany;
             }
         }
     }
@@ -23,98 +23,84 @@ pageextension 50111 SROListExt extends "Sales Return Order List"
                 ApplicationArea = Basic, Suite;
                 Caption = 'Auto Post Invoice';
                 Image = PostOrder;
+                Visible = Not IsInventoryCompany;
                 Promoted = true;
                 PromotedCategory = Category7;
-                PromotedOnly = true;
-                PromotedIsBig = true;
+                // PromotedOnly = true;
+                // PromotedIsBig = true;
                 trigger OnAction();
                 var
                     SalesLine: Record "Sales Line";
                     WarehouseRequest: Record "Warehouse Request";
-                    TempInteger: Integer;
                     ReleaseSalesDoc: Codeunit "Release Sales Document";
                     InventorySalesOrder: Record "Sales Header";
                     SessionId: Integer;
                     PurchaseHeader: Record "Purchase Header";
                     PurchaseLine: Record "Purchase Line";
-
+                    PostedSalesInvoiceHeader: Record "Sales Invoice Header";
+                    NoSeries: Record "No. Series";
+                    NoSeriesMgt: Codeunit NoSeriesManagement;
                     RetailSalesLine: Record "Sales Line";
-
+                    VendorInvoiceNo: Code[20];
+                    TempText: Text[20];
+                    TempNum: Text[20];
+                    TempInteger: Integer;
                     TempSalesLine: Record "Sales Line";
                     TempItem: Record Item;
                     IsValideIC: Boolean;
+                    Text1: Label 'Please only post invoice in the retail company %1';
+                    PostedPurchaseInvoice: Record "Purch. Inv. Header";
+                    // Only the Sales Header associated with more then one inventory item sale line could be pass
+                    Shipped: Boolean;
                     SalesHeader: Record "Sales Header";
-                    SalesTruthMgt: Codeunit "Sales Truth Mgt";
-                // Only the Sales Header associated with more then one inventory item sale line could be pass
                 begin
-                    // if SalesHeader.FindSet() then
-                    //     repeat
-                    //         SalesTruthMgt.AutoPost(SalesHeader);
-                    //     until SalesHeader.Next() = 0;
-                    IsValideIC := false;
-                    TempSalesLine.SetRange("Document No.", Rec."No.");
-                    TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
-                    if TempSalesLine.FindSet() then
+                    CurrPage.SetSelectionFilter(SalesHeader);
+                    if SalesHeader.FindSet() then
                         repeat
-                            TempItem.Get(TempSalesLine."No.");
-                            if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
-                        until TempSalesLine.Next() = 0;
-
-                    if IsValideIC = false then Error('Please Only use the normal Posting');
-                    SessionId := 51;
-
-                    InventorySalesOrder.Reset();
-                    InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
-                    // InventorySalesOrder.SetRange("External Document No.", PurchaseHeader."No.");
-                    InventorySalesOrder.FindLast();
-
-                    PurchaseHeader.Reset();
-                    PurchaseHeader.SetRange("Sales Order Ref", Rec."No.");
-                    PurchaseHeader.FindSet();
-                    PurchaseHeader."Due Date" := Rec."Due Date";
-                    // PurchaseHeader."Vendor Invoice No." := InventorySalesOrder."No.";
-                    PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
-                    PurchaseHeader.Modify();
-
-                    // RetailSalesLine.SetRange("Document No.", Rec."No.");
-                    // if RetailSalesLine.FindSet() then
-                    //     repeat
-                    //         RetailSalesLine."Quantity Shipped" := RetailSalesLine."Qty. to Ship";
-                    //         RetailSalesLine."Qty. to Ship" := 0;
-                    //         RetailSalesLine.Modify();
-                    //     until RetailSalesLine.Next() = 0;
-
-                    PurchaseLine.Reset();
-                    PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
-                    if PurchaseLine.FindSet() then
-                        repeat
-                            PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
-                            PurchaseLine.Modify();
-                        until PurchaseLine.Next() = 0;
-
-
-                    Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
-                    Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", Rec);
-                    // Post Purchase Order Invoice
-                    // Post Intercompany Sales Order Invoice
-
-                    StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
-                        'HEQS International Pty Ltd', InventorySalesOrder);
+                            SalesTruthMgt.ReturnAutoPost(SalesHeader);
+                        until SalesHeader.Next() = 0;
                 end;
 
             }
+        }
+        modify(Release)
+        {
+            Visible = IsPei;
         }
     }
 
     var
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+        IsPei: Boolean;
 
     trigger OnOpenPage();
+    var
+        SalesHeader: Record "Sales Header";
+        OK: Boolean;
+        SessionID: Integer;
+        User: Record User;
     begin
-        IsInventoryCompany := true;
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" = 'Pei Xu' then IsPei := true;
+        IsInventoryCompany := false;
         if Rec.CurrentCompany = InventoryCompanyName then
-            IsInventoryCompany := false;
+            IsInventoryCompany := true;
+        if SalesHeader.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
+            SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+            if SalesHeader.FindSet() then
+                repeat
+                    if SalesHeader."External Document No." <> '' then begin
+                        OK := STARTSESSION(SessionId, CODEUNIT::RetailBatchPostShipment);
+                        if OK = false then
+                            ERROR('The session was not started successfully.');
+                        // SalesHeader."External Document No." := '';
+                        // SalesHeader.Modify();
+
+                    end;
+                until SalesHeader.Next() = 0;
+        end;
 
         Rec.SetView('sorting (Rec."No.") order(descending)');
         Rec.SetRange("No.");

@@ -415,6 +415,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         PurchaseHeader."Posting Date" := Rec."Posting Date";
         PurchaseHeader."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
         PurchaseHeader."Status" := Rec."Status";
+        if PurchaseHeader."Document Type" = PurchaseHeader."Document Type"::"Return Order" then
+            PurchaseHeader."Reason Code" := Rec."Reason Code";
         PurchaseHeader.Modify();
     end;
 

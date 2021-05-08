@@ -18,6 +18,115 @@ codeunit 50101 "Sales Truth Mgt"
     /// 
     /// 
     /// //////////////////////////////////////////////////////////
+    /// 
+    procedure ReturnAutoPost(var SalesHeader: Record "Sales Header");
+    var
+        SalesLine: Record "Sales Line";
+        WarehouseRequest: Record "Warehouse Request";
+        ReleaseSalesDoc: Codeunit "Release Sales Document";
+        InventorySalesOrder: Record "Sales Header";
+        SessionId: Integer;
+        PurchaseHeader: Record "Purchase Header";
+        PurchaseLine: Record "Purchase Line";
+        PostedSalesCrMemoHeader: Record "Sales Cr.Memo Header";
+        NoSeries: Record "No. Series";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+        RetailSalesLine: Record "Sales Line";
+        VendorInvoiceNo: Code[20];
+        TempText: Text[20];
+        TempNum: Text[20];
+        TempInteger: Integer;
+        TempSalesLine: Record "Sales Line";
+        TempItem: Record Item;
+        IsValideIC: Boolean;
+        Text1: Label 'Please only post invoice in the retail company %1';
+
+        PurchCrMemoHdr: Record "Purch. Cr. Memo Hdr.";
+        // Only the Sales Header associated with more then one inventory item sale line could be pass
+        Shipped: Boolean;
+    begin
+        Shipped := false;
+        if SalesHeader.CurrentCompany = InventoryCompany() then
+            Error(Text1, SalesHeader."Sell-to Customer Name");
+        IsValideIC := false;
+        TempSalesLine.SetRange("Document No.", SalesHeader."No.");
+        TempSalesLine.SetRange(Type, TempSalesLine.Type::Item);
+        if TempSalesLine.FindSet() then
+            repeat
+                TempItem.Get(TempSalesLine."No.");
+                if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
+                if TempSalesLine."Quantity Shipped" <> 0 then Shipped := true;
+                if TempSalesLine."Document Type" = TempSalesLine."Document Type"::"Return Order" then
+                    if TempSalesLine."Return Qty. Received" <> 0 then Shipped := true;
+            ////////
+            /// 
+            ///  Test the Sales line  has Quantity to Shpment
+            ///     
+            /// //
+            until TempSalesLine.Next() = 0;
+
+        if IsValideIC = false then Error('Please Only use the normal Posting');
+        if Shipped = false then Error('This Order has nothing to post');
+
+
+        PostedSalesCrMemoHeader.ChangeCompany('HEQS International Pty Ltd');
+        if PostedSalesCrMemoHeader.FindLast() then begin
+            VendorInvoiceNo := PostedSalesCrMemoHeader."No.";
+
+            TempText := Format(VendorInvoiceNo);
+            TempNum := TempText.Substring(6);
+            Evaluate(TempInteger, TempNum);
+            TempInteger += 1;
+            VendorInvoiceNo := 'INTAD' + Format(TempInteger);
+        end
+        else
+            VendorInvoiceNo := 'INTAD100001';
+
+        PurchCrMemoHdr.Reset();
+        if PurchCrMemoHdr.FindLast() then
+            if VendorInvoiceNo = PurchCrMemoHdr."Vendor Cr. Memo No." then begin
+                VendorInvoiceNo := VendorInvoiceNo + '*';
+            end;
+
+
+
+        PurchaseHeader.Reset();
+        PurchaseHeader.SetRange("Sales Order Ref", SalesHeader."No.");
+        if PurchaseHeader.FindSet() and (VendorInvoiceNo <> '') then begin
+            PurchaseHeader."Due Date" := SalesHeader."Due Date";
+
+            PurchaseHeader."Gen. Bus. Posting Group" := 'DOMESTIC';
+            PurchaseHeader.Modify();
+
+            PurchaseLine.Reset();
+            PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+            if PurchaseLine.FindSet() then
+                repeat
+                    PurchaseLine."Gen. Bus. Posting Group" := 'DOMESTIC';
+                    PurchaseLine.Modify();
+                until PurchaseLine.Next() = 0;
+
+            NoSeries.ChangeCompany(InventoryCompany());
+            NoSeries.Get('S-INV+');
+            PurchaseHeader."Vendor Cr. Memo No." := VendorInvoiceNo;
+            PurchaseHeader.Modify();
+            Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
+        end;
+
+        Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", SalesHeader);
+
+        SessionId := 51;
+        InventorySalesOrder.Reset();
+        InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
+        InventorySalesOrder.SetRange("Document Type", SalesHeader."Document Type");
+        InventorySalesOrder.SetRange(RetailSalesHeader, SalesHeader."No.");
+
+        if InventorySalesOrder.FindLast() then
+            StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                                       'HEQS International Pty Ltd', InventorySalesOrder);
+
+    end;
+
     procedure AutoPost(var SalesHeader: Record "Sales Header");
     var
         SalesLine: Record "Sales Line";
@@ -55,12 +164,16 @@ codeunit 50101 "Sales Truth Mgt"
                 TempItem.Get(TempSalesLine."No.");
                 if TempItem.Type = TempItem.Type::Inventory then IsValideIC := true;
                 if TempSalesLine."Quantity Shipped" <> 0 then Shipped := true;
+                if TempSalesLine."Document Type" = TempSalesLine."Document Type"::"Return Order" then
+                    if TempSalesLine."Return Qty. Received" <> 0 then Shipped := true;
             ////////
             /// 
             ///  Test the Sales line  has Quantity to Shpment
             ///     
             /// //
             until TempSalesLine.Next() = 0;
+
+
 
         if IsValideIC = false then Error('Please Only use the normal Posting');
         if Shipped = false then Error('This Order has nothing to post');
@@ -755,6 +868,8 @@ codeunit 50101 "Sales Truth Mgt"
                     SalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
                     SalesLine.AssemblyHour := RetailSalesLine.AssemblyHour;
                     SalesLine.UnitAssembleHour := RetailSalesLine.UnitAssembleHour;
+                    if SalesLine."Document Type" = SalesLine."Document Type"::"Return Order" then
+                        SalesLine."Return Reason Code" := RetailSalesLine."Return Reason Code";
                     if RetailSalesLine.NeedAssemble then
                         TempAssemblyItem := TempAssemblyItem + 'Yes' + '\'
                     else
@@ -855,6 +970,8 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseHeader."Posting Date" := SalesHeader."Posting Date";
             PurchaseHeader."Buy-from IC Partner Code" := 'HEQSINTERNATIONAL';
             PurchaseHeader."Status" := SalesHeader."Status";
+            if PurchaseHeader."Document Type" = PurchaseHeader."Document Type"::"Return Order" then
+                PurchaseHeader."Reason Code" := SalesHeader."Reason Code";
             PurchaseHeader.Insert();
             SalesHeader."Automate Purch.Doc No." := PurchaseHeader."No.";
             SalesHeader.Modify();
@@ -1019,6 +1136,8 @@ codeunit 50101 "Sales Truth Mgt"
                     PurchaseLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
 
                     Item.Get(TempSalesLine."No.");
+                    if PurchaseLine."Document Type" = PurchaseLine."Document Type"::"Return Order" then
+                        PurchaseLine."Return Reason Code" := TempSalesLine."Return Reason Code";
                     PurchaseLine.Modify();
                 end;
             until TempSalesLine.Next() = 0;
@@ -1087,7 +1206,7 @@ codeunit 50101 "Sales Truth Mgt"
                         ICSalesLine."Unit of Measure" := SalesLine."Unit of Measure";
                         ICSalesLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
                         if ICSalesLine."Document Type" = ICSalesLine."Document Type"::"Return Order" then
-                            ICSalesLine."Return Reason Code" := SalesLine."Return Reason Code";
+                            ICSalesLine."Return Reason Code" := TempSalesLine."Return Reason Code";
                         ICSalesLine.Modify();
                     end;
 
@@ -1379,6 +1498,8 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseLine.Validate("No.", SalesLine."No.");
             PurchaseLine."BOM Item" := SalesLine."BOM Item";
             PurchaseLine.Validate(Quantity, SalesLine.Quantity);
+            if PurchaseLine."Document Type" = PurchaseLine."Document Type"::"Return Order" then
+                PurchaseLine."Return Reason Code" := SalesLine."Return Reason Code";
             PurchaseLine.Insert();
             User.Get(Database.UserSecurityId());
             if User."Full Name" <> 'Pei Xu' then
