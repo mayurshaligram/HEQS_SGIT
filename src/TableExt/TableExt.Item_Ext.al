@@ -233,39 +233,40 @@ tableextension 50102 "Item_Ext" extends "Item"
                 repeat
                     if ('HEQS International Pty Ltd' <> OtherCompanyRecord.Name) then begin
                         RetailItemRecord.ChangeCompany(OtherCompanyRecord.Name);
-                        RetailItemRecord.Get(Rec."No.");
-                        // AB#67
-                        TempCost := RetailItemRecord."Unit Cost";
-                        TempPrice := RetailItemRecord."Unit Price";
-                        TempShelfNo := RetailItemRecord."Shelf No.";
-                        TempStandardCost := RetailItemRecord."Standard Cost";
-                        TempIndirectCost := RetailItemRecord."Indirect Cost %";
-                        TempLastDirectCost := RetailItemRecord."Last Direct Cost";
-                        TempItemDiscGroup := RetailItemRecord."Item Disc. Group";
-                        TempVendorNO := RetailItemRecord."Vendor No.";
-                        TempVendorItemNo := RetailItemRecord."Vendor Item No.";
+                        if RetailItemRecord.Get(Rec."No.") then begin
+                            // AB#67
+                            TempCost := RetailItemRecord."Unit Cost";
+                            TempPrice := RetailItemRecord."Unit Price";
+                            TempShelfNo := RetailItemRecord."Shelf No.";
+                            TempStandardCost := RetailItemRecord."Standard Cost";
+                            TempIndirectCost := RetailItemRecord."Indirect Cost %";
+                            TempLastDirectCost := RetailItemRecord."Last Direct Cost";
+                            TempItemDiscGroup := RetailItemRecord."Item Disc. Group";
+                            TempVendorNO := RetailItemRecord."Vendor No.";
+                            TempVendorItemNo := RetailItemRecord."Vendor Item No.";
 
-                        RetailItemRecord := Rec;
-                        RetailItemRecord."Unit Cost" := TempCost;
-                        RetailItemRecord."Unit Price" := TempPrice;
-                        RetailItemRecord."Shelf No." := TempShelfNo;
-                        RetailItemRecord."Standard Cost" := TempStandardCost;
-                        RetailItemRecord."Indirect Cost %" := TempIndirectCost;
-                        RetailItemRecord."Last Direct Cost" := TempLastDirectCost;
-                        RetailItemRecord."Item Disc. Group" := TempItemDiscGroup;
-                        RetailItemRecord."Vendor Item No." := TempVendorNO;
-                        RetailItemRecord."Vendor No." := TempVendorItemNo;
-                        RetailItemRecord.Modify();
+                            RetailItemRecord := Rec;
+                            RetailItemRecord."Unit Cost" := TempCost;
+                            RetailItemRecord."Unit Price" := TempPrice;
+                            RetailItemRecord."Shelf No." := TempShelfNo;
+                            RetailItemRecord."Standard Cost" := TempStandardCost;
+                            RetailItemRecord."Indirect Cost %" := TempIndirectCost;
+                            RetailItemRecord."Last Direct Cost" := TempLastDirectCost;
+                            RetailItemRecord."Item Disc. Group" := TempItemDiscGroup;
+                            RetailItemRecord."Vendor Item No." := TempVendorNO;
+                            RetailItemRecord."Vendor No." := TempVendorItemNo;
+                            RetailItemRecord.Modify();
 
-                        if Rec."Base Unit of Measure" <> xRec."Base Unit of Measure" then begin
-                            ItemUOM.Reset();
-                            ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
-                            ItemUOM.SetRange("Item No.", Rec."No.");
-                            ItemUOM.SetRange(Code, Rec."Base Unit of Measure");
-                            if ItemUOM.Count = 0 then begin
-                                if OriginalItemUOM.Get(Rec."No.", Rec."Base Unit of Measure") then begin
-                                    ItemUOM := OriginalItemUOM;
-                                    ItemUOM.Insert();
+                            if Rec."Base Unit of Measure" <> xRec."Base Unit of Measure" then begin
+                                ItemUOM.Reset();
+                                ItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                                ItemUOM.SetRange("Item No.", Rec."No.");
+                                ItemUOM.SetRange(Code, Rec."Base Unit of Measure");
+                                if ItemUOM.Count = 0 then begin
+                                    if OriginalItemUOM.Get(Rec."No.", Rec."Base Unit of Measure") then begin
+                                        ItemUOM := OriginalItemUOM;
+                                        ItemUOM.Insert();
+                                    end;
                                 end;
                             end;
                         end;
