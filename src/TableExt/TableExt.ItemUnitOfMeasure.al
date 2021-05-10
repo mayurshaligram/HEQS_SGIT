@@ -6,7 +6,7 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
         User: Record User;
     begin
         User.Get(Database.UserSecurityId());
-        if User."Full Name" <> 'Karen Huang' then begin
+        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') then begin
             if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
                 Error('Please only edit items in HEQS International Pty Ltd');
         end;
@@ -43,7 +43,7 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
         User: Record User;
     begin
         User.Get(Database.UserSecurityId());
-        if User."Full Name" <> 'Karen Huang' then begin
+        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') then begin
             if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
                 Error('Please only edit items in HEQS International Pty Ltd');
         end;
@@ -84,7 +84,7 @@ tableextension 50119 ItemUOMExt extends "Item Unit of Measure"
         User: Record User;
     begin
         User.Get(Database.UserSecurityId());
-        if User."Full Name" <> 'Karen Huang' then begin
+        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') then begin
             if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
                 Error('Please only edit items in HEQS International Pty Ltd');
         end;
