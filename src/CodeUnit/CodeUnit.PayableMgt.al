@@ -79,6 +79,35 @@ codeunit 50113 PayableMgt
         // Payable."Source of Cash" := Rec."Payment Method Code";
     end;
 
+    procedure ModifyPayable(var PurchaseHeader: Record "Purchase Header")
+    var
+        Payable: Record Payable;
+    begin
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        if Payable.Get(PurchaseHeader."No.") = false then exit;
+        Payable.Reset();
+        Payable.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        Payable."No." := PurchaseHeader."No.";
+        PurchaseHeader.CalcFields("Amount Including VAT");
+        PurchaseHeader.CalcFields("Amt. Rcd. Not Invoiced (LCY)");
+        // CRUD Method for the Purchase Line determine the Item
+        Payable."AUD" := PurchaseHeader."Amount Including VAT";
+
+        // Payable."Amount Received Not Invoiced" := PurchaseHeader.recei
+        // Payable."Date of Payment" := Rec."Due Date";
+        Payable."Currency Code" := PurchaseHeader."Currency Code";
+        Payable.Company := PurchaseHeader.CurrentCompany;
+        Payable.Vendor := PurchaseHeader."Buy-from Vendor Name";
+        Payable."Vendor Invoice No." := PurchaseHeader."Vendor Invoice No.";
+        Payable."Amount Received Not Invoiced" := PurchaseHeader."Amt. Rcd. Not Invoiced (LCY)";
+        Payable."Schedule Date" := PurchaseHeader."Due Date";
+        Payable."Payment Method Code" := PurchaseHeader."Payment Method Code";
+        // AUD Cal
+        Payable.Modify();
+    end;
+
+
     procedure PutPayableItem(var PurchaseLine: Record "Purchase Line")
     var
         Payable: Record Payable;

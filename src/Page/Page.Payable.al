@@ -176,8 +176,13 @@ page 50110 Payable
                 field("Account Details"; Rec."Account Details")
                 {
                     ApplicationArea = All;
+                    Visible = false;
                 }
-
+                field(WorkDescription; TempText)
+                {
+                    ApplicationArea = All;
+                    MultiLine = true;
+                }
                 field(Note; Rec.Note)
                 {
                     ApplicationArea = All;
@@ -374,6 +379,8 @@ page 50110 Payable
         IsCADPage: Boolean;
         IsCNYPage: Boolean;
 
+        TempText: Text;
+
     trigger OnOpenPage()
     var
         User: Record User;
@@ -391,6 +398,49 @@ page 50110 Payable
         IsUSDPage := false;
         IsCADPage := false;
         IsCNYPage := false;
+    end;
+
+    trigger OnAfterGetRecord()
+    var
+        RecordLink: Record "Record Link";
+        TypeHelper: Codeunit "Type Helper";
+        PurchaseHeader: Record "Purchase Header";
+        PurchInvHeader: Record "Purch. Inv. Header";
+        InnerText: Text;
+        MyInStream: InStream;
+    begin
+        TempText := '';
+        Clear(PurchaseHeader);
+        PurchaseHeader.ChangeCompany(Rec.Company);
+        PurchaseHeader.SetRange("No.", Rec."No.");
+        if PurchaseHeader.FindSet() then begin
+            RecordLink.ChangeCompany(Rec.Company);
+            RecordLink.SetRange("Record ID", PurchaseHeader.RecordId);
+            if RecordLink.FindSet() then
+                repeat
+                    RecordLink.CalcFields(Note);
+                    RecordLink.Note.CreateInStream(MyInStream);
+                    InnerText += TypeHelper.ReadAsTextWithSeparator(MyInStream, ' ');
+                until RecordLink.Next() = 0;
+        end;
+        if Rec."Posted Invoice No" <> '' then begin
+            begin
+                Clear(PurchInvHeader);
+                PurchInvHeader.ChangeCompany(Rec.Company);
+                PurchInvHeader.SetRange("No.", Rec."Posted Invoice No");
+                if PurchInvHeader.FindSet() then begin
+                    RecordLink.ChangeCompany(Rec.Company);
+                    RecordLink.SetRange("Record ID", PurchInvHeader.RecordId);
+                    if RecordLink.FindSet() then
+                        repeat
+                            RecordLink.CalcFields(Note);
+                            RecordLink.Note.CreateInStream(MyInStream);
+                            InnerText += TypeHelper.ReadAsTextWithSeparator(MyInStream, ' ');
+                        until RecordLink.Next() = 0;
+                end;
+            end;
+        end;
+        TempText := InnerText;
     end;
 
     local procedure UpdateAUD();

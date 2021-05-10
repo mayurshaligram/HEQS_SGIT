@@ -25,11 +25,8 @@ tableextension 50101 "Purchase Header_Ext" extends "Purchase Header"
 
 
     trigger OnModify()
-    var
-        Payable: Record Payable;
     begin
-        if Rec.Amount <> xRec.Amount then
-            ModifyPayableAmount()
+        PayableMgt.ModifyPayable(Rec);
     end;
 
     local procedure ModifyPayableAmount()

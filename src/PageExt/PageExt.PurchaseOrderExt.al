@@ -105,12 +105,24 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
                     Error('Please do release action in "%1", Sales Order: "%2"', Rec.CurrentCompany, Rec."Sales Order Ref");
             end;
         }
+        modify(CopyDocument)
+        {
+            trigger OnAfterAction()
+            var
+                PurchaseLine: Record "Purchase Line";
+            begin
+                Clear(PurchaseLine);
+                PurchaseLine.Get(Rec."Document Type", Rec."No.");
+                PayableMgt.PutPayableItem(PurchaseLine);
+            end;
+        }
     }
     var
         WorkDescription: Text;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
 
         IsPei: Boolean;
+        PayableMgt: Codeunit PayableMgt;
 
     procedure GetWorkDescription(): Text
     var
