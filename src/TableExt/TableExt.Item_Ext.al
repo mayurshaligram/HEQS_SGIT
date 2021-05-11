@@ -213,8 +213,8 @@ tableextension 50102 "Item_Ext" extends "Item"
         TempText: Text;
         RetailItemRecord: Record Item;
         OtherCompanyRecord: Record Company;
-        TempCost: Integer;
-        TempPrice: Integer;
+        TempCost: Decimal;
+        TempPrice: Decimal;
         TempShelfNo: Code[10];
         TempStandardCost: Decimal;
         TempIndirectCost: Decimal;
@@ -280,8 +280,8 @@ tableextension 50102 "Item_Ext" extends "Item"
         TempText: Text;
         RetailItemRecord: Record Item;
         OtherCompanyRecord: Record Company;
-        TempCost: Integer;
-        TempPrice: Integer;
+        TempCost: Decimal;
+        TempPrice: Decimal;
         TempShelfNo: Code[10];
         TempStandardCost: Decimal;
         TempIndirectCost: Decimal;
