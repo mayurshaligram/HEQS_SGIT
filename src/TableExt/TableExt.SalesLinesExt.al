@@ -140,8 +140,8 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         IsItemLine := false;
 
         if (Rec.Type = Rec.Type::Item) then begin
-            Item.Get(Rec."No.");
-            if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
+            if Item.Get(Rec."No.") then
+                if (Item.Type = Item.Type::Inventory) then IsItemLine := true;
         end;
 
         if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
