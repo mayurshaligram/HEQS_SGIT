@@ -1,6 +1,7 @@
 codeunit 50101 "Sales Truth Mgt"
 {
-    Permissions = TableData "Sales Invoice Header" = imd;
+    Permissions = TableData "Sales Invoice Header" = imd,
+                    TableData "Purch. Inv. Header" = imd;
     EventSubscriberInstance = StaticAutomatic;
 
     var
@@ -511,6 +512,20 @@ codeunit 50101 "Sales Truth Mgt"
         if SalesHeader.CurrentCompany = InventoryCompany() then
             IsHandled := true;
     end;
+
+    [EventSubscriber(ObjectType::Codeunit, 90, 'OnAfterFinalizePosting', '', false, false)]
+    local procedure OnAfterFinalizePosting(var PurchHeader: Record "Purchase Header"; var PurchRcptHeader: Record "Purch. Rcpt. Header"; var PurchInvHeader: Record "Purch. Inv. Header"; var PurchCrMemoHdr: Record "Purch. Cr. Memo Hdr."; var ReturnShptHeader: Record "Return Shipment Header"; var GenJnlPostLine: Codeunit "Gen. Jnl.-Post Line"; PreviewMode: Boolean; CommitIsSupressed: Boolean)
+    begin
+        if PurchInvHeader."No." <> '' then begin
+            PurchInvHeader."Vendor Shipment No." := PurchHeader."Vendor Shipment No.";
+            PurchInvHeader.Modify();
+        end;
+    end;
+
+    // [IntegrationEvent(false, false)]
+    // local procedure OnAfterFinalizePosting(var PurchHeader: Record "Purchase Header"; var PurchRcptHeader: Record "Purch. Rcpt. Header"; var PurchInvHeader: Record "Purch. Inv. Header"; var PurchCrMemoHdr: Record "Purch. Cr. Memo Hdr."; var ReturnShptHeader: Record "Return Shipment Header"; var GenJnlPostLine: Codeunit "Gen. Jnl.-Post Line"; PreviewMode: Boolean; CommitIsSupressed: Boolean)
+    // begin
+    // end;
 
     //     [IntegrationEvent(false, false)]
     // local procedure OnAfterPurchInvLineInsert(var PurchInvLine: Record "Purch. Inv. Line"; PurchInvHeader: Record "Purch. Inv. Header"; PurchLine: Record "Purchase Line"; ItemLedgShptEntryNo: Integer; WhseShip: Boolean; WhseReceive: Boolean; CommitIsSupressed: Boolean)
