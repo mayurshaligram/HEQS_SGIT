@@ -8,7 +8,7 @@ pageextension 50117 "WhseSubformExt" extends "Whse. Pick Subform"
             {
                 ApplicationArea = Warehouse;
                 ToolTip = 'Specifies the original SO for warehouse activity line.';
-                Visible = false;
+                Visible = true;
             }
         }
     }

@@ -27,10 +27,36 @@ pageextension 50105 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                                 WarehouseActivityLine.Modify();
                             until WarehouseActivityLine.Next() = 0;
                     until WarehouseShipmentLine.Next() = 0;
+                AssignPickOriginalSO();
             end;
         }
     }
 
     var
         WhseShipPExtMgt: Codeunit WhseShipPExtMgt;
+
+    local procedure AssignPickOriginalSO();
+    var
+        WhsePickHeader: Record "Warehouse Activity Header";
+        WhsePickLines: Record "Warehouse Activity Line";
+        SourceNo: Record "Sales Header";
+    begin
+        Clear(WhsePickHeader);
+        WhsePickHeader.SetRange(Type, WhsePickHeader.Type::Pick);
+        if WhsePickHeader.FindLast() then
+            repeat
+                Clear(WhsePickLines);
+                WhsePickLines.SetRange("No.", WhsePickHeader."No.");
+                if WhsePickLines.FindSet() then
+                    repeat
+                        if WhsePickLines."Source Document" = WhsePickLines."Source Document"::"Sales Order" then begin
+                            Clear(SourceNo);
+                            if SourceNo.Get(SourceNo."Document Type"::Order, WhsePickLines."Source No.") then begin
+                                WhsePickLines."Original SO" := SourceNo.RetailSalesHeader;
+                                WhsePickLines.Modify();
+                            end;
+                        end;
+                    until WhsePickLines.Next() = 0;
+            until WhsePickHeader.Next() = 0;
+    end;
 }

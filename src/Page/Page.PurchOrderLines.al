@@ -20,6 +20,7 @@ page 50103 "Purch Order Lines"
                     HideValue = DocumentNoHideValue;
                     StyleExpr = 'Strong';
                     ToolTip = 'Specifies the number of the related document.';
+
                 }
                 field("Buy-from Vendor No."; Rec."Buy-from Vendor No.")
                 {
