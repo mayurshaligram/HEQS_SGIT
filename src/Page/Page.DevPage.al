@@ -7,7 +7,7 @@ page 50105 "DevPage"
     UsageCategory = Lists;
     ApplicationArea = All;
     AdditionalSearchTerms = 'DevPage';
-    Permissions = TableData 112 = rimd;
+    Permissions = TableData 112 = rimd, TableData "Purch. Inv. Header" = imd;
 
     layout
     {
@@ -29,22 +29,22 @@ page 50105 "DevPage"
                     begin
                         // if Password = 'Heqs326688' then
                         if Password = '0' then
-                            if Dialog.Confirm('Clear all the payable') then begin
-                                ClearPayable;
+                            if Dialog.Confirm('Load the Archive Vendor shipment No') then begin
+                                LoadVendorShipmentNo();
                             end;
-                        if Password = '1' then begin
-                            if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
-                                Error('Please only delete the retail company purchase invoice');
-                            if Dialog.Confirm('Clear This compant all purhchase invoice') then begin
-                                ClearPurchaseInvoice;
-                            end
-                        end;
-                        if Password = '2' then
-                            if Dialog.Confirm('Reload the Payable Table') then begin
+                        // if Password = '1' then begin
+                        //     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
+                        //         Error('Please only delete the retail company purchase invoice');
+                        //     if Dialog.Confirm('Clear This compant all purhchase invoice') then begin
+                        //         ClearPurchaseInvoice;
+                        //     end
+                        // end;
+                        // if Password = '2' then
+                        //     if Dialog.Confirm('Reload the Payable Table') then begin
 
-                                LoadPayable;
-                                LoadPayableForPurchInv;
-                            end;
+                        //         LoadPayable;
+                        //         LoadPayableForPurchInv;
+                        //     end;
 
 
                         // if Password = 'Heqs326688' then
@@ -141,6 +141,24 @@ page 50105 "DevPage"
     // begin
     //     ChangeWarehouseRequest();
     // end;
+    local procedure LoadVendorShipmentNo();
+    var
+        PostedPurchInvoice: Record "Purch. Inv. Header";
+        PurchaseHeaderArchive: Record "Purchase Header Archive";
+    begin
+        Clear(PostedPurchInvoice);
+        if PostedPurchInvoice.FindSet() then
+            repeat
+                Clear(PurchaseHeaderArchive);
+                PurchaseHeaderArchive.SetRange("No.", PostedPurchInvoice."Order No.");
+                if PurchaseHeaderArchive.FindLast() then begin
+                    PostedPurchInvoice."Vendor Invoice No." := PurchaseHeaderArchive."Vendor Invoice No.";
+                    PostedPurchInvoice."Vendor Shipment No." := PurchaseHeaderArchive."Vendor Shipment No.";
+                    PostedPurchInvoice.Modify()
+                end;
+            until PostedPurchInvoice.Next() = 0;
+    end;
+
     local procedure RemoveLink();
     var
         SalesHeader: Record "Sales Header";
