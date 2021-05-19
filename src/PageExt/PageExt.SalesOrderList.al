@@ -113,12 +113,33 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
 
             }
         }
+        addfirst(processing)
+        {
+            action("&Import")
+            {
+                Caption = '&Import';
+                Image = ImportExcel;
+                Promoted = true;
+                PromotedCategory = New;
+                PromotedIsBig = true;
+                ApplicationArea = All;
+                Visible = IsFurniture;
+                ToolTip = 'Import data from excel.';
+
+                trigger OnAction()
+                var
+                begin
+                    page.run(50111);
+                end;
+            }
+        }
     }
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         IsPei: Boolean;
+        IsFurniture: Boolean;
 
     trigger OnOpenPage();
     var
@@ -130,6 +151,9 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         OK: Boolean;
         User: Record User;
     begin
+        IsFurniture := false;
+        if Rec.CurrentCompany = 'HEQS Furniture Pty Ltd' then
+            IsFurniture := true;
         User.Get(Database.UserSecurityId());
         if User."Full Name" = 'Pei Xu' then IsPei := true;
         if SalesHeader.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin

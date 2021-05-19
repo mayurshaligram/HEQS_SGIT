@@ -162,6 +162,28 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Description = 'TripSequence';
             Editable = true;
         }
+
+        field(50127; "Batch Name"; Code[30])
+        {
+            Caption = 'Batch Name';
+            DataClassification = CustomerContent;
+        }
+        field(50126; "Request Delivery Period"; Enum "Delivery Period")
+        {
+            Caption = 'Request Delivery Period';
+            DataClassification = CustomerContent;
+        }
+        field(50125; "Need Manage Approval"; Boolean)
+        {
+            Caption = 'Need Manage Approval';
+            DataClassification = CustomerContent;
+        }
+    }
+    keys
+    {
+        key(Key14; "Batch Name")
+        {
+        }
     }
     trigger OnAfterInsert();
     begin
@@ -921,4 +943,5 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         SalesLine.Insert();
         // OnAfterCreateSalesLine(SalesLine, TempSalesLine);
     end;
+
 }
