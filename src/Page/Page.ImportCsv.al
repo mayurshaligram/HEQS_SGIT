@@ -207,8 +207,8 @@ page 50111 "SO Import Worksheet"
         if TempHeaderText <> '' then
             SOImportBuffer."Ship-to Contact" := TempHeaderText;
         // Caseworker's Name and CaseWorker Contact Name
-        TempWorkDescription += GetValueAtCell(4, 4) + '  ';
-        TempWorkDescription += GetValueAtCell(4, 7) + '  ';
+        TempWorkDescription += 'CaseWorker: ' + GetValueAtCell(4, 4) + '  ';
+        TempWorkDescription += 'CaseWorker No: ' + GetValueAtCell(4, 7) + '  ';
         // Date Ordered to Order Date
         if GetValueAtCell(5, 4) <> '' then begin
             if Evaluate(TempDate, GetValueAtCell(5, 4)) then
@@ -297,6 +297,19 @@ page 50111 "SO Import Worksheet"
             end;
             TempRow += 1;
         until TempRow > 180;
+        if SOImportBuffer."Amount Including VAT" <= 300 then begin
+            Clear(SLImportBuffer);
+            SLImportBuffer.init();
+            SLImportBuffer."Document Type" := SLImportBuffer."Document Type"::Order;
+            SLImportBuffer."Document No." := SOImportBuffer."No.";
+            SLImportBuffer.Type := SLImportBuffer.Type::Item;
+            SLImportBuffer.Validate("No.", '9010000');
+            SLImportBuffer.Validate(Quantity, 1);
+            SLImportBuffer.Validate("Unit Price", 50);
+            SLImportBuffer."Location Code" := SOImportBuffer."Location Code";
+            SLImportBuffer.Insert(true);
+        end;
+
     end;
 
     local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text

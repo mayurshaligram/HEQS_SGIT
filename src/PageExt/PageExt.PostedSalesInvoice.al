@@ -1,15 +1,27 @@
 pageextension 50121 PostedSalesInvoiceExt extends "Posted Sales Invoice"
 {
-    layout
+    actions
     {
-        modify("Ship-to Name")
+        addbefore("&Track Package")
         {
-            Editable = IsSuper;
+            action("Modify Reference")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Modify Reference';
+                Image = ItemTracking;
+                Promoted = true;
+                PromotedCategory = Process;
+                ToolTip = 'Modify Reference';
+                trigger OnAction();
+                var
+                    ChangePostedInvoice: Page ChangePostedSalesInvoice;
+                begin
+                    ChangePostedInvoice.SetRecord(Rec);
+                    ChangePostedInvoice.Run();
+                end;
+            }
         }
-        modify("Bill-to Name")
-        {
-            Editable = true;
-        }
+
     }
 
 

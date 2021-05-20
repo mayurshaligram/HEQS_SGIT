@@ -189,6 +189,13 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         }
         modify("Create &Warehouse Shipment")
         {
+            trigger OnBeforeAction();
+            var
+                WhseRequestMgt: Codeunit WhseRequestMgt;
+            begin
+                WhseRequestMgt.ValidateWhseRequest(Rec);
+            end;
+
             // trigger OnBeforeAction();
             // // var
             // //     WhseShipLine: Record "Warehouse Shipment Line";

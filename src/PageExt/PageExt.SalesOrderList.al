@@ -133,6 +133,57 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 end;
             }
         }
+        modify("Create &Warehouse Shipment")
+        {
+            trigger OnBeforeAction();
+            var
+                WhseRequestMgt: Codeunit WhseRequestMgt;
+                Nothing: Integer;
+                WhseRequest: Record "Warehouse Request";
+                NewWhseRequest: Record "Warehouse Request";
+            begin
+                Nothing := 1;
+                WhseRequestMgt.ValidateWhseRequest(Rec);
+                // WhseRequest.Reset();
+                // WhseRequest.SetRange("Source No.", Rec."No.");
+                // if WhseRequest.FindFirst() then begin
+                //     if WhseRequest."Location Code" <> REc."Location Code" then begin
+                //         NewWhseRequest.Reset();
+                //         NewWhseRequest := WhseRequest;
+                //         NewWhseRequest."Location Code" := Rec."Location Code";
+                //         WhseRequest.Delete();
+                //         Database.Commit();
+                //         NewWhseRequest.Insert();
+                //         Database.Commit();
+                //     end
+                // end;
+            end;
+
+            trigger OnAfterAction();
+            var
+                WarehouseShipmentHeader: Record "Warehouse Shipment Header";
+                WarehouseShipmentLine: Record "Warehouse Shipment Line";
+                BOMComponent: Record "BOM Component";
+                SalesLine: Record "Sales Line";
+            begin
+                if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
+                    WarehouseShipmentLine.SetRange("Source No.", Rec."No.");
+                    if WarehouseShipmentLine.FindSet() then
+                        repeat
+                            BOMComponent.SetRange("Parent Item No.", WarehouseShipmentLine."Item No.");
+                            if BOMComponent.findset() then
+                                WarehouseShipmentLine."Pick-up Item" := false
+                            else
+                                WarehouseShipmentLine."Pick-up Item" := true;
+                            WarehouseShipmentLine."Original SO" := Rec.RetailSalesHeader;
+                            WarehouseShipmentLine.Modify();
+
+                        until WarehouseShipmentLine.Next() = 0;
+                    Rec.Status := Rec.Status::Released;
+                    Rec.Modify();
+                end;
+            end;
+        }
     }
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";

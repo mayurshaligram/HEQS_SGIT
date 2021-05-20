@@ -30,6 +30,7 @@ pageextension 50105 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                 AssignPickOriginalSO();
             end;
         }
+
     }
 
     var

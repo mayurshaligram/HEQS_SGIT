@@ -471,6 +471,15 @@ codeunit 50101 "Sales Truth Mgt"
         end;
     end;
 
+    // OnBeforeCreateShptHeader(WhseShptHeader, "Warehouse Request", "Sales Line", IsHandled, Location, WhseShptLine, ActivitiesCreated, WhseHeaderCreated, RequestType);
+    [EventSubscriber(ObjectType::Table, 37, 'OnBeforeValidateShipmentDate', '', false, false)]
+    local procedure BeforeValidateShipmentDate(var IsHandled: boolean);
+    begin
+        IsHandled := true;
+    end;
+
+
+
     //     [IntegrationEvent(false, false)]
     // local procedure OnBeforeWarehouseRequestOnAfterGetRecord(var WarehouseRequest: Record "Warehouse Request"; var WhseHeaderCreated: Boolean; var SkipRecord: Boolean; var BreakReport: Boolean; RequestType: Option Receive,Ship; var WhseReceiptHeader: Record "Warehouse Receipt Header"; var WhseShptHeader: Record "Warehouse Shipment Header"; OneHeaderCreated: Boolean)
     // begin
@@ -691,6 +700,20 @@ codeunit 50101 "Sales Truth Mgt"
                     end;
                 until WhseShipmentLine.Next() = 0;
         end;
+    end;
+
+    [EventSubscriber(ObjectType::Codeunit, 5752, 'OnBeforeGetSingleOutboundDoc', '', false, false)]
+    local procedure OnBeforeGetSingleOutboundDoc(var WarehouseShipmentHeader: Record "Warehouse Shipment Header"; var IsHandled: Boolean);
+    var
+        SalesHeader: Record "Sales Header";
+        WhseRequestMgt: Codeunit WhseRequestMgt;
+    begin
+        SalesHeader.SetRange("Location Code", WarehouseShipmentHeader."Location Code");
+        SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        if SalesHeader.FindSet() then
+            repeat
+                WhseRequestMgt.ValidateWhseRequest(SalesHeader);
+            until SalesHeader.Next() = 0;
     end;
 
 

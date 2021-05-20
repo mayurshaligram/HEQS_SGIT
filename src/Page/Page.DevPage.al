@@ -26,19 +26,27 @@ page 50105 "DevPage"
                         InputWindow: Dialog;
                         SalesHeader: Record "Sales Header";
                         PayableMgt: Record Payable;
+                        WhseRequest: Record "Warehouse Request";
+                        NewWhseRequest: Record "Warehouse Request";
                     begin
                         // if Password = 'Heqs326688' then
                         if Password = '0' then
                             if Dialog.Confirm('Load the Archive Vendor shipment No') then begin
                                 LoadVendorShipmentNo();
                             end;
-                        // if Password = '1' then begin
-                        //     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
-                        //         Error('Please only delete the retail company purchase invoice');
-                        //     if Dialog.Confirm('Clear This compant all purhchase invoice') then begin
-                        //         ClearPurchaseInvoice;
-                        //     end
-                        // end;
+
+                        if Password = '1' then begin
+                            if Dialog.Confirm('Change Location Code for INT101074 to VIC for testing') then begin
+                                WhseRequest.SetRange("Source No.", 'INT101073');
+                                if WhseRequest.FindFirst() then begin
+                                    NewWhseRequest := WhseRequest;
+                                    NewWhseRequest."Location Code" := 'VIC';
+                                    WhseRequest.Delete();
+                                    NewWhseRequest.Insert();
+                                end
+
+                            end
+                        end;
                         // if Password = '2' then
                         //     if Dialog.Confirm('Reload the Payable Table') then begin
 
