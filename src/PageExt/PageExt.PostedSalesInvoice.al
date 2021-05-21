@@ -38,8 +38,4 @@ pageextension 50121 PostedSalesInvoiceExt extends "Posted Sales Invoice"
             IsSuper := true;
         end;
     end;
-
-
-
-
 }

@@ -29,24 +29,13 @@ page 50105 "DevPage"
                         WhseRequest: Record "Warehouse Request";
                         NewWhseRequest: Record "Warehouse Request";
                     begin
-                        // if Password = 'Heqs326688' then
                         if Password = '0' then
-                            if Dialog.Confirm('Load the Archive Vendor shipment No') then begin
-                                LoadVendorShipmentNo();
-                            end;
+                            if Dialog.Confirm('Reload Item unit of measure in international company') then
+                                ReloadItemUnitOfMeasure();
+                        // if Password = '1' then
+                        //     if Dialog.Confirm('Add Test Case') then
+                        //         AddTestCase();
 
-                        if Password = '1' then begin
-                            if Dialog.Confirm('Change Location Code for INT101074 to VIC for testing') then begin
-                                WhseRequest.SetRange("Source No.", 'INT101073');
-                                if WhseRequest.FindFirst() then begin
-                                    NewWhseRequest := WhseRequest;
-                                    NewWhseRequest."Location Code" := 'VIC';
-                                    WhseRequest.Delete();
-                                    NewWhseRequest.Insert();
-                                end
-
-                            end
-                        end;
                         // if Password = '2' then
                         //     if Dialog.Confirm('Reload the Payable Table') then begin
 
@@ -149,6 +138,44 @@ page 50105 "DevPage"
     // begin
     //     ChangeWarehouseRequest();
     // end;
+    local procedure addtestcase();
+    var
+        Test: Record "Item Unit of Measure";
+    begin
+        Test."Item No." := '7010004-B2 OF 2';
+        Test.Code := 'BOX';
+        Test.Insert();
+    end;
+
+    local procedure ReloadItemUnitOfMeasure();
+    var
+        Test: Record "Item Unit of Measure";
+        Item: Record Item;
+        ItemUOM: Record "Item Unit of Measure";
+        NewItemUOM: Record "Item Unit of Measure";
+        OtherCompanyRecord: Record Company;
+    begin
+        if ItemUOM.FindSet() then
+            repeat
+                if ItemUOM.CurrentCompany = 'HEQS International Pty Ltd' then begin
+                    OtherCompanyRecord.Reset();
+                    if OtherCompanyRecord.Find('-') then
+                        repeat
+                            NewItemUOM.Reset();
+                            NewItemUOM.ChangeCompany(OtherCompanyRecord.Name);
+                            if NewItemUOM.Get(ItemUOM."Item No.", ItemUOM.Code) = false then begin
+                                Item.Reset();
+                                Item.ChangeCompany(OtherCompanyRecord.Name);
+                                if Item.Get(ItemUOM."Item No.") then begin
+                                    NewItemUOM := ItemUOM;
+                                    NewItemUOM.Insert(true);
+                                end;
+                            end;
+                        until OtherCompanyRecord.Next() = 0;
+                end;
+            until ItemUOM.Next() = 0;
+    end;
+
     local procedure LoadVendorShipmentNo();
     var
         PostedPurchInvoice: Record "Purch. Inv. Header";

@@ -1136,6 +1136,7 @@ codeunit 50101 "Sales Truth Mgt"
                 if BOMSalesLine.FindSet() then
                     repeat
                         BOMSalesLine.NeedAssemble := SalesLine.NeedAssemble;
+                        BOMSalesLine."Return Reason Code" := SalesLine."Return Reason Code";
                         BOMSalesLine.Validate("Location Code", SalesLine."Location Code");
                         BOMSalesLine.Validate(Quantity, SalesLine.Quantity * BOMComponent."Quantity per");
                         BOMSalesLine.Modify();

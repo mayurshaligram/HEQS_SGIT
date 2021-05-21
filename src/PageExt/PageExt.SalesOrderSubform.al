@@ -102,7 +102,7 @@ pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
 
                 trigger OnAction()
                 begin
-                    Rec.Reset();
+                    Rec.SetView('WHERE("Document Type" = FILTER(Order))');
                     CurrPage.Update();
                 end;
             }
@@ -149,5 +149,4 @@ pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
             CurrPage.Update();
         end;
     end;
-
 }

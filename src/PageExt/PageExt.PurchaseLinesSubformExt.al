@@ -43,7 +43,7 @@ pageextension 50109 "Purchase Lines Subform_Ext" extends "Purchase Order Subform
                     PurchaseHeader.Reset();
                     PurchaseHeader.Get(Rec."Document Type", Rec."Document No.");
                     SalesTruthMgt.BOMAssignPurchase(PurchaseHeader);
-                    Rec.Reset();
+                    Rec.SetView('WHERE("Document Type" = FILTER(Order))');
                     CurrPage.Update();
                 end;
             }
