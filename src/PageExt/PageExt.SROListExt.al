@@ -67,6 +67,22 @@ pageextension 50111 SROListExt extends "Sales Return Order List"
         {
             Visible = IsPei;
         }
+        modify(Post)
+        {
+            Visible = false;
+        }
+        modify("Post and &Print")
+        {
+            Visible = false;
+        }
+        modify("Post &Batch")
+        {
+            Visible = false;
+        }
+        modify("Post and Email")
+        {
+            Visible = false;
+        }
     }
 
     var

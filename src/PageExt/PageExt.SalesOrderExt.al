@@ -53,6 +53,15 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 
 
         }
+        addafter("Ship-to Contact")
+        {
+            field("Ship-to Contact 2"; Rec."Ship-to Contact 2")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Contact';
+                ToolTip = 'Specifies the name of the contact person at the address that products on the sales document will be shipped to.';
+            }
+        }
 
         modify("Promised Delivery Date")
         {

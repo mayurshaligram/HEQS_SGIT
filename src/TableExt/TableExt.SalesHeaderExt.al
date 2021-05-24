@@ -178,6 +178,10 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             Caption = 'Need Manage Approval';
             DataClassification = CustomerContent;
         }
+        field(50124; "Ship-to Contact 2"; Text[100])
+        {
+            Caption = 'Ship-to Contact 2';
+        }
     }
     keys
     {

@@ -30,8 +30,8 @@ page 50105 "DevPage"
                         NewWhseRequest: Record "Warehouse Request";
                     begin
                         if Password = '0' then
-                            if Dialog.Confirm('Reload Item unit of measure in international company') then
-                                ReloadItemUnitOfMeasure();
+                            if Dialog.Confirm('This for hard delete the Sales Return Order and Purchase Return Order and Associated Sales line and Purchase LIne') then
+                                HardDeletedSalesROLPOL();
                         // if Password = '1' then
                         //     if Dialog.Confirm('Add Test Case') then
                         //         AddTestCase();
@@ -138,6 +138,26 @@ page 50105 "DevPage"
     // begin
     //     ChangeWarehouseRequest();
     // end;
+    local procedure HardDeletedSalesROLPOL();
+    var
+        SalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+        SalesLine: Record "Sales Line";
+        Text1: Label 'Please only post invoice in the retail company %1';
+        Text2: Text;
+    begin
+        SalesHeader.Get(SalesHeader."Document Type"::"Return Order", 'FSRO1003');
+        SalesHeader.Delete();
+        SalesLine.SetRange("Document Type", SalesLine."Document Type"::"Return Order");
+        SalesLine.SetRange("Document No.", 'FSRO1003');
+        if SalesLine.FindSet() then
+            repeat
+                SalesLine.Delete();
+            until SalesLine.Next() = 0;
+        PurchaseHeader.Get(PurchaseHeader."Document Type"::"Return Order", 'FPRO1003');
+        PurchaseHeader.Delete();
+    end;
+
     local procedure addtestcase();
     var
         Test: Record "Item Unit of Measure";

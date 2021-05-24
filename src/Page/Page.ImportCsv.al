@@ -188,7 +188,9 @@ page 50111 "SO Import Worksheet"
         SOImportBuffer.Init();
         Evaluate(SOImportBuffer."Batch Name", BatchName);
         Show := GetValueAtCell(1, 4);
-        SOImportBuffer.Validate("Sell-to Customer Name", GetValueAtCell(1, 4));
+        if Show = '' then
+            Show := 'blank';
+        SOImportBuffer.Validate("Sell-to Customer Name", ExamSamePrefixName(Show));
         SOImportBuffer."Document Type" := SOImportBuffer."Document Type"::Order;
         // PO number to Your reference
         TempHeaderText := GetValueAtCell(1, 7);
@@ -201,7 +203,7 @@ page 50111 "SO Import Worksheet"
         // Client's Name to Ship-to Contact
         TempHeaderText := GetValueAtCell(3, 4);
         if TempHeaderText <> '' then
-            SOImportBuffer."Ship-to Name" := TempHeaderText;
+            SOImportBuffer."Sell-to Contact" := TempHeaderText;
         // Client's Contact Name
         TempHeaderText := GetValueAtCell(3, 7);
         if TempHeaderText <> '' then
@@ -209,67 +211,65 @@ page 50111 "SO Import Worksheet"
         // Caseworker's Name and CaseWorker Contact Name
         TempWorkDescription += 'CaseWorker: ' + GetValueAtCell(4, 4) + '  ';
         TempWorkDescription += 'CaseWorker No: ' + GetValueAtCell(4, 7) + '  ';
+        TempWorkDescription += 'CaseWorker No 2: ' + GetValueAtCell(5, 7) + '  ';
         // Date Ordered to Order Date
         if GetValueAtCell(5, 4) <> '' then begin
             if Evaluate(TempDate, GetValueAtCell(5, 4)) then
                 SOImportBuffer."Order Date" := TempDate
-        end;
-        // Prefered Delivery date to Promised Delivery date
-        if GetValueAtCell(5, 7) <> '' then begin
-            if Evaluate(TempDate, GetValueAtCell(5, 7)) then
-                SOImportBuffer."Requested Delivery Date" := TempDate
         end;
         // Delivery Address
         TempHeaderText := GetValueAtCell(6, 4);
         if TempHeaderText <> '' then begin
             SOImportBuffer."Ship-to Address" := TempHeaderText;
         end;
-        // Delivery Address 2
-        TempHeaderText := GetValueAtCell(7, 4);
-        if TempHeaderText <> '' then begin
-            SOImportBuffer."Ship-to Address 2" := TempHeaderText;
-        end;
-        // City 
-        TempHeaderText := GetValueAtCell(8, 2);
-        if TempHeaderText <> '' then
-            SOImportBuffer.validate("Ship-to City", TempHeaderText);
-        // PostCode
-        TempHeaderText := GetValueAtCell(8, 4);
-        if TempHeaderText <> '' then
-            SOImportBuffer.validate("Ship-to Post Code", TempHeaderText);
-        // Preferred Delivery Period
-        TempHeaderText := GetValueAtCell(8, 6);
-        if TempHeaderText <> '' then
-            if TempHeaderText = 'M' then
-                SOImportBuffer."Request Delivery Period" := SOImportBuffer."Request Delivery Period"::"Morning 8am - 1pm"
-            else
-                SOImportBuffer."Request Delivery Period" := SOImportBuffer."Request Delivery Period"::"Afternoon 1pm - 6pm";
-        // Manage Approve
-        TempHeaderText := GetValueAtCell(8, 8);
-        if TempHeaderText <> '' then
-            if TempHeaderText <> 'Y' then
-                SOImportBuffer."Need Manage Approval" := true
-            else
-                SOImportBuffer."Need Manage Approval" := false;
         // Floor
-        TempHeaderText := GetValueAtCell(9, 4);
+        TempHeaderText := GetValueAtCell(7, 4);
         if TempHeaderText <> '' then
             TempWorkDescription += '  Floor' + TempHeaderText;
+        // Prefered Delivery date to Promised Delivery date
+        if GetValueAtCell(7, 7) <> '' then begin
+            if Evaluate(TempDate, GetValueAtCell(5, 7)) then
+                SOImportBuffer."Requested Delivery Date" := TempDate
+        end;
         // Special 
-        TempHeaderText := GetValueAtCell(10, 5);
+        TempHeaderText := GetValueAtCell(8, 5);
         if TempHeaderText <> '' then
             TempWorkDescription += '  Other' + TempHeaderText;
-        // Send Email
-        TempHeaderText := GetValueAtCell(11, 4);
-        if TempHeaderText <> '' then
-            if TempHeaderText <> '' then
-                SOImportBuffer."Sell-to E-Mail" := TempHeaderText;
+        // City 
+        // TempHeaderText := GetValueAtCell(8, 2);
+        // if TempHeaderText <> '' then
+        //     SOImportBuffer.validate("Ship-to City", TempHeaderText);
+        // // PostCode
+        // TempHeaderText := GetValueAtCell(8, 4);
+        // if TempHeaderText <> '' then
+        //     SOImportBuffer.validate("Ship-to Post Code", TempHeaderText);
+        // // Preferred Delivery Period
+        // TempHeaderText := GetValueAtCell(8, 6);
+        // if TempHeaderText <> '' then
+        //     if TempHeaderText = 'M' then
+        //         SOImportBuffer."Request Delivery Period" := SOImportBuffer."Request Delivery Period"::"Morning 8am - 1pm"
+        //     else
+        //         SOImportBuffer."Request Delivery Period" := SOImportBuffer."Request Delivery Period"::"Afternoon 1pm - 6pm";
+        // // Manage Approve
+        // TempHeaderText := GetValueAtCell(8, 8);
+        // if TempHeaderText <> '' then
+        //     if TempHeaderText <> 'Y' then
+        //         SOImportBuffer."Need Manage Approval" := true
+        //     else
+        //         SOImportBuffer."Need Manage Approval" := false;
+
+
+        // // Send Email
+        // TempHeaderText := GetValueAtCell(11, 4);
+        // if TempHeaderText <> '' then
+        //     if TempHeaderText <> '' then
+        //         SOImportBuffer."Sell-to E-Mail" := TempHeaderText;
         LSetWorkDescription(SOImportBuffer, TempWorkDescription);
         if SOImportBuffer."Ship-to Address" <> '' then
             SOImportBuffer.Delivery := SOImportBuffer.Delivery::Delivery;
         SOImportBuffer.Insert(true);
         temp := GetValueAtCell(TempRow, 5);
-        TempRow := 12;
+        TempRow := 15;
         repeat
             Clear(SLImportBuffer);
             SLImportBuffer.init();
@@ -297,6 +297,7 @@ page 50111 "SO Import Worksheet"
             end;
             TempRow += 1;
         until TempRow > 180;
+        SOImportBuffer.CalcFields("Amount Including VAT");
         if SOImportBuffer."Amount Including VAT" <= 300 then begin
             Clear(SLImportBuffer);
             SLImportBuffer.init();
@@ -309,7 +310,38 @@ page 50111 "SO Import Worksheet"
             SLImportBuffer."Location Code" := SOImportBuffer."Location Code";
             SLImportBuffer.Insert(true);
         end;
+    end;
 
+    local procedure ExamSamePrefixName(Show: Text): Text
+    var
+        Customer: Record Customer;
+        OptionMembers: Text;
+        OptionNumber: Integer;
+        DefaultNumber: Integer;
+        Instruction: Label 'Please Select the customer name.';
+        Seperator: List of [Text];
+        OptionList: List of [Text];
+        CustomerName: Text;
+    begin
+
+        Customer.SETFILTER(Name, '@' + Show + '*');
+        if Customer.FindSet() then begin
+            repeat
+                if OptionMembers <> '' then
+                    OptionMembers := OptionMembers + ',' + Customer.Name
+                else
+                    OptionMembers := Customer.Name;
+            until Customer.Next() = 0;
+            DefaultNumber := 1;
+            OptionNumber := Dialog.StrMenu(OptionMembers, DefaultNumber, Instruction);
+            Seperator.Add(',');
+            OptionList := OptionMembers.Split(Seperator);
+            CustomerName := OptionList.Get(OptionNumber);
+            Message(CustomerName);
+        end
+        else
+            CustomerName := Show;
+        exit(CustomerName);
     end;
 
     local procedure GetValueAtCell(RowNo: Integer; ColNo: Integer): Text

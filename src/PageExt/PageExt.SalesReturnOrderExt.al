@@ -97,6 +97,14 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
                 end;
             end;
         }
+        modify(Post)
+        {
+            Visible = isPei;
+        }
+        modify("Post and &Print")
+        {
+            Visible = IsPei;
+        }
         addbefore(Post)
         {
             action("Auto Post Invoice")
@@ -146,11 +154,17 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
 
         IsInventoryCompany: Boolean;
+        IsPei: Boolean;
 
     trigger OnAfterGetRecord();
     var
         IsICSalesHeader: Boolean;
+        IsPei: Boolean;
+        User: Record User;
     begin
+        User.Get(Database.UserSecurityId());
+        if User."Full Name" = 'Pei Xu' then
+            isPei := true;
         IsInventoryCompany := false;
         If Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
             IsInventoryCompany := true;
@@ -170,6 +184,7 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
         TempBool := true;
         SalesLine.SetRange("Document Type", SalesHeader."Document Type");
         SalesLine.SetRange("Document No.", SalesHeader."No.");
+        SalesLine.SetRange(Type, SalesLine.Type::Item);
         if SalesLine.FindSet() then
             repeat
                 if SalesLine."Return Reason Code" = '' then
