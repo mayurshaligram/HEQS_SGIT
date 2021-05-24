@@ -97,6 +97,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 BOMComponent: Record "BOM Component";
                 BOMSalesLine: Record "Sales Line";
                 CorrectMainSalesLine: Record "Sales Line";
+                ZoneCode: Record ZoneTable;
             begin
                 SalesLine.Reset();
                 SalesLine.SetRange("Document No.", Rec."No.");
@@ -349,6 +350,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     Shipped: Boolean;
                     SalesHeader: Record "Sales Header";
                 begin
+
                     Shipped := false;
                     if Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
                         Error(Text1, Rec."Sell-to Customer Name");

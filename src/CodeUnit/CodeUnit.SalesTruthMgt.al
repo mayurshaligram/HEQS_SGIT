@@ -887,9 +887,9 @@ codeunit 50101 "Sales Truth Mgt"
         // For Return Order, Also need to carry the same Reason Code
         if SalesHeader."Document Type" = SalesHeader."Document Type"::"Return Order" then
             SalesHeader."Reason Code" := RetailSalesHeader."Reason Code";
-
-        ZoneCode."Order Price" := RetailSalesHeader.Amount;
-        if ZoneCode.Find('>') then
+        RetailSalesHeader.CalcFields("Amount Including VAT");
+        ZoneCode.SetRange("Order Price", RetailSalesHeader."Amount Including VAT", 999999);
+        if ZoneCode.FindFirst() then
             SalesHeader.ZoneCode := ZoneCode.Code;
 
 
@@ -1086,6 +1086,10 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader."Delivery without BOM Item" := TempDeliveryItemWithoutBOM;
         ICSalesHeader."Assembly Item without BOM Item" := TempAssemblyItemWithoutBOM;
         ICSalesHeader."Assembly Item" := TempAssemblyItem;
+        ICSalesHeader.CalcFields("Amount Including VAT");
+        ZoneCode.SetRange("Order Price", ICSalesHeader."Amount Including VAT", 999999);
+        if ZoneCode.FindFirst() then
+            ICSalesHeader.ZoneCode := ZoneCode.Code;
         ICSalesHeader.Modify();
     end;
 
