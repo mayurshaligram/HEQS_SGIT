@@ -1,6 +1,5 @@
 pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
 {
-
     actions
     {
         modify(Release)
@@ -25,6 +24,8 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
                     if Rec."Reason Code" = '' then
                         Error('Please Provide Reason Code for this Return Order.');
+                    if Rec."Location Code" = '' then
+                        Error('Please Provide location code in shipping and billing tab');
                     if ReasonCodeCheck(Rec) = false then
                         Error('Please Provide Reason Code for the item line');
                     PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.");
@@ -59,6 +60,8 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
                 BOMComponent: Record "BOM Component";
                 TempLineNo: Integer;
             begin
+                Rec."Automate Purch.Doc No." := xRec."Automate Purch.Doc No.";
+                Rec.Modify();
                 // Delete Copied BOM line (the original COPY function didn't COPY)
                 if SalesLine.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin
                     SalesLine.SetRange("Document Type", Rec."Document Type");

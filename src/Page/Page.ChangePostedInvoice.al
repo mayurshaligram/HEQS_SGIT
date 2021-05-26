@@ -25,6 +25,11 @@ page 50112 ChangePostedSalesInvoice
                     ApplicationArea = All;
                     Editable = true;
                 }
+                field("Sell-to Customer Name"; Rec."Sell-to Customer Name")
+                {
+                    ApplicationArea = All;
+                    Editable = true;
+                }
             }
         }
     }

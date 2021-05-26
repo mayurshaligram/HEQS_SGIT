@@ -867,6 +867,7 @@ codeunit 50101 "Sales Truth Mgt"
         WarehouseRequest: Record "Warehouse Request";
 
         TempLine: Integer;
+        TempInt: Integer;
     begin
         TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
@@ -888,7 +889,8 @@ codeunit 50101 "Sales Truth Mgt"
         if SalesHeader."Document Type" = SalesHeader."Document Type"::"Return Order" then
             SalesHeader."Reason Code" := RetailSalesHeader."Reason Code";
         RetailSalesHeader.CalcFields("Amount Including VAT");
-        ZoneCode.SetRange("Order Price", RetailSalesHeader."Amount Including VAT", 999999);
+        TempInt := ROUND(RetailSalesHeader."Amount Including VAT", 1, '=');
+        ZoneCode.SetRange("Order Price", TempInt, 999999);
         if ZoneCode.FindFirst() then
             SalesHeader.ZoneCode := ZoneCode.Code;
 
@@ -1044,7 +1046,7 @@ codeunit 50101 "Sales Truth Mgt"
         ZoneCode: Record ZoneTable;
         TempAssemblyItem: Text[2000];
         TempAssemblyItemWithoutBOM: Text[2000];
-
+        TempInt: Integer;
     begin
         ICSalesHeader.ChangeCompany(InventoryCompany());
         ICSalesHeader.SetRange("Document Type", SalesLine."Document Type");
@@ -1087,7 +1089,8 @@ codeunit 50101 "Sales Truth Mgt"
         ICSalesHeader."Assembly Item without BOM Item" := TempAssemblyItemWithoutBOM;
         ICSalesHeader."Assembly Item" := TempAssemblyItem;
         ICSalesHeader.CalcFields("Amount Including VAT");
-        ZoneCode.SetRange("Order Price", ICSalesHeader."Amount Including VAT", 999999);
+        TempInt := ROUND(ICSalesHeader."Amount Including VAT", 1, '=');
+        ZoneCode.SetRange("Order Price", TempInt, 999999);
         if ZoneCode.FindFirst() then
             ICSalesHeader.ZoneCode := ZoneCode.Code;
         ICSalesHeader.Modify();
