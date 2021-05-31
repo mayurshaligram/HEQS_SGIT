@@ -1,1 +1,1 @@
-﻿{"Added":[],"Modified":[],"Removed":[{"Id":50100,"Kind":27,"Name":"StandardSalesOrderConf.Ext","PackagePath":"/src/src/ReportExt/ReportExt.SalesConfirmationExt.al"}]}
+﻿{"Added":[],"Modified":[{"Id":50111,"Kind":12,"Name":"SO Import Worksheet","PackagePath":"/src/src/Page/Page.ImportCsv.al"},{"Id":50109,"Kind":11,"Name":"ZoneUpgrade","PackagePath":"/src/src/CodeUnit/CodeUnit.Upgrade.al"},{"Id":50101,"Kind":16,"Name":"Sales Order List","PackagePath":"/src/src/PageExt/PageExt.SalesOrderList.al"}],"Removed":[]}

@@ -196,14 +196,14 @@ page 50111 "SO Import Worksheet"
         TempHeaderText := GetValueAtCell(1, 7);
         if TempHeaderText <> '' then
             SOImportBuffer."Your Reference" := TempHeaderText;
-        // Person Orderding to Sell-to Contact
+        // Person Orderding to Ship-to Contact
         TempHeaderText := GetValueAtCell(2, 4);
         if TempHeaderText <> '' then
             SOImportBuffer."Sell-to Contact" := TempHeaderText;
         // Client's Name to Ship-to Contact
         TempHeaderText := GetValueAtCell(3, 4);
         if TempHeaderText <> '' then
-            SOImportBuffer."Sell-to Contact" := TempHeaderText;
+            SOImportBuffer."Ship-to Name" := TempHeaderText;
         // Client's Contact Name
         TempHeaderText := GetValueAtCell(3, 7);
         if TempHeaderText <> '' then

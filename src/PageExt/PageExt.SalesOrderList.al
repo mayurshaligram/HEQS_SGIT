@@ -39,7 +39,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Caption = 'IsDeliveried/IsPicked';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies whether the Sales Order has been deliveried.';
-                Visible = IsInventoryCompany;
+                Visible = true;
             }
         }
 
