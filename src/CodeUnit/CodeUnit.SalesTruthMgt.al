@@ -319,6 +319,7 @@ codeunit 50101 "Sales Truth Mgt"
                     if RetailSalesLine.Get(SalesLine."Document Type", ICSalesHeader.RetailSalesHeader, SalesLine."Line No.") = false then
                         exit;
                     SalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
+                    SalesLine."Location Code" := RetailSalesLine."Location Code";
                     SalesLine.Modify();
                 // end;
                 until SalesLine.Next() = 0;
