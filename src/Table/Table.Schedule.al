@@ -94,6 +94,20 @@ table 50100 "Schedule"
         {
             Caption = 'Status';
         }
+        field(19; Remote; Boolean)
+        {
+            Caption = 'Remote';
+        }
+        field(20; "From Location Code"; Code[20])
+        {
+            Caption = 'From Location Code';
+            Description = 'This Attribute only design for the Transfer Order';
+        }
+        field(21; "To Location Code"; Code[21])
+        {
+            Caption = 'To Location Code';
+            Description = 'This Attribute only design for the Transfer Order';
+        }
     }
 
     keys
