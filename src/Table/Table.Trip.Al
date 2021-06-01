@@ -1,0 +1,73 @@
+table 50107 Trip
+{
+    DataClassification = CustomerContent;
+
+    fields
+    {
+        field(1; "No."; Code[20])
+        {
+            Caption = 'No.';
+
+            trigger OnValidate()
+            begin
+                if "No." <> xRec."No." then begin
+                    SalesSetup.Get();
+                    NoSeriesMgt.TestManual(SalesSetup."Schedule Nos.");
+                    "No. Series" := '';
+                end;
+            end;
+        }
+
+        field(2; "No. Series"; Code[20])
+        {
+            Caption = 'No. Series';
+            Editable = false;
+            TableRelation = "No. Series";
+        }
+        field(3; Status; Enum "Trip Status")
+        {
+            Caption = 'Trip Status';
+        }
+        field(4; Note; Text[200])
+        {
+            Caption = 'Note';
+        }
+    }
+
+    keys
+    {
+        key(PK; "No.")
+        {
+            Clustered = true;
+        }
+    }
+
+    var
+        SalesSetup: Record "Sales & Receivables Setup";
+        NoSeriesMgt: Codeunit NoSeriesManagement;
+
+    trigger OnInsert()
+    begin
+        if "No." = '' then begin
+            SalesSetup.Get();
+            SalesSetup.TestField("Trip");
+            NoSeriesMgt.InitSeries(SalesSetup."Trip", xRec."No. Series", 0D, "No.", "No. Series");
+        end;
+    end;
+
+    trigger OnModify()
+    begin
+
+    end;
+
+    trigger OnDelete()
+    begin
+
+    end;
+
+    trigger OnRename()
+    begin
+
+    end;
+
+}

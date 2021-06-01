@@ -40,7 +40,7 @@ page 50113 "Schedule List"
                 }
                 field("Delivery Date"; Rec."Delivery Date")
                 {
-                    Caption = 'Zone';
+                    Caption = 'Delivery Date';
                     ApplicationArea = All;
                     StyleExpr = TempStr;
                 }

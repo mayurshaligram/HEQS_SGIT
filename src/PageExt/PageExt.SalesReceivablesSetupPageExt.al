@@ -9,6 +9,11 @@ pageextension 50100 SalesReceivablesSetupPageExt extends "Sales & Receivables Se
                 Caption = 'Schedule Nos.';
                 ApplicationArea = All;
             }
+            field(Trip; Rec.Trip)
+            {
+                Caption = 'Trip';
+                ApplicationArea = All;
+            }
         }
     }
 }

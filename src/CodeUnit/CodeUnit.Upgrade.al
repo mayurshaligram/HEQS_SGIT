@@ -15,7 +15,7 @@ codeunit 50109 ZoneUpgrade
     var
         Company: Record Company;
     begin
-        // LoadZoneTable();
+        LoadZoneTable();
         // if Company.Name = SalesTruthMgt.InventoryCompany() then
         //     ClearPayable();
         // LoadPayable();
@@ -39,7 +39,7 @@ codeunit 50109 ZoneUpgrade
     begin
         if ZoneTable.FindSet() = false then begin
             ZoneTable."Order Price" := 1000;
-            ZoneTable.Code := 'O1';
+            ZoneTable.Code := 'O0';
             ZoneTable."Delivery Fee" := 20;
             ZoneTable.L1 := 10;
             ZoneTable.L2 := 20;
@@ -47,7 +47,7 @@ codeunit 50109 ZoneUpgrade
             ZoneTable.Insert();
 
             ZoneTable."Order Price" := 2000;
-            ZoneTable.Code := 'O2';
+            ZoneTable.Code := 'O1';
             ZoneTable."Delivery Fee" := 30;
             ZoneTable.L1 := 20;
             ZoneTable.L2 := 30;
@@ -55,7 +55,7 @@ codeunit 50109 ZoneUpgrade
             ZoneTable.Insert();
 
             ZoneTable."Order Price" := 3000;
-            ZoneTable.Code := 'O3';
+            ZoneTable.Code := 'O2';
             ZoneTable."Delivery Fee" := 40;
             ZoneTable.L1 := 30;
             ZoneTable.L2 := 40;
@@ -63,7 +63,7 @@ codeunit 50109 ZoneUpgrade
             ZoneTable.Insert();
 
             ZoneTable."Order Price" := 4000;
-            ZoneTable.Code := 'O4';
+            ZoneTable.Code := 'O3';
             ZoneTable."Delivery Fee" := 50;
             ZoneTable.L1 := 40;
             ZoneTable.L2 := 50;

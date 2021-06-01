@@ -12,11 +12,9 @@ codeunit 50110 "Schedule Color Mgt"
                     Schedule.Status::Pending:
                         exit('Attention');
                     Schedule.Status::Norm:
-                        exit('Accent');
-                end
-
+                        exit('Strong');
+                end;
         end;
-
     end;
 
 }

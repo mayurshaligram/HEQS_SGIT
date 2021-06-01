@@ -1,7 +1,7 @@
 table 50100 "Schedule"
 {
     Caption = 'Schedule';
-    DataCaptionFields = "Source Type", "No.";
+    DataCaptionFields = "Source Type", "Source No.";
     LookupPageId = 50113;
     DataClassification = CustomerContent;
 
@@ -58,7 +58,7 @@ table 50100 "Schedule"
         {
             Caption = 'Delivery Items';
         }
-        field(10; "Assemble"; Text[2000])
+        field(10; "Assemble"; Boolean)
         {
             Caption = 'Assemble';
         }
@@ -117,6 +117,7 @@ table 50100 "Schedule"
             Clustered = true;
         }
     }
+
 
     var
         SalesSetup: Record "Sales & Receivables Setup";
