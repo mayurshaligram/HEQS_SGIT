@@ -98,6 +98,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 BOMSalesLine: Record "Sales Line";
                 CorrectMainSalesLine: Record "Sales Line";
                 ZoneCode: Record ZoneTable;
+                DeleteSalesLine: Record "Sales Line";
             begin
                 SalesLine.Reset();
                 SalesLine.SetRange("Document No.", Rec."No.");
@@ -136,8 +137,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                         if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) then
                                             if BOMSalesLine."No." <> BOMComponent."No." then begin
                                                 CorrectMainSalesLine := MainSalesLine;
-                                                MainSalesLine.Delete(true);
-                                                CorrectMainSalesLine.Insert(true);
+                                                if DeleteSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", MainSalesLine."Line No.") then begin
+                                                    MainSalesLine.Delete(true);
+                                                    CorrectMainSalesLine.Insert(true);
+                                                end;
+
                                             end;
                                     // if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) = false then begin
                                     //     CorrectMainSalesLine := MainSalesLine;
