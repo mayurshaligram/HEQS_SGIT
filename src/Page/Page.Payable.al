@@ -389,7 +389,7 @@ page 50110 Payable
         TempBool := false;
         User.Reset();
         User.Get(Database.UserSecurityId());
-        if (User."Full Name" = 'Kevin Lin') or (User."Full Name" = 'Karen Huang') or (User."Full Name" = 'Admin HEQS') or (User."Full Name" = 'Pei Xu') then
+        if (User."Full Name" = 'Kevin LIN') or (User."Full Name" = 'Karen Huang') or (User."Full Name" = 'Admin HEQS') or (User."Full Name" = 'Pei Xu') then
             TempBool := true;
         if TempBool = false then
             Error('Please contact admin to assign Payable Page Permission.');

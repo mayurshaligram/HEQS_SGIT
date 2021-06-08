@@ -122,6 +122,7 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         LastSalesLine: Record "Sales Line";
         LastLineNo: Integer;
         NewSalesLine: Record "Sales Line";
+        SalesLine: Record "Sales Line";
     begin
         // if (Rec."No." <> xRec."No.") and (Rec.CurrentCompany <> SalesTruthMgt.InventoryCompany()) then begin
         //     Message('No has changed.');
@@ -147,6 +148,18 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
         if (Rec."Promised Delivery Date" <> xRec."Promised Delivery Date") then IsItemLine := true;
 
         if (Rec.CurrentCompany <> 'HEQS International Pty Ltd') and IsItemLine then begin
+            // if (Rec."No." <> xRec."No.") and (xRec."No." <> '') then begin
+            //     SalesLine.Init();
+            //     SalesLine."Document Type" := Rec."Document Type";
+            //     SalesLine."Document No." := Rec."Document No.";
+            //     SalesLine.Type := Rec.Type;
+            //     SalesLine."No." := Rec."No.";
+            //     SalesLine.Insert(true);
+            //     Rec.Delete(true);
+            //     // Clear(Rec);
+            //     // Rec.Get(SalesLine."Document Type", SalesLine."Document No.", SalesLine."Line No.");
+            // end
+            // else
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = rec."Document Type"::"Return Order") then
                 OnUpdatePurchICBOM(Rec);
         end;

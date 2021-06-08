@@ -319,6 +319,7 @@ codeunit 50101 "Sales Truth Mgt"
                     if RetailSalesLine.Get(SalesLine."Document Type", ICSalesHeader.RetailSalesHeader, SalesLine."Line No.") = false then
                         exit;
                     SalesLine.NeedAssemble := RetailSalesLine.NeedAssemble;
+                    SalesLine."Location Code" := RetailSalesLine."Location Code";
                     SalesLine.Modify();
                 // end;
                 until SalesLine.Next() = 0;
@@ -1546,6 +1547,8 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseLine.Validate(Quantity, SalesLine.Quantity);
             if PurchaseLine."Document Type" = PurchaseLine."Document Type"::"Return Order" then
                 PurchaseLine."Return Reason Code" := SalesLine."Return Reason Code";
+            PurchaseLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
+            PurchaseLine."Unit of Measure" := SalesLine."Unit of Measure";
             PurchaseLine.Insert();
             User.Get(Database.UserSecurityId());
             if User."Full Name" <> 'Pei Xu' then

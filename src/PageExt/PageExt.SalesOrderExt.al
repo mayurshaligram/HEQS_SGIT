@@ -98,6 +98,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 BOMSalesLine: Record "Sales Line";
                 CorrectMainSalesLine: Record "Sales Line";
                 ZoneCode: Record ZoneTable;
+                DeleteSalesLine: Record "Sales Line";
             begin
                 SalesLine.Reset();
                 SalesLine.SetRange("Document No.", Rec."No.");
@@ -136,8 +137,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                                         if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) then
                                             if BOMSalesLine."No." <> BOMComponent."No." then begin
                                                 CorrectMainSalesLine := MainSalesLine;
-                                                MainSalesLine.Delete(true);
-                                                CorrectMainSalesLine.Insert(true);
+                                                if DeleteSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", MainSalesLine."Line No.") then begin
+                                                    MainSalesLine.Delete(true);
+                                                    CorrectMainSalesLine.Insert(true);
+                                                end;
+
                                             end;
                                     // if BOMSalesLine.Get(MainSalesLine."Document Type", MainSalesLine."Document No.", TempLineNo) = false then begin
                                     //     CorrectMainSalesLine := MainSalesLine;
@@ -161,9 +165,25 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 ICInOutboxMgt: Codeunit ICInboxOutboxMgt;
                 ApprovalsMgmt: Codeunit "Approvals Mgmt.";
                 PurchaseHeader: Record "Purchase Header";
+                PurchaseLine: Record "Purchase Line";
+                SalesLine: Record "Sales Line";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
+                    // Keep Purchase Line unit of measure and code same as the sales line
+
                     PurchaseHeader.Get(Rec."Document Type", Rec."Automate Purch.Doc No.");
+                    PurchaseLine.SetRange("Document Type", Rec."Document Type");
+                    PurchaseLine.SetRange("Document No.", PurchaseHeader."No.");
+                    if PurchaseLine.FindSet() then
+                        repeat
+                            SalesLine.Reset();
+                            SalesLine.Get(Rec."Document Type", Rec."No.", PurchaseLine."Line No.");
+                            if PurchaseLine."Unit of Measure" <> SalesLine."Unit of Measure" then begin
+                                PurchaseLine."Unit of Measure" := SalesLine."Unit of Measure";
+                                PurchaseLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
+                                PurchaseLine.Modify();
+                            end;
+                        until PurchaseLine.Next() = 0;
                     ICSalesHeader.ChangeCompany(InventoryCompanyName);
                     ICSalesHeader.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
                     if ICSalesHeader.Findset() = false then
