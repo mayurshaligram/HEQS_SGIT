@@ -1,12 +1,13 @@
 page 50113 "Schedule List"
 {
-    Caption = 'Schedule List';
+    Caption = 'NSW Schedule';
     PageType = List;
     SourceTable = Schedule;
     ApplicationArea = All;
     ModifyAllowed = false;
     CardPageId = 50114;
     UsageCategory = Lists;
+    SourceTableView = sorting("Trip No.", "Trip Sequece") order(ascending) WHERE("From Location Code" = CONST('NSW'));
 
     layout
     {
@@ -93,6 +94,12 @@ page 50113 "Schedule List"
                     ApplicationArea = All;
                     StyleExpr = TempStr;
                 }
+                field("Trip No."; Rec."Trip No.")
+                {
+                    Caption = 'Trip';
+                    ApplicationArea = All;
+                    StyleExpr = TempStr;
+                }
                 field(Remote; Rec.Remote)
                 {
                     ApplicationArea = All;
@@ -100,26 +107,155 @@ page 50113 "Schedule List"
                 }
             }
         }
+
     }
+
+
 
     actions
     {
         area(Processing)
         {
-            action(ActionName)
+            action("Complete Order")
             {
                 ApplicationArea = All;
 
                 trigger OnAction()
+                var
+                    Schedule: Record Schedule;
                 begin
+                    CurrPage.SetSelectionFilter(Schedule);
+                    if Schedule.FindSet() then
+                        repeat
+                            Schedule.Status := Schedule.Status::Completed;
+                            Schedule.Modify();
+                        until Schedule.Next() = 0;
+                end;
+            }
+            action("New Trip")
+            {
+                ApplicationArea = All;
 
+                trigger OnAction()
+                var
+                    Schedule: Record Schedule;
+                    Trip: Record Trip;
+                    TempInt: Integer;
+                    TempBool: Boolean;
+                    ConfirmStr: Text;
+                    ResultStr: Text;
+                begin
+                    CurrPage.SetSelectionFilter(Schedule);
+                    if Schedule.FindSet() then begin
+                        Trip.Init();
+                        Trip.Insert(true);
+                        TempInt := 0;
+                        repeat
+                            TempBool := true;
+                            if Schedule."Trip No." <> '' then begin
+                                ConfirmStr := Schedule."Source No." + ' has already in Trip ' + Schedule."Trip No." + ' do you want to move it to the new trip?';
+                                TempBool := Confirm(ConfirmStr);
+                            end;
+                            if TempBool then begin
+                                Schedule."Trip No." := Trip."No.";
+                                Schedule."Trip Sequece" := TempInt;
+                                Schedule.Modify();
+                                TempInt += 1;
+                            end
+                        until Schedule.Next() = 0;
+                    end;
+                    if TempInt >= 1 then begin
+                        ResultStr := 'Trip ' + Trip."No." + ' has been created, do you want to open to adjust sequence?';
+                        TempBool := Confirm(ResultStr);
+                        if TempBool then begin
+                            Commit();
+                            Page.Run(Page::"Trip Card", Trip);
+                        end;
+                    end
+                    else
+                        Trip.Delete();
+                end;
+            }
+            action("View Trip")
+            {
+                ApplicationArea = All;
+                trigger OnAction();
+                var
+                    Trip: Record Trip;
+                    TripCardPage: Page "Trip Card";
+                begin
+                    Trip.Get(Rec."Trip No.");
+                    TripCardPage.SetRecord(Trip);
+                    TripCardPage.Run;
+                end;
+            }
+            action("Assign Trip")
+            {
+                ApplicationArea = All;
+                trigger OnAction();
+                var
+                    TripCardPage: Page "Trip List";
+                    Trip: Record Trip;
+                begin
+                    if TripCardPage.RunModal = Action::OK then begin
+                        TripCardPage.GetRecord(Trip);
+                        Rec."Trip No." := Trip."No.";
+                        Rec.Modify();
+                    end;
                 end;
             }
         }
     }
+    views
+    {
+        view(Postponed)
+        {
+            Caption = 'Postponed (Yellow)';
+            SharedLayout = true;
+            Filters = where("Status" = filter(Postponed));
+        }
+        view(Complete)
+        {
+            Caption = 'Complete (Grey)';
+            SharedLayout = true;
+            Filters = where("Status" = filter(Completed));
+        }
+        view(RemoteView)
+        {
+            Caption = 'Remote (Woollongong)';
+            SharedLayout = true;
+            Filters = where("Remote" = const(true));
+        }
+
+        view("NSW - QLD")
+        {
+            Caption = 'NSW - QLD';
+            SharedLayout = true;
+            Filters = where("To Location Code" = const('QLD'));
+        }
+        view("NSW - VIC")
+        {
+            Caption = 'NSW - VIC';
+            SharedLayout = true;
+            Filters = where("To Location Code" = const('VIC'));
+        }
+        view("Property Management")
+        {
+            Caption = 'Property Management';
+            SharedLayout = true;
+            Filters = where("Source Type" = filter("Property Management"));
+        }
+        view("Second Lease Pick Up")
+        {
+            Caption = 'Second Lease Pick Up';
+            SharedLayout = true;
+            Filters = where(Status = filter(NeedReschedule));
+        }
+
+    }
 
     var
-        ScheduleColorMgt: Codeunit "Schedule Color Mgt";
+        ScheduleColorMgt: Codeunit "Schedule Color Mgt1";
         TempStr: Text;
 
     trigger OnAfterGetRecord()

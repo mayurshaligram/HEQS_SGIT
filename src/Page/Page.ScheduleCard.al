@@ -70,6 +70,7 @@ page 50114 "Schedule Card"
                                 Rec."Phone No." := SalesHeader."Ship-to Phone No.";
                                 Rec.Remote := false;
                                 Rec.Status := Rec.Status::Norm;
+                                Rec."From Location Code" := SalesHeader."Location Code";
                             end
                         end;
                         if Rec."Source Type" = Rec."Source Type"::"Sales Return Order" then begin
@@ -92,6 +93,7 @@ page 50114 "Schedule Card"
                                 Rec."Phone No." := SalesHeader."Ship-to Phone No.";
                                 Rec.Remote := false;
                                 Rec.Status := Rec.Status::Norm;
+                                Rec."From Location Code" := SalesHeader."Location Code";
                             end;
                         end;
                         if Rec."Source Type" = Rec."Source Type"::"Transfer Order" then begin
@@ -106,6 +108,7 @@ page 50114 "Schedule Card"
                                         TempDeliveryItem := TempDeliveryItem + Format((TransferLine.Quantity)) + '*' + SalesLine.Description + ', ';
                                     until SalesLine.Next() = 0;
                                 Rec.Status := Rec.Status::Norm;
+                                Rec."From Location Code" := SalesHeader."Location Code";
                             end;
                         end;
                     end;
@@ -183,6 +186,16 @@ page 50114 "Schedule Card"
                 field(Remote; Rec.Remote)
                 {
                     Caption = 'Remote';
+                    ApplicationArea = All;
+                }
+                field("From Location Code"; Rec."From Location Code")
+                {
+                    Caption = 'From Location Code';
+                    ApplicationArea = All;
+                }
+                field("To Location Code"; Rec."To Location Code")
+                {
+                    Caption = 'To Location Code';
                     ApplicationArea = All;
                 }
             }

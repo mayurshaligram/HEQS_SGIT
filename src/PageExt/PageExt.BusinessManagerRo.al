@@ -6,13 +6,29 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
         {
             group("Schedule")
             {
-                action("Scheduling")
+                action("NSW Schedule")
                 {
                     ApplicationArea = Suite;
-                    Caption = 'Scheduling';
+                    Caption = 'NSW';
                     Image = PostedMemo;
                     RunObject = Page "Schedule List";
-                    ToolTip = 'Scheduling the Sales Order, Transfer Order, Sales Return Order.';
+                    ToolTip = 'From NSW Scheduling the Sales Order, Transfer Order, Sales Return Order ';
+                }
+                action("VIC Schedule")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'VIC';
+                    Image = PostedMemo;
+                    RunObject = Page "VIC Schedule";
+                    ToolTip = 'From VIC Scheduling the Sales Order, Transfer Order, Sales Return Order.';
+                }
+                action("QLD Schedule")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'QLD';
+                    Image = PostedMemo;
+                    RunObject = Page "QLD Schedule";
+                    ToolTip = 'From QLD Scheduling the Sales Order, Transfer Order, Sales Return Order.';
                 }
                 action("Trip")
                 {

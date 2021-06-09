@@ -1,0 +1,24 @@
+{
+	"id": "016726c2-b845-40e8-9844-04d5f207ae34",
+	"name": "Automated Business Flow",
+	"publisher": "Pei Xu",
+	"version": "1.0.1.119",
+	"brief": "The 365 BC extension make automation flow",
+	"description": "Achieved - Stage one auto create the PO, To Do - Stage two Inter Company transaction",
+	"help": "",
+	"url": "",
+	"logo": "",
+	"dependencies": [],
+	"screenshots": [],
+	"platform": "1.0.0.0",
+	"application": "18.0.0.0",
+	"idRanges": [
+		{
+			"from": 50100,
+			"to": 50149
+		}
+	],
+	"contextSensitiveHelpUrl": "https://Beginner_Extension.com/help/",
+	"showMyCode": true,
+	"runtime": "7.0"
+}

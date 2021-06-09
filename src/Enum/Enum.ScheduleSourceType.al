@@ -11,4 +11,7 @@ enum 50106 "Schedule Source Type"
     value(2; "Transfer Order")
     {
     }
+    value(3; "Property Management")
+    {
+    }
 }

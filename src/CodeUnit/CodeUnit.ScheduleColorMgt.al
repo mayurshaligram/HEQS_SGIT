@@ -1,19 +1,17 @@
-codeunit 50110 "Schedule Color Mgt"
+codeunit 50110 "Schedule Color Mgt1"
 {
     procedure ChangeColor(Schedule: Record Schedule): Text[50]
     begin
-        case Schedule."Source Type" of
-            "Schedule Source Type"::"Sales Order":
-                case Schedule.Status of
-                    Schedule.Status::Completed:
-                        exit('Subordinate');
-                    Schedule.Status::NeedReschedule:
-                        exit('Ambiguous');
-                    Schedule.Status::Pending:
-                        exit('Attention');
-                    Schedule.Status::Norm:
-                        exit('Strong');
-                end;
+
+        case Schedule.Status of
+            Schedule.Status::Completed:
+                exit('Favorable');
+            Schedule.Status::NeedReschedule:
+                exit('StrongAccent');
+            Schedule.Status::Postponed:
+                exit('Ambiguous');
+            Schedule.Status::Norm:
+                exit('Strong');
         end;
     end;
 

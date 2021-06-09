@@ -108,6 +108,7 @@ table 50100 "Schedule"
             Caption = 'To Location Code';
             Description = 'This Attribute only design for the Transfer Order';
         }
+
     }
 
     keys
@@ -115,6 +116,13 @@ table 50100 "Schedule"
         key(PK; "No.")
         {
             Clustered = true;
+        }
+        key(S1; "Trip Sequece")
+        {
+
+        }
+        key(S2; "Trip No.", "Trip Sequece")
+        {
         }
     }
 

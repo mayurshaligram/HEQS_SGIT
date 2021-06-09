@@ -8,7 +8,7 @@ enum 50104 "Schedule Status"
     value(1; NeedReschedule)
     {
     }
-    value(2; Pending)
+    value(2; Postponed)
     {
     }
     value(3; Norm)
