@@ -1695,6 +1695,10 @@ codeunit 50101 "Sales Truth Mgt"
 
     procedure RequirFieldTesting(var SalesHeader: Record "Sales Header");
     begin
+        if SalesHeader.CurrentCompany = 'Priceworth Retails Pty Ltd' then begin
+            if SalesHeader."Salesperson Code" = '' then
+                Error('Please Give SalesPerson Code to Release.');
+        end;
         if SalesHeader.Delivery = SalesHeader.Delivery::" " then
             Error('Please select the delivery option')
         else
