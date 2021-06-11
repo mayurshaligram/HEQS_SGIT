@@ -93,12 +93,67 @@ page 50117 "Schedule Subform"
                     CurrPage.Update();
                 end;
             }
+            action("Add Schedule Item")
+            {
+                ApplicationArea = All;
+                Caption = 'Add Schedule Item';
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                Image = "8ball";
+
+                trigger OnAction()
+                var
+                    Schedule: Record Schedule;
+                    TempInt: Integer;
+
+                // NSWPage: Page "Schedule List";
+                // VICPage: page "VIC Schedule";
+                // QLDPage: Page "QLD Schedule";
+                begin
+                    Schedule.SetRange("Trip No.", Rec."Trip No.");
+                    TempInt := Schedule.Count();
+                    Schedule.Reset();
+                    case Rec."From Location Code" of
+                        'NSW':
+                            if Page.RunModal(Page::"Schedule List", Schedule) = Action::LookupOK then begin
+                                Schedule."Trip No." := Rec."Trip No.";
+                                Schedule."Trip Sequece" := TempInt;
+                                Schedule.Modify();
+                            end;
+                        'VIC':
+                            if Page.RunModal(Page::"VIC Schedule", Schedule) = Action::LookupOK then begin
+                                Schedule."Trip No." := Rec."Trip No.";
+                                Schedule."Trip Sequece" := TempInt;
+                                Schedule.Modify()
+                            end;
+                        'QLD':
+                            if Page.RunModal(Page::"QLD Schedule", Schedule) = Action::LookupOK then begin
+                                Schedule."Trip No." := Rec."Trip No.";
+                                Schedule."Trip Sequece" := TempInt;
+                                Schedule.Modify();
+                            end;
+                    end;
+                    CurrPage.Update();
+                end;
+            }
+            action("Remove Schedule Item")
+            {
+                ApplicationArea = All;
+                Caption = 'Remove Schedule Item';
+                Promoted = true;
+                PromotedCategory = Process;
+                PromotedIsBig = true;
+                Image = AboutNav;
+
+                trigger OnAction()
+                begin
+                    Rec."Trip No." := '';
+                    Rec."Trip Sequece" := 0;
+                    Rec.Modify();
+                    CurrPage.Update();
+                end;
+            }
         }
     }
-
-    // trigger OnAfterGetRecord();
-    // begin
-    //     Rec.SetView('sorting (Rec."Trip Sequece") order(descending)');
-    //     CurrPage.Update();
-    // end;
 }

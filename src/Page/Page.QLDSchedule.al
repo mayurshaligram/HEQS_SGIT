@@ -174,8 +174,22 @@ page 50119 "QLD Schedule"
                 var
                     Trip: Record Trip;
                 begin
-                    Trip.Get(Rec."Trip No.");
-                    Page.RunModal(Page::"Trip Card", Trip);
+                    if Trip.Get(Rec."Trip No.") then
+                        Page.RunModal(Page::"Trip Card", Trip)
+                    else
+                        Message('This Schedule item has not been assign to a trip.');
+                end;
+            }
+            action("Assign Trip")
+            {
+                ApplicationArea = All;
+                trigger OnAction();
+                var
+                    Trip: Record Trip;
+                begin
+                    if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then
+                        Rec."Trip No." := Trip."No.";
+                    Rec.Modify();
                 end;
             }
         }
@@ -183,6 +197,17 @@ page 50119 "QLD Schedule"
 
     views
     {
+        view("Sorting By Trip")
+        {
+            Caption = 'Sorting By Trip';
+            OrderBy = Ascending("Trip No.", "Trip Sequece");
+        }
+        view(NeedSchedule)
+        {
+            Caption = 'Need Schedule (Norm and PostPoned)';
+            SharedLayout = true;
+            Filters = where("Status" = filter(Norm | Postponed), "Trip No." = const(''));
+        }
         view(Postponed)
         {
             Caption = 'Postponed (Yellow)';
@@ -191,7 +216,7 @@ page 50119 "QLD Schedule"
         }
         view(Complete)
         {
-            Caption = 'Complete (Grey)';
+            Caption = 'Complete (Green)';
             SharedLayout = true;
             Filters = where("Status" = filter(Completed));
         }

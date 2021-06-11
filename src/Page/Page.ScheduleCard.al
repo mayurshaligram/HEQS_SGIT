@@ -117,6 +117,17 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'Suburb';
                     ApplicationArea = All;
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        Postcode: Record "Post Code";
+                    begin
+                        Postcode.Reset();
+                        if Page.RunModal(Page::"Post Codes", Postcode) = Action::LookupOK then
+                            Rec."Ship-to City" := Postcode.City;
+                        Rec.Modify();
+                    end;
+
                 }
                 field(Zone; Rec.Zone)
                 {
@@ -162,11 +173,31 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'Driver';
                     ApplicationArea = All;
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        Driver: Record Driver;
+                    begin
+                        Driver.Reset();
+                        if Page.RunModal(Page::"Driver Lookup", Driver) = Action::LookupOK then
+                            Rec.Driver := Driver."First Name" + ' ' + Driver."Last Name";
+                        Rec.Modify();
+                    end;
                 }
                 field(Vehicle; Rec.Vehicle)
                 {
                     Caption = 'Vehicle';
                     ApplicationArea = All;
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        Vehicle: Record Vehicle;
+                    begin
+                        Vehicle.Reset();
+                        if Page.RunModal(Page::"Vehicle Lookup", Vehicle) = Action::LookupOK then
+                            Rec.Vehicle := Vehicle."No.";
+                        Rec.Modify();
+                    end;
                 }
                 field(Status; Rec.Status)
                 {
@@ -177,6 +208,16 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'Trip';
                     ApplicationArea = All;
+
+                    trigger OnLookup(var Text: Text): Boolean
+                    var
+                        Trip: Record Trip;
+                    begin
+                        Trip.Reset();
+                        if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then
+                            Rec."Trip No." := Trip."No.";
+                        Rec.Modify();
+                    end;
                 }
                 field("Trip Sequece"; Rec."Trip Sequece")
                 {

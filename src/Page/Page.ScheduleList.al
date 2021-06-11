@@ -7,7 +7,7 @@ page 50113 "Schedule List"
     ModifyAllowed = false;
     CardPageId = 50114;
     UsageCategory = Lists;
-    SourceTableView = sorting("Trip No.", "Trip Sequece") order(ascending) WHERE("From Location Code" = CONST('NSW'));
+    SourceTableView = WHERE("From Location Code" = CONST('NSW'));
 
     layout
     {
@@ -139,6 +139,7 @@ page 50113 "Schedule List"
                 trigger OnAction()
                 var
                     Schedule: Record Schedule;
+                    TempSchedule: Record Schedule;
                     Trip: Record Trip;
                     TempInt: Integer;
                     TempBool: Boolean;
@@ -146,6 +147,11 @@ page 50113 "Schedule List"
                     ResultStr: Text;
                 begin
                     CurrPage.SetSelectionFilter(Schedule);
+                    // if Schedule.FindSet() then begin
+                    //     repeat
+                    //         Message(Schedule."No.");
+                    //     until Schedule.Next() = 0;
+                    // end;
                     if Schedule.FindSet() then begin
                         Trip.Init();
                         Trip.Insert(true);
@@ -160,6 +166,10 @@ page 50113 "Schedule List"
                                 Schedule."Trip No." := Trip."No.";
                                 Schedule."Trip Sequece" := TempInt;
                                 Schedule.Modify();
+                                // TempSchedule.Get(Schedule."No.");
+                                // TempSchedule."Trip No." := Trip."No.";
+                                // TempSchedule."Trip Sequece" := TempInt;
+                                // TempSchedule.Modify();
                                 TempInt += 1;
                             end
                         until Schedule.Next() = 0;
@@ -182,11 +192,11 @@ page 50113 "Schedule List"
                 trigger OnAction();
                 var
                     Trip: Record Trip;
-                    TripCardPage: Page "Trip Card";
                 begin
-                    Trip.Get(Rec."Trip No.");
-                    TripCardPage.SetRecord(Trip);
-                    TripCardPage.Run;
+                    if Trip.Get(Rec."Trip No.") then
+                        Page.RunModal(Page::"Trip Card", Trip)
+                    else
+                        Message('This Schedule item has not been assign to a trip.');
                 end;
             }
             action("Assign Trip")
@@ -194,20 +204,28 @@ page 50113 "Schedule List"
                 ApplicationArea = All;
                 trigger OnAction();
                 var
-                    TripCardPage: Page "Trip List";
                     Trip: Record Trip;
                 begin
-                    if TripCardPage.RunModal = Action::OK then begin
-                        TripCardPage.GetRecord(Trip);
+                    if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then
                         Rec."Trip No." := Trip."No.";
-                        Rec.Modify();
-                    end;
+                    Rec.Modify();
                 end;
             }
         }
     }
     views
     {
+        view("Sorting By Trip")
+        {
+            Caption = 'Sorting By Trip';
+            OrderBy = Ascending("Trip No.", "Trip Sequece");
+        }
+        view(NeedSchedule)
+        {
+            Caption = 'Need Schedule (Norm and PostPoned)';
+            SharedLayout = true;
+            Filters = where("Status" = filter(Norm | Postponed), "Trip No." = const(''));
+        }
         view(Postponed)
         {
             Caption = 'Postponed (Yellow)';
@@ -216,7 +234,7 @@ page 50113 "Schedule List"
         }
         view(Complete)
         {
-            Caption = 'Complete (Grey)';
+            Caption = 'Complete (Green)';
             SharedLayout = true;
             Filters = where("Status" = filter(Completed));
         }

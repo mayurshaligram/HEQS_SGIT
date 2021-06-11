@@ -32,6 +32,7 @@ table 50107 Trip
         {
             Caption = 'Note';
         }
+
     }
 
     keys
