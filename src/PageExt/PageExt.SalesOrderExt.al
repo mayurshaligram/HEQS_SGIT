@@ -476,7 +476,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         IsInventoryCompany: Boolean;
 
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
-
         IsPei: Boolean;
 
 

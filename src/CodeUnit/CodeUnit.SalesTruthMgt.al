@@ -1697,7 +1697,7 @@ codeunit 50101 "Sales Truth Mgt"
     begin
         if SalesHeader.CurrentCompany = 'Priceworth Retails Pty Ltd' then begin
             if SalesHeader."Salesperson Code" = '' then
-                Error('Please Give SalesPerson Code to Release.');
+                Error('Please give SalesPerson Code to Release.');
         end;
         if SalesHeader.Delivery = SalesHeader.Delivery::" " then
             Error('Please select the delivery option')
