@@ -178,6 +178,9 @@ page 50111 "SO Import Worksheet"
 
         TotalAmount: Decimal;
         NoAssemblyList: List of [Text];
+
+        PriceDecimal: Decimal;
+        TempText: Text;
     begin
         InitializeNoAssembly(NoAssemblyList);
         RowNo := 0;
@@ -209,9 +212,15 @@ page 50111 "SO Import Worksheet"
         if TempHeaderText <> '' then
             SOImportBuffer."Ship-to Contact" := TempHeaderText;
         // Caseworker's Name and CaseWorker Contact Name
-        TempWorkDescription += 'CaseWorker: ' + GetValueAtCell(4, 4) + '  ';
-        TempWorkDescription += 'CaseWorker No: ' + GetValueAtCell(4, 7) + '  ';
-        TempWorkDescription += 'CaseWorker No 2: ' + GetValueAtCell(5, 7) + '  ';
+        TempText := GetValueAtCell(4, 4);
+        if TempText <> '' then
+            TempWorkDescription += 'CaseWorker: ' + TempText + '  ';
+        TempText := GetValueAtCell(4, 7);
+        if TempText <> '' then
+            TempWorkDescription += 'CaseWorker No: ' + TempText + '  ';
+        TempText := GetValueAtCell(5, 7);
+        if TempText <> '' then
+            TempWorkDescription += 'CaseWorker No 2: ' + TempText + '  ';
         // Date Ordered to Order Date
         if GetValueAtCell(5, 4) <> '' then begin
             if Evaluate(TempDate, GetValueAtCell(5, 4)) then
@@ -277,7 +286,7 @@ page 50111 "SO Import Worksheet"
             SLImportBuffer."Document No." := SOImportBuffer."No.";
             SLImportBuffer.Type := SLImportBuffer.Type::Item;
             temp := GetValueAtCell(TempRow, 6);
-            if temp <> '' then begin
+            if (temp <> '') AND (Evaluate(PriceDecimal, temp)) then begin
                 Evaluate(TempCode, GetValueAtCell(TempRow, 2));
                 if TempCode <> 'CODE' then begin
                     SLImportBuffer.Validate("No.", TempCode);
@@ -296,7 +305,7 @@ page 50111 "SO Import Worksheet"
                 end;
             end;
             TempRow += 1;
-        until TempRow > 180;
+        until TempRow > 200;
         SOImportBuffer.CalcFields("Amount Including VAT");
         if SOImportBuffer."Amount Including VAT" <= 300 then begin
             Clear(SLImportBuffer);
