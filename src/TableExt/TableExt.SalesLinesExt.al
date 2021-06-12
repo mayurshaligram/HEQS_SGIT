@@ -100,9 +100,15 @@ tableextension 50103 "Sales line_Ext" extends "Sales Line"
     trigger OnBeforeModify();
     var
         User: Record User;
+        xItem: Record Item;
+        Item: Record Item;
     begin
+        if Item.Get(Rec."No.") then
+            if xItem.Get(xRec."No.") then
+                if (Item.Type <> xItem.Type) then
+                    Error('Please delete this line, and recreat the different line');
         User.Get(Database.UserSecurityId());
-        if Rec.Type <> xRec.Type then begin
+        if (Rec.Type <> xRec.Type) then begin
             Error('Please delete this line, and recreat the different line');
         end;
         if Rec.Token = false then begin
