@@ -14,4 +14,7 @@ enum 50106 "Schedule Source Type"
     value(3; "Property Management")
     {
     }
+    value(4; "Warranty Service")
+    {
+    }
 }

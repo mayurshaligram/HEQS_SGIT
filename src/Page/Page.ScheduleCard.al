@@ -62,8 +62,11 @@ page 50114 "Schedule Card"
                                     repeat
                                         if SalesLine.NeedAssemble then
                                             TempAssemble := true;
-                                        TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + ', ';
+                                        if IsMainItemLine(SalesLine) then
+                                            if StrLen(TempDeliveryItem) < 1900 then
+                                                TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + ', ';
                                     until SalesLine.Next() = 0;
+
                                 Rec."Delivery Items" := TempDeliveryItem;
                                 Rec.Assemble := TempAssemble;
                                 Rec.Customer := SalesHeader."Ship-to Contact";
@@ -71,6 +74,7 @@ page 50114 "Schedule Card"
                                 Rec.Remote := false;
                                 Rec.Status := Rec.Status::Norm;
                                 Rec."From Location Code" := SalesHeader."Location Code";
+                                Rec."Subsidiary Source No." := SalesHeader."RetailSalesHeader";
                             end
                         end;
                         if Rec."Source Type" = Rec."Source Type"::"Sales Return Order" then begin
@@ -85,7 +89,9 @@ page 50114 "Schedule Card"
                                     repeat
                                         if SalesLine.NeedAssemble then
                                             TempAssemble := true;
-                                        TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + ', ';
+                                        if IsMainItemLine(SalesLine) then
+                                            if StrLen(TempDeliveryItem) < 1900 then
+                                                TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + ', ';
                                     until SalesLine.Next() = 0;
                                 Rec."Delivery Items" := TempDeliveryItem;
                                 Rec.Assemble := TempAssemble;
@@ -94,6 +100,7 @@ page 50114 "Schedule Card"
                                 Rec.Remote := false;
                                 Rec.Status := Rec.Status::Norm;
                                 Rec."From Location Code" := SalesHeader."Location Code";
+                                Rec."Subsidiary Source No." := SalesHeader."RetailSalesHeader";
                             end;
                         end;
                         if Rec."Source Type" = Rec."Source Type"::"Transfer Order" then begin
@@ -103,15 +110,26 @@ page 50114 "Schedule Card"
                                 Rec."Delivery Date" := Transfer."Shipment Date";
                                 Rec.Assemble := false;
                                 TransferLine.SetRange("Document No.", Transfer."No.");
-                                if Transfer.FindSet() then
+                                if TransferLine.FindSet() then
                                     repeat
-                                        TempDeliveryItem := TempDeliveryItem + Format((TransferLine.Quantity)) + '*' + SalesLine.Description + ', ';
-                                    until SalesLine.Next() = 0;
+                                        if IsMainItemLineTrans(TransferLine) then
+                                            if StrLen(TempDeliveryItem) < 1900 then
+                                                TempDeliveryItem := TempDeliveryItem + Format((TransferLine.Quantity)) + '*' + TransferLine.Description + ', ';
+                                    until TransferLine.Next() = 0;
                                 Rec.Status := Rec.Status::Norm;
-                                Rec."From Location Code" := SalesHeader."Location Code";
+                                Rec."From Location Code" := Transfer."Transfer-from Code";
+                                Rec."Delivery Items" := TempDeliveryItem;
+                                Rec."To Location Code" := Transfer."Transfer-to Code";
+                                Rec."Subsidiary Source No." := Transfer."No.";
                             end;
                         end;
                     end;
+                }
+                field("Subsidiary Source No."; Rec."Subsidiary Source No.")
+                {
+                    Caption = 'Original SO';
+                    ApplicationArea = All;
+                    Visible = true;
                 }
                 field(Suburb; Rec."Ship-to City")
                 {
@@ -142,6 +160,7 @@ page 50114 "Schedule Card"
                 field("Delivery Time"; Rec."Delivery Time")
                 {
                     Caption = 'Delivery Time/Note';
+                    MultiLine = true;
                     ApplicationArea = All;
                 }
                 field("Delivery Items"; Rec."Delivery Items")
@@ -240,6 +259,31 @@ page 50114 "Schedule Card"
                     ApplicationArea = All;
                 }
             }
+
         }
     }
+
+    local procedure IsMainItemLine(SalesLine: Record "Sales Line"): Boolean;
+    var
+        TempItem: Record Item;
+    begin
+        TempItem.Reset();
+        if TempItem.Get(SalesLine."No.") = false then
+            exit(false);
+        TempItem.CalcFields("Assembly BOM");
+        if TempItem."Assembly BOM" then
+            exit(true);
+    end;
+
+    local procedure IsMainItemLineTrans(Transfer: Record "Transfer Line"): Boolean;
+    var
+        TempItem: Record Item;
+    begin
+        TempItem.Reset();
+        if TempItem.Get(Transfer."Item No.") = false then
+            exit(false);
+        TempItem.CalcFields("Assembly BOM");
+        if TempItem."Assembly BOM" then
+            exit(true);
+    end;
 }

@@ -8,7 +8,6 @@ page 50113 "Schedule List"
     CardPageId = 50114;
     UsageCategory = Lists;
     SourceTableView = WHERE("From Location Code" = CONST('NSW'));
-
     layout
     {
         area(Content)
@@ -21,10 +20,17 @@ page 50113 "Schedule List"
                     Visible = false;
                     StyleExpr = TempStr;
                 }
+                field("Subsidiary Source No."; Rec."Subsidiary Source No.")
+                {
+                    Caption = 'Original SO';
+                    ApplicationArea = All;
+                    StyleExpr = TempStr;
+                }
                 field("Source No."; Rec."Source No.")
                 {
                     Caption = 'Order No.';
                     ApplicationArea = All;
+                    Visible = false;
                     StyleExpr = TempStr;
                 }
                 field(Suburb; Rec."Ship-to City")
@@ -104,6 +110,10 @@ page 50113 "Schedule List"
                 {
                     ApplicationArea = All;
                     Visible = false;
+                }
+                field(Status; Rec.Status)
+                {
+                    ApplicationArea = All;
                 }
             }
         }
@@ -215,16 +225,12 @@ page 50113 "Schedule List"
     }
     views
     {
-        view("Sorting By Trip")
-        {
-            Caption = 'Sorting By Trip';
-            OrderBy = Ascending("Trip No.", "Trip Sequece");
-        }
         view(NeedSchedule)
         {
             Caption = 'Need Schedule (Norm and PostPoned)';
             SharedLayout = true;
-            Filters = where("Status" = filter(Norm | Postponed), "Trip No." = const(''));
+            OrderBy = Ascending("Trip No.", "Trip Sequece");
+            Filters = where("Status" = filter(Norm | Postponed));
         }
         view(Postponed)
         {

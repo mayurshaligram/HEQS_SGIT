@@ -32,7 +32,14 @@ table 50107 Trip
         {
             Caption = 'Note';
         }
-
+        field(5; Driver; Text[30])
+        {
+            Caption = 'Driver';
+        }
+        field(6; Vehicle; Text[30])
+        {
+            Caption = 'Vehicle';
+        }
     }
 
     keys

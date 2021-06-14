@@ -21,10 +21,17 @@ page 50118 "VIC Schedule"
                     Visible = false;
                     StyleExpr = TempStr;
                 }
+                field("Subsidiary Source No."; Rec."Subsidiary Source No.")
+                {
+                    Caption = 'Original SO';
+                    ApplicationArea = All;
+                    StyleExpr = TempStr;
+                }
                 field("Source No."; Rec."Source No.")
                 {
                     Caption = 'Order No.';
                     ApplicationArea = All;
+                    Visible = false;
                     StyleExpr = TempStr;
                 }
                 field(Suburb; Rec."Ship-to City")
@@ -98,6 +105,10 @@ page 50118 "VIC Schedule"
                 {
                     ApplicationArea = All;
                     Visible = false;
+                }
+                field(Status; Rec.Status)
+                {
+                    ApplicationArea = All;
                 }
             }
         }
@@ -198,15 +209,12 @@ page 50118 "VIC Schedule"
 
     views
     {
-        view("Sorting By Trip")
-        {
-            Caption = 'Sorting By Trip';
-            OrderBy = Ascending("Trip No.", "Trip Sequece");
-        }
+
         view(NeedSchedule)
         {
             Caption = 'Need Schedule (Norm and PostPoned)';
             SharedLayout = true;
+            OrderBy = Ascending("Trip No.", "Trip Sequece");
             Filters = where("Status" = filter(Norm | Postponed));
         }
         view(Postponed)

@@ -1,14 +1,10 @@
 table 50100 "Schedule"
 {
     Caption = 'Schedule';
-    DataCaptionFields = "Source Type", "Source No.";
+    DataCaptionFields = "Source Type", "Subsidiary Source No.";
     LookupPageId = 50113;
     DataClassification = CustomerContent;
 
-    // The Additional Field in the Sales Header
-    // Google Schedule Sequence
-
-    // With Auto No.series Setting Up using Sales and Receivable Setup
     fields
     {
         field(1; "Source Type"; Enum "Schedule Source Type")
@@ -107,6 +103,11 @@ table 50100 "Schedule"
         {
             Caption = 'To Location Code';
             Description = 'This Attribute only design for the Transfer Order';
+        }
+        field(22; "Subsidiary Source No."; Code[22])
+        {
+            Caption = 'Order No.';
+            Description = 'Order No. for the schedule item in subsidiary.';
         }
 
     }
