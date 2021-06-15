@@ -167,6 +167,7 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'Delivery Items';
                     ApplicationArea = All;
+                    MultiLine = true;
                 }
                 field(Assemble; Rec.Assemble)
                 {
@@ -263,6 +264,23 @@ page 50114 "Schedule Card"
         }
     }
 
+    actions
+    {
+        area(Processing)
+        {
+            action(Testing)
+            {
+                ApplicationArea = All;
+                Caption = 'Testing';
+
+                trigger OnAction();
+                begin
+                    Testfunction();
+                end;
+            }
+        }
+    }
+
     local procedure IsMainItemLine(SalesLine: Record "Sales Line"): Boolean;
     var
         TempItem: Record Item;
@@ -285,5 +303,16 @@ page 50114 "Schedule Card"
         TempItem.CalcFields("Assembly BOM");
         if TempItem."Assembly BOM" then
             exit(true);
+    end;
+
+    procedure Testfunction();
+    var
+        ScheduleMgt: Codeunit "Schedule Mgt";
+        SalesHeader: Record "Sales Header";
+        TempText: Text;
+    begin
+        // SalesHeader.Get(SalesHeader."Document Type"::Order, Rec."Source No.");
+        // ScheduleMgt.LoadWarrantyLine(SalesHeader, Rec, TempText);
+        // Rec.Modify();
     end;
 }

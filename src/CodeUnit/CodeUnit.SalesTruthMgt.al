@@ -6,6 +6,7 @@ codeunit 50101 "Sales Truth Mgt"
 
     var
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
+        ScheduleMgt: Codeunit "Schedule Mgt";
 
     //////////////////////////////////////////////////////////////
     /// 
@@ -850,6 +851,7 @@ codeunit 50101 "Sales Truth Mgt"
         SalesInvoiceHeader.Modify();
     end;
 
+
     [EventSubscriber(ObjectType::Codeunit, 427, 'OnAfterCreateSalesDocument', '', false, false)]
     local procedure AfterCreateSalesDocument(var SalesHeader: Record "Sales Header"; ICInboxSalesHeader: Record "IC Inbox Sales Header"; HandledICInboxSalesHeader: Record "Handled IC Inbox Sales Header");
     var
@@ -869,6 +871,7 @@ codeunit 50101 "Sales Truth Mgt"
 
         TempLine: Integer;
         TempInt: Integer;
+
     begin
         TempAssemble := false;
         RetailSalesHeader.ChangeCompany(SalesHeader."Sell-to Customer Name");
@@ -952,6 +955,8 @@ codeunit 50101 "Sales Truth Mgt"
         WarehouseRequest.FindSet();
         WarehouseRequest."Original SO" := SalesHeader.RetailSalesHeader;
         WarehouseRequest.Modify();
+
+        ScheduleMgt.CreateScheduleItem(SalesHeader);
     end;
 
 
