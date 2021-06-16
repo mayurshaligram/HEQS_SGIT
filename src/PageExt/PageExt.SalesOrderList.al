@@ -42,6 +42,16 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Visible = true;
             }
         }
+        addafter("Location Code")
+        {
+            field(Delivery; Rec.Delivery)
+            {
+                Caption = 'Delivery Type';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies delivery or pick up';
+                Visible = false;
+            }
+        }
 
     }
     actions
