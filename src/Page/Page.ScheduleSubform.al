@@ -272,9 +272,9 @@ page 50117 "Schedule Subform"
                     Schedule: Record Schedule;
                     TempInt: Integer;
 
-                // NSWPage: Page "Schedule List";
-                // VICPage: page "VIC Schedule";
-                // QLDPage: Page "QLD Schedule";
+                    NSWPage: Page "Schedule List";
+                    VICPage: page "VIC Schedule";
+                    QLDPage: Page "QLD Schedule";
                 begin
                     Schedule.SetRange("Trip No.", Rec."Trip No.");
                     TempInt := Schedule.Count();
