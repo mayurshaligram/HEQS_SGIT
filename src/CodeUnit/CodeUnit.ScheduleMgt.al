@@ -155,4 +155,40 @@ codeunit 50114 "Schedule Mgt"
         if TempItem."Assembly BOM" then
             exit(true);
     end;
+
+    procedure AssignTrip(var Schedule: Record Schedule; TripNo: Code[20]);
+    var
+        TempBool: Boolean;
+    begin
+        TempBool := ComfirmChange(Schedule);
+        if TempBool then
+            AssignTripNo(Schedule, TripNo);
+    end;
+
+    procedure ComfirmChange(var
+                                Schedule: Record Schedule): Boolean;
+
+    var
+        ConfirmStr: Text;
+    begin
+        if Schedule."Trip No." <> '' then begin
+            ConfirmStr := Schedule."Source No." + ' has already in Trip ' + Schedule."Trip No." + ' do you want to move it to the new trip?';
+            if Confirm(ConfirmStr) = false then
+                exit(false);
+        end;
+        exit(true);
+    end;
+
+
+    procedure AssignTripNo(var Schedule: Record Schedule; TripNo: Code[20]);
+    var
+        Trip: Record Trip;
+    begin
+        Schedule.Get(Schedule."No.");
+        Schedule."Trip No." := TripNo;
+        Trip.Get(TripNo);
+        Trip.CalcFields("Total Schedule");
+        Schedule."Trip Sequece" := Trip."Total Schedule";
+        Schedule.Modify();
+    end;
 }

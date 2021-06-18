@@ -258,7 +258,7 @@ page 50118 "VIC Schedule"
         {
             Caption = 'Second Lease Pick Up';
             SharedLayout = true;
-            Filters = where(Status = filter(NeedReschedule));
+            Filters = where(Status = filter(Rescheduled));
         }
     }
 

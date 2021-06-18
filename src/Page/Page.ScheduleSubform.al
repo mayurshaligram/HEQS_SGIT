@@ -7,6 +7,8 @@ page 50117 "Schedule Subform"
     PageType = ListPart;
     SourceTable = "Schedule";
     SourceTableView = sorting("Trip Sequece") order(ascending);
+    RefreshOnActivate = true;
+    Editable = true;
 
     layout
     {
@@ -275,16 +277,40 @@ page 50117 "Schedule Subform"
                     NSWPage: Page "Schedule List";
                     VICPage: page "VIC Schedule";
                     QLDPage: Page "QLD Schedule";
+
+                    ConfirmStr: Text;
+                    TempBool: Boolean;
                 begin
                     Schedule.SetRange("Trip No.", Rec."Trip No.");
                     TempInt := Schedule.Count();
                     Schedule.Reset();
+                    TempBool := true;
                     case Rec."From Location Code" of
                         'NSW':
-                            if Page.RunModal(Page::"Schedule List", Schedule) = Action::LookupOK then begin
-                                Schedule."Trip No." := Rec."Trip No.";
-                                Schedule."Trip Sequece" := TempInt;
-                                Schedule.Modify();
+                            begin
+                                Schedule.Reset();
+                                Schedule.SetFilter("Trip No.", '<>%1', Rec."Trip No.");
+                                NSWPage.SetTableView(Schedule);
+                                NSWPage.LookupMode(true);
+
+                                if NSWPage.RunModal() = Action::LookupOK then begin
+                                    Schedule.Reset();
+                                    NSWPage.GetRecord(Schedule);
+                                    Schedule.SetFilter("No.", NSWPage.GetSelectionFilter());
+                                    if Schedule.FindSet() then
+                                        repeat
+                                            if Schedule."Trip No." <> '' then begin
+                                                ConfirmStr := Schedule."Subsidiary Source No." + ' has already in Trip ' + Schedule."Trip No." + ' do you want to move it to the new trip?';
+                                                TempBool := Confirm(ConfirmStr);
+                                            end;
+                                            if TempBool then begin
+                                                Schedule."Trip No." := Rec."Trip No.";
+                                                Schedule."Trip Sequece" := TempInt;
+                                                Schedule.Modify();
+                                                TempInt += 1;
+                                            end;
+                                        until Schedule.Next() = 0;
+                                end;
                             end;
                         'VIC':
                             if Page.RunModal(Page::"VIC Schedule", Schedule) = Action::LookupOK then begin
@@ -312,11 +338,31 @@ page 50117 "Schedule Subform"
                 Image = AboutNav;
 
                 trigger OnAction()
+                var
+                    Schedule: Record Schedule;
+                    Trip: Record Trip;
+                    TempInt: Integer;
                 begin
-                    Rec."Trip No." := '';
-                    Rec."Trip Sequece" := 0;
-                    Rec.Modify();
-                    CurrPage.Update();
+
+                    CurrPage.SetSelectionFilter(Schedule);
+                    if Schedule.FindSet() then begin
+                        Trip.Get(Schedule."Trip No.");
+                        TempInt := 0;
+                        repeat
+                            Schedule."Trip No." := '';
+                            Schedule."Trip Sequece" := 0;
+                            Schedule.Modify();
+                        until Schedule.Next() = 0;
+                        Clear(Schedule);
+                        Schedule.SetRange("Trip No.", Trip."No.");
+                        if Schedule.FindSet() then
+                            repeat
+                                Schedule."Trip Sequece" := TempInt;
+                                TempInt += 1;
+                                Schedule.Modify(true);
+                            until Schedule.Next() = 0;
+                        CurrPage.Update();
+                    end
                 end;
             }
             action("Edit")
@@ -341,6 +387,7 @@ page 50117 "Schedule Subform"
 
     trigger OnAfterGetRecord()
     begin
+        // TempStr := 'Accent';
         TempStr := ScheduleColorMgt.ChangeColor(Rec);
     end;
 }

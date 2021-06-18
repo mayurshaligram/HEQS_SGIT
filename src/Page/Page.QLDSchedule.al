@@ -256,7 +256,7 @@ page 50119 "QLD Schedule"
         {
             Caption = 'Second Lease Pick Up';
             SharedLayout = true;
-            Filters = where(Status = filter(NeedReschedule));
+            Filters = where(Status = filter(Rescheduled));
         }
     }
 

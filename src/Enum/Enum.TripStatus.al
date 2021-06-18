@@ -5,7 +5,7 @@ enum 50107 "Trip Status"
     value(0; Open)
     {
     }
-    value(1; Release)
+    value(1; Released)
     {
     }
     value(2; Completed)

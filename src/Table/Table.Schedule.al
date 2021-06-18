@@ -109,7 +109,11 @@ table 50100 "Schedule"
             Caption = 'Order No.';
             Description = 'Order No. for the schedule item in subsidiary.';
         }
-
+        field(23; "Global Sequence"; Code[20])
+        {
+            Caption = 'Global Sequence';
+            Description = 'Help to move the record';
+        }
     }
 
     keys
@@ -120,9 +124,11 @@ table 50100 "Schedule"
         }
         key(S1; "Trip Sequece")
         {
-
         }
         key(S2; "Trip No.", "Trip Sequece")
+        {
+        }
+        key(S3; "Global Sequence")
         {
         }
     }
@@ -140,11 +146,27 @@ table 50100 "Schedule"
             SalesSetup.TestField("Schedule Nos.");
             NoSeriesMgt.InitSeries(SalesSetup."Schedule Nos.", xRec."No. Series", 0D, "No.", "No. Series");
         end;
+        "Global Sequence" := format("Trip No.") + format("Trip Sequece");
     end;
 
     trigger OnModify()
+    var
+        xSchedule: Record Schedule;
+        TempInt: Integer;
     begin
-
+        "Global Sequence" := format("Trip No.") + format("Trip Sequece");
+        TempInt := 0;
+        if (xRec."Trip No." <> '') and (Rec."Trip No." = '') then
+            xSchedule.SetRange("Trip No.", xRec."Trip No.");
+        if xSchedule.FindSet() then
+            repeat
+                if xSchedule."No." <> Rec."No." then begin
+                    xSchedule."Trip Sequece" := TempInt;
+                    TempInt += 1;
+                    xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
+                    xSchedule.Modify();
+                end;
+            until xSchedule.Next() = 0;
     end;
 
     trigger OnDelete()

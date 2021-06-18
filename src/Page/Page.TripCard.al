@@ -18,6 +18,29 @@ page 50116 "Trip Card"
                 field("Status"; Rec.Status)
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate();
+                    var
+                        Schedule: Record Schedule;
+                    begin
+                        if Confirm('The trip status has changed, do you aslo change all the schedule item status?') then begin
+                            Schedule.SetRange("Trip No.", Rec."No.");
+
+                            if Schedule.FindSet() then
+                                repeat
+                                    case Rec.Status of
+                                        Rec.Status::Completed:
+                                            Schedule.Status := Schedule.Status::Completed;
+                                        Rec.Status::Open:
+                                            Schedule.Status := Schedule.Status::Norm;
+                                        Rec.Status::Released:
+                                            Schedule.Status := Schedule.Status::Released;
+                                    end;
+                                    Schedule.Modify();
+                                until Schedule.Next() = 0;
+                        end;
+
+                    end;
                 }
                 field(Driver; Rec.Driver)
                 {
@@ -172,8 +195,9 @@ page 50116 "Trip Card"
                     //     until WhseRqst.Next() = 0;
                     // end;
                     if (WhseShipmentHeader.CurrentCompany = SalesTruthMgt.InventoryCompany()) then begin
+
                         WhseShipmentLine.SetRange("No.", WhseShipmentHeader."No.");
-                        if WhseShipmentLine.FindSet() then
+                        if WhseShipmentLine.FindSet() then begin
                             repeat
                                 if WhseShipmentLine."Source Document" = WhseShipmentLine."Source Document"::"Sales Order" then begin
                                     SalesHeader.Get(SalesHeader."Document Type"::Order, WhseShipmentLine."Source No.");
@@ -181,8 +205,21 @@ page 50116 "Trip Card"
                                     WhseShipmentLine.Modify();
                                 end;
                             until WhseShipmentLine.Next() = 0;
+                        end;
+
                     end;
-                    Page.Run(Page::"Warehouse Shipment", WhseShipmentHeader);
+                    WhseShipmentLine.Reset();
+                    WhseShipmentLine.SetRange("No.", WhseShipmentHeader."No.");
+                    if WhseShipmentLine.FindSet() then begin
+                        ReleaseScheduleItem(Rec);
+                        Page.Run(Page::"Warehouse Shipment", WhseShipmentHeader);
+                        CurrPage.Update();
+                    end
+                    else begin
+                        Message('No WarehouseShipment has created.');
+                        WhseShipmentHeader.Delete(true);
+                    end;
+
                 end;
 
             }
@@ -226,6 +263,20 @@ page 50116 "Trip Card"
                     exit(false);
             until WarehouseShipment.Next() = 0;
         exit(true);
+    end;
+
+    local procedure ReleaseScheduleItem(Trip: Record Trip);
+    var
+        Schedule: Record Schedule;
+    begin
+        Schedule.SetRange("Trip No.", Trip."No.");
+        if Schedule.FindSet() then
+            repeat
+                Schedule.Status := Schedule.Status::Released;
+                Schedule.Modify();
+            until Schedule.Next() = 0;
+        Trip.Status := Trip.Status::Released;
+        Trip.Modify();
     end;
 
 }

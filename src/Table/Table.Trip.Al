@@ -40,6 +40,11 @@ table 50107 Trip
         {
             Caption = 'Vehicle';
         }
+        field(7; "Total Schedule"; Integer)
+        {
+            FieldClass = FlowField;
+            CalcFormula = count(Schedule where("Trip No." = field("No.")));
+        }
     }
 
     keys

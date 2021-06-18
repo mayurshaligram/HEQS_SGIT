@@ -6,12 +6,14 @@ codeunit 50110 "Schedule Color Mgt1"
         case Schedule.Status of
             Schedule.Status::Completed:
                 exit('Favorable');
-            Schedule.Status::NeedReschedule:
+            Schedule.Status::Rescheduled:
                 exit('StrongAccent');
             Schedule.Status::Postponed:
                 exit('Ambiguous');
             Schedule.Status::Norm:
                 exit('Strong');
+            Schedule.Status::Released:
+                exit('AttentionAccent');
         end;
     end;
 
