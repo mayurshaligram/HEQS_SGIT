@@ -56,6 +56,7 @@ page 50118 "VIC Schedule"
                 {
                     Caption = 'Delivery Time/Note';
                     ApplicationArea = All;
+                    MultiLine = true;
                     StyleExpr = TempStr;
                 }
                 field("Delivery Items"; Rec."Delivery Items")

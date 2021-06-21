@@ -232,10 +232,27 @@ page 50114 "Schedule Card"
                     trigger OnLookup(var Text: Text): Boolean
                     var
                         Trip: Record Trip;
+                        xSchedule: Record Schedule;
                     begin
+                        xSchedule.Reset();
+                        xSchedule.SetCurrentKey("Trip No.", "Trip Sequece");
+                        xSchedule.SetRange("Trip No.", Rec."Trip No.");
+                        xSchedule.SetFilter("Trip Sequece", '>%1', Rec."Trip Sequece");
                         Trip.Reset();
-                        if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then
+                        if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then begin
                             Rec."Trip No." := Trip."No.";
+                            Trip.Get(Rec."Trip No.");
+                            Trip.CalcFields("Total Schedule");
+                            Rec."Trip Sequece" := Trip."Total Schedule";
+                            Rec."Global Sequence" := format(Rec."Trip No.") + format(Rec."Trip Sequece");
+                        end;
+                        if xSchedule.FindSet() then
+                            repeat
+                                xSchedule."Trip Sequece" -= 1;
+                                xSchedule."Global Sequence" := format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
+                                xSchedule.Modify();
+                            until xSchedule.Next() = 0;
+
                         Rec.Modify();
                     end;
                 }
@@ -243,6 +260,7 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'Trip Sequence';
                     ApplicationArea = All;
+                    Editable = false;
                 }
                 field(Remote; Rec.Remote)
                 {

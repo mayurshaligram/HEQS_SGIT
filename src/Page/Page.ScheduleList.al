@@ -57,6 +57,7 @@ page 50113 "Schedule List"
                 field("Delivery Time"; Rec."Delivery Time")
                 {
                     Caption = 'Delivery Time/Note';
+                    MultiLine = true;
                     ApplicationArea = All;
                     StyleExpr = TempStr;
                 }
@@ -232,10 +233,9 @@ page 50113 "Schedule List"
                         if TempBool then begin
                             Schedule."Trip No." := Trip."No.";
                             Schedule."Trip Sequece" := TempInt;
-                            Schedule.Modify();
+                            Schedule.Modify(True);
                             TempInt += 1;
                         end
-
                     end;
                     if TempInt >= 1 then begin
                         ResultStr := 'Trip ' + Trip."No." + ' has been created, do you want to open to adjust sequence?';
@@ -244,6 +244,7 @@ page 50113 "Schedule List"
                             Commit();
                             Page.Run(Page::"Trip Card", Trip);
                         end;
+                        CurrPage.Update();
                     end
                     else
                         Trip.Delete();
@@ -256,8 +257,10 @@ page 50113 "Schedule List"
                 var
                     Trip: Record Trip;
                 begin
-                    if Trip.Get(Rec."Trip No.") then
-                        Page.RunModal(Page::"Trip Card", Trip)
+                    if Trip.Get(Rec."Trip No.") then begin
+                        Page.RunModal(Page::"Trip Card", Trip);
+                        CurrPage.Update();
+                    end
                     else
                         Message('This Schedule item has not been assign to a trip.');
                 end;
@@ -265,8 +268,10 @@ page 50113 "Schedule List"
             action("Assign Trip")
             {
                 ApplicationArea = All;
+
                 trigger OnAction();
                 var
+                    CurrentRec: Record Schedule;
                     Trip: Record Trip;
                     Schedule: Record Schedule;
                     ScheduleMgt: Codeunit "Schedule Mgt";
@@ -285,6 +290,131 @@ page 50113 "Schedule List"
                             AssignTrip(Schedule, Trip."No.");
                         end;
                         CurrPage.Update();
+                    end;
+                end;
+
+
+            }
+            action("Up")
+            {
+                ApplicationArea = All;
+                Image = MoveUp;
+                ToolTip = 'Move up the item in Schedule. Shift+ctrl+J';
+                ShortcutKey = 'Shift+Ctrl+J';
+
+                trigger OnAction();
+                var
+                    Schedule: Record Schedule;
+                    Trip: Record Trip;
+                    Message: Label 'Scheduel %1 is at top of Trip %2 Do you want to move up the last item in Trip %3';
+                    TempText: Text;
+                begin
+                    if Rec."Trip No." = '' then begin
+                        // Assign Trip
+                        if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then begin
+
+                            Rec."Trip No." := Trip."No.";
+                            Trip.CalcFields("Total Schedule");
+                            Rec."Trip Sequece" := Trip."Total Schedule";
+                            Rec.Modify(true);
+                            CurrPage.Update();
+
+                        end;
+                    end else // Move down the trip if the sequence = 0
+                    begin
+                        if Rec."Trip Sequece" = 0 then begin
+                            TempText := 'Schedule ' + Rec."Subsidiary Source No." + ' is at top of Trip ' + Rec."Trip No." + '. Do you want to move to other Trip?';
+                            if Confirm(TempText) then begin
+                                if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then begin
+                                    if Trip."No." <> Rec."Trip No." then begin
+                                        Schedule.SetRange("Trip No.", Rec."Trip No.");
+                                        Rec."Trip No." := Trip."No.";
+                                        Trip.CalcFields("Total Schedule");
+                                        Rec."Trip Sequece" := Trip."Total Schedule";
+                                        Rec.Modify(true);
+                                        CurrPage.Update();
+                                    end;
+                                    if Schedule.FindSet() then
+                                        repeat
+                                            Schedule."Trip Sequece" -= 1;
+                                            Schedule."Global Sequence" := Format(Schedule."Trip No.") + Format(Schedule."Trip Sequece");
+                                            Schedule.Modify();
+                                        until Schedule.Next() = 0;
+                                end;
+                            end;
+                        end
+                        else begin
+                            // Switch the trip sequence with another schedule item in one trip
+                            Schedule.Reset();
+                            Schedule.SetRange("Trip No.", Rec."Trip No.");
+                            Schedule.SetRange("Trip Sequece", Rec."Trip Sequece" - 1);
+                            if Schedule.FindSet() then begin
+                                Schedule."Trip Sequece" := Rec."Trip Sequece";
+                                Rec."Trip Sequece" -= 1;
+                                Schedule.Modify(true);
+                                Rec.Modify(true);
+                                CurrPage.Update();
+                            end;
+                        end;
+                    end;
+
+                end;
+            }
+            action("Down")
+            {
+                ApplicationArea = All;
+                Image = MoveDown;
+                ToolTip = 'Move down the item in Schedule.Shit+Ctrl+K';
+                ShortcutKey = 'Shift+Ctrl+K';
+
+                trigger OnAction();
+                var
+                    Schedule: Record Schedule;
+                    Trip: Record Trip;
+                    TempText: Text;
+                begin
+                    if Rec."Trip No." = '' then begin
+                        if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then begin
+                            if Trip."No." <> Rec."Trip No." then begin
+                                Rec."Trip No." := Trip."No.";
+                                Trip.CalcFields("Total Schedule");
+                                Rec."Trip Sequece" := Trip."Total Schedule";
+                                Rec.Modify(true);
+                                CurrPage.Update();
+                            end;
+                        end;
+                    end else
+                    // if is trip sequence is equal to the total sequence of the trip then ask whether move to other trip;
+
+                    begin
+                        Trip.Get(Rec."Trip No.");
+                        Trip.CalcFields("Total Schedule");
+                        if (Rec."Trip Sequece" + 1) >= Trip."Total Schedule" then begin
+                            TempText := 'Schedule ' + Rec."Subsidiary Source No." + ' is at bottom of Trip ' + Rec."Trip No." + '. Do you want to move this schedule item to the other Trip?';
+                            if Confirm(TempText) then begin
+                                if Page.RunModal(Page::"Trip List", Trip) = Action::LookupOK then begin
+                                    if Trip."No." <> Rec."Trip No." then begin
+                                        Rec."Trip No." := Trip."No.";
+                                        Trip.CalcFields("Total Schedule");
+                                        Rec."Trip Sequece" := Trip."Total Schedule";
+                                        Rec.Modify(true);
+                                        CurrPage.Update();
+                                    end;
+                                end;
+                            end;
+                        end else begin
+                            Schedule.Reset();
+                            Schedule.SetRange("Trip No.", Rec."Trip No.");
+                            Schedule.SetRange("Trip Sequece", Rec."Trip Sequece" + 1);
+                            if Schedule.FindSet() then begin
+                                Schedule."Trip Sequece" := Rec."Trip Sequece";
+                                Rec."Trip Sequece" += 1;
+                                Schedule.Modify(true);
+                                Rec.Modify(true);
+                                CurrPage.Update();
+                            end;
+                        end;
+
                     end;
                 end;
             }
@@ -394,7 +524,7 @@ page 50113 "Schedule List"
         ConfirmStr: Text;
     begin
         if Schedule."Trip No." <> '' then begin
-            ConfirmStr := Schedule."Source No." + ' has already in Trip ' + Schedule."Trip No." + ' do you want to move it to the new trip?';
+            ConfirmStr := Schedule."Subsidiary Source No." + ' has already in Trip ' + Schedule."Trip No." + ' do you want to move it to the new trip?';
             if Confirm(ConfirmStr) = false then
                 exit(false);
         end;
@@ -403,13 +533,26 @@ page 50113 "Schedule List"
 
     procedure AssignTripNo(var Schedule: Record Schedule; TripNo: Code[20]);
     var
+        xSchedule: Record Schedule;
         Trip: Record Trip;
     begin
+        xSchedule.Reset();
+        xSchedule.SetCurrentKey("Trip No.", "Trip Sequece");
+        xSchedule.SetRange("Trip No.", Rec."Trip No.");
+        xSchedule.SetFilter("Trip Sequece", '>%1', Rec."Trip Sequece");
         Schedule."Trip No." := TripNo;
         Trip.Get(TripNo);
         Trip.CalcFields("Total Schedule");
         Schedule."Trip Sequece" := Trip."Total Schedule";
-        Schedule.Modify();
+        Schedule.Modify(true);
+        if xSchedule.FindSet() then
+            repeat
+                xSchedule."Trip Sequece" -= 1;
+                xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
+                xSchedule.Modify();
+            until xSchedule.Next() = 0;
+
+
     end;
 
 

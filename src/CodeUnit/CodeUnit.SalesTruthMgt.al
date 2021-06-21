@@ -888,6 +888,7 @@ codeunit 50101 "Sales Truth Mgt"
         SalesHeader.RetailSalesHeader := RetailSalesHeader."No.";
         SalesHeader."Ship-to Phone No." := RetailSalesHeader."Ship-to Phone No.";
         SalesHeader."Ship-to City" := RetailSalesHeader."Ship-to City";
+        SalesHeader."Sell-to City" := RetailSalesHeader."Sell-to City";
         SalesHeader."Shipping Agent Code" := RetailSalesHeader."Shipping Agent Code";
         // For Return Order, Also need to carry the same Reason Code
         if SalesHeader."Document Type" = SalesHeader."Document Type"::"Return Order" then

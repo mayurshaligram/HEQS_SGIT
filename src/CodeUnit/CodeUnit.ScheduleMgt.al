@@ -74,6 +74,9 @@ codeunit 50114 "Schedule Mgt"
         Zone.SetRange("Order Price", TempInt, 999999);
         if Zone.FindSet() then
             Schedule.Zone := Zone.Code;
+
+        // Load Work Description From Original Retail Order
+        LoadWorkDescriptionFromOriginalRetailOrder(SalesHeader, Schedule);
         Schedule.Insert(true);
     end;
 
@@ -116,7 +119,9 @@ codeunit 50114 "Schedule Mgt"
     begin
         Schedule."Source No." := SalesHeader."No.";
         Schedule."Subsidiary Source No." := SalesHeader.RetailSalesHeader;
-        Schedule."Ship-to City" := SalesHeader."Location Code";
+        Schedule."Ship-to City" := SalesHeader."Ship-to City";
+        if Schedule."Ship-to City" = '' then
+            Schedule."Ship-to City" := SalesHeader."Sell-to City";
         SalesHeader.CalcFields("Amount Including VAT");
         Schedule."Delivery Date" := SalesHeader."Promised Delivery Date";
         SalesLine.SetRange("Document Type", SalesHeader."Document Type");
@@ -190,5 +195,28 @@ codeunit 50114 "Schedule Mgt"
         Trip.CalcFields("Total Schedule");
         Schedule."Trip Sequece" := Trip."Total Schedule";
         Schedule.Modify();
+    end;
+
+    procedure LoadWorkDescriptionFromOriginalRetailOrder(ICSalesHeader: Record "Sales Header"; var Schedule: Record Schedule);
+    var
+        RetailSalesHeader: Record "Sales Header";
+        TempText: Text[2000];
+    begin
+        RetailSalesHeader.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
+        RetailSalesHeader.Get(ICSalesHeader."Document Type", ICSalesHeader.RetailSalesHeader);
+        RetailSalesHeader.CalcFields("Work Description");
+        TempText := GetWorkDescription(RetailSalesHeader);
+        Schedule."Delivery Date" := RetailSalesHeader."Requested Delivery Date";
+        Schedule."Delivery Time" += TempText;
+    end;
+
+    procedure GetWorkDescription(var SalesHeader: Record "Sales Header"): Text
+    var
+        TypeHelper: Codeunit "Type Helper";
+        InStream: InStream;
+    begin
+        SalesHeader.CalcFields("Work Description");
+        SalesHeader."Work Description".CreateInStream(InStream, TEXTENCODING::UTF8);
+        exit(TypeHelper.ReadAsTextWithSeparator(InStream, TypeHelper.LFSeparator));
     end;
 }

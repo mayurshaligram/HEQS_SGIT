@@ -16,14 +16,28 @@ page 50115 "Trip List"
                 field("No."; Rec."No.")
                 {
                     ApplicationArea = All;
+                    StyleExpr = ColorStr;
+                }
+                field("Delivery Date"; Rec."Delivery Date")
+                {
+                    ApplicationArea = All;
+                    StyleExpr = ColorStr;
+                }
+                field(Ongoing; OnGoingStr)
+                {
+                    ApplicationArea = All;
+                    StyleExpr = ColorStr;
                 }
                 field(Status; Rec.Status)
                 {
                     ApplicationArea = All;
+                    StyleExpr = ColorStr;
                 }
+
                 field(Note; Rec.Note)
                 {
                     ApplicationArea = All;
+                    StyleExpr = ColorStr;
                 }
             }
         }
@@ -47,4 +61,19 @@ page 50115 "Trip List"
 
     var
         myInt: Integer;
+        OnGoingStr: Text;
+        ColorStr: Text;
+
+    trigger OnAfterGetCurrRecord();
+    begin
+        OnGoingStr := format(Rec."Total Completed") + '/' + format(Rec."Total Schedule");
+        case Rec.Status of
+            Rec.Status::Completed:
+                ColorStr := 'Favorable';
+            Rec.Status::Released:
+                ColorStr := 'AttentionAccent';
+            Rec.Status::Open:
+                ColorStr := 'Strong';
+        end
+    end;
 }

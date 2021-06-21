@@ -46,7 +46,7 @@ table 50100 "Schedule"
         {
             Caption = 'Delivery Date';
         }
-        field(8; "Delivery Time"; Text[200])
+        field(8; "Delivery Time"; Text[2000])
         {
             Caption = 'Delivery Time/Note';
         }
@@ -151,22 +151,27 @@ table 50100 "Schedule"
 
     trigger OnModify()
     var
+        Schedule: Record Schedule;
         xSchedule: Record Schedule;
         TempInt: Integer;
     begin
         "Global Sequence" := format("Trip No.") + format("Trip Sequece");
         TempInt := 0;
-        if (xRec."Trip No." <> '') and (Rec."Trip No." = '') then
+        // Commit();
+        // Reorder Previous Trip 
+        if (xRec."Trip No." <> '') and ("Trip No." = '') then begin
             xSchedule.SetRange("Trip No.", xRec."Trip No.");
-        if xSchedule.FindSet() then
-            repeat
-                if xSchedule."No." <> Rec."No." then begin
-                    xSchedule."Trip Sequece" := TempInt;
-                    TempInt += 1;
-                    xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
-                    xSchedule.Modify();
-                end;
-            until xSchedule.Next() = 0;
+            if xSchedule.FindSet() then
+                repeat
+                    if xSchedule."No." <> Rec."No." then begin
+                        xSchedule."Trip Sequece" := TempInt;
+                        TempInt += 1;
+                        xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
+                        xSchedule.Modify();
+                    end;
+                until xSchedule.Next() = 0;
+        end;
+
     end;
 
     trigger OnDelete()

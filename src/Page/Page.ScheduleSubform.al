@@ -351,7 +351,7 @@ page 50117 "Schedule Subform"
                         repeat
                             Schedule."Trip No." := '';
                             Schedule."Trip Sequece" := 0;
-                            Schedule.Modify();
+                            Schedule.Modify(true);
                         until Schedule.Next() = 0;
                         Clear(Schedule);
                         Schedule.SetRange("Trip No.", Trip."No.");

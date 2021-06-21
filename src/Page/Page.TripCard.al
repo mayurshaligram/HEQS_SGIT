@@ -86,9 +86,31 @@ page 50116 "Trip Card"
                             until Schedule.Next() = 0;
                     end;
                 }
+                field("Delivery Date"; Rec."Delivery Date")
+                {
+                    ApplicationArea = All;
+
+                    trigger OnValidate();
+                    var
+                        Schedule: Record Schedule;
+                    begin
+                        Schedule.Reset();
+                        Schedule.SetRange("Trip No.", Rec."No.");
+                        if Schedule.FindSet() then
+                            repeat
+                                Schedule."Delivery Date" := Rec."Delivery Date";
+                                Schedule.Modify();
+                            until Schedule.Next() = 0;
+                    end;
+                }
                 field(Note; Rec.Note)
                 {
                     ApplicationArea = All;
+                }
+                field("Total Schedule"; Rec."Total Schedule")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
                 }
             }
             part(ScheduleSubform; "Schedule Subform")
