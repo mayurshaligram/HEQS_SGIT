@@ -45,17 +45,16 @@ page 50116 "Trip Card"
                 field(Driver; Rec.Driver)
                 {
                     Caption = 'Driver';
+                    TableRelation = Driver;
                     ApplicationArea = All;
 
-                    trigger OnLookup(var Text: Text): Boolean
+                    trigger OnValidate();
                     var
                         Driver: Record Driver;
                         Schedule: Record Schedule;
                     begin
-                        Driver.Reset();
-                        if Page.RunModal(Page::"Driver Lookup", Driver) = Action::LookupOK then
-                            Rec.Driver := Driver."First Name" + ' ' + Driver."Last Name";
-                        Rec.Modify();
+                        Driver.Get(Rec.Driver);
+                        Rec.Driver := Driver."First Name" + Driver."Last Name";
                         Schedule.SetRange("Trip No.", Rec."No.");
                         if Schedule.FindSet() then
                             repeat
@@ -67,17 +66,14 @@ page 50116 "Trip Card"
                 field(Vehicle; Rec.Vehicle)
                 {
                     Caption = 'Vehicle';
+                    TableRelation = Vehicle;
                     ApplicationArea = All;
 
-                    trigger OnLookup(var Text: Text): Boolean
+                    trigger OnValidate();
                     var
-                        Vehicle: Record Vehicle;
                         Schedule: Record Schedule;
                     begin
-                        Vehicle.Reset();
-                        if Page.RunModal(Page::"Vehicle Lookup", Vehicle) = Action::LookupOK then
-                            Rec.Vehicle := Vehicle."No.";
-                        Rec.Modify();
+                        Schedule.Reset();
                         Schedule.SetRange("Trip No.", Rec."No.");
                         if Schedule.FindSet() then
                             repeat
@@ -108,6 +104,11 @@ page 50116 "Trip Card"
                     ApplicationArea = All;
                 }
                 field("Total Schedule"; Rec."Total Schedule")
+                {
+                    ApplicationArea = All;
+                    Editable = false;
+                }
+                field("Completed Schedule"; Rec."Total Completed")
                 {
                     ApplicationArea = All;
                     Editable = false;
@@ -256,6 +257,8 @@ page 50116 "Trip Card"
                 trigger OnAction();
                 var
                     Schedule: Record Schedule;
+                    SalesOrder: Record "Sales Header";
+                    RetailSalesOrder: Record "Sales Header";
                 begin
                     Schedule.Reset();
                     Schedule.SetRange("Trip No.", Rec."No.");
@@ -263,6 +266,29 @@ page 50116 "Trip Card"
                         repeat
                             Schedule.Status := Schedule.Status::Completed;
                             Schedule.Modify();
+                            case Schedule."Source Type" of
+                                Schedule."Source Type"::"Sales Order":
+                                    begin
+                                        if SalesOrder.Get(SalesOrder."Document Type"::Order, Schedule."Source No.") then begin
+                                            SalesOrder.IsDeliveried := true;
+                                            SalesOrder.Modify();
+                                        end;
+                                        RetailSalesOrder.ChangeCompany(SalesOrder."Sell-to Customer Name");
+                                        if RetailSalesOrder.Get(RetailSalesOrder."Document Type"::Order, Schedule."Subsidiary Source No.") then begin
+                                            RetailSalesOrder.IsDeliveried := true;
+                                            RetailSalesOrder.Modify();
+                                        end;
+                                    end;
+                                Schedule."Source Type"::"Warranty Service":
+                                    begin
+                                        if RetailSalesOrder.ChangeCompany(Schedule."Subsidiary Name") then begin
+                                            if RetailSalesOrder.Get(RetailSalesOrder."Document Type"::Order, Schedule."Subsidiary Source No.") then begin
+                                                RetailSalesOrder.IsDeliveried := true;
+                                                RetailSalesOrder.Modify();
+                                            end;
+                                        end;
+                                    end;
+                            end
                         until Schedule.Next() = 0;
                     Rec.Status := Rec.Status::Completed;
                     CurrPage.Update();
@@ -286,6 +312,7 @@ page 50116 "Trip Card"
             until WarehouseShipment.Next() = 0;
         exit(true);
     end;
+
 
     local procedure ReleaseScheduleItem(Trip: Record Trip);
     var

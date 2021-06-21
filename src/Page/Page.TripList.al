@@ -64,8 +64,11 @@ page 50115 "Trip List"
         OnGoingStr: Text;
         ColorStr: Text;
 
-    trigger OnAfterGetCurrRecord();
+
+    trigger OnAfterGetRecord();
     begin
+        Rec.CalcFields("Total Completed");
+        Rec.CalcFields("Total Schedule");
         OnGoingStr := format(Rec."Total Completed") + '/' + format(Rec."Total Schedule");
         case Rec.Status of
             Rec.Status::Completed:

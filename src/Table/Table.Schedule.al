@@ -114,6 +114,12 @@ table 50100 "Schedule"
             Caption = 'Global Sequence';
             Description = 'Help to move the record';
         }
+        field(24; "Subsidiary Name"; Text[30])
+        {
+            Caption = 'Subsidiary Name';
+            Description = 'Subsidiary Name';
+        }
+
     }
 
     keys

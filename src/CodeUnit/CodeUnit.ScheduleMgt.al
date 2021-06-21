@@ -208,6 +208,7 @@ codeunit 50114 "Schedule Mgt"
         TempText := GetWorkDescription(RetailSalesHeader);
         Schedule."Delivery Date" := RetailSalesHeader."Requested Delivery Date";
         Schedule."Delivery Time" += TempText;
+        Schedule."Subsidiary Name" := RetailSalesHeader.CurrentCompany();
     end;
 
     procedure GetWorkDescription(var SalesHeader: Record "Sales Header"): Text
