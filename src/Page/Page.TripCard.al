@@ -113,6 +113,21 @@ page 50116 "Trip Card"
                     ApplicationArea = All;
                     Editable = false;
                 }
+                field(ShowMap; ShowMapLbl)
+                {
+                    ApplicationArea = Basic, Suite;
+                    Editable = false;
+                    ShowCaption = false;
+                    Style = StrongAccent;
+                    StyleExpr = TRUE;
+                    ToolTip = 'Specifies show quickest optimized multiple waypoints route in Map Servie';
+
+                    trigger OnDrillDown()
+                    begin
+                        CurrPage.Update(true);
+                        Rec.DisplayMap();
+                    end;
+                }
             }
             part(ScheduleSubform; "Schedule Subform")
             {
@@ -246,6 +261,17 @@ page 50116 "Trip Card"
                 end;
 
             }
+            action("Smart Quickest Ordering")
+            {
+                ApplicationArea = Warehouse;
+                Caption = 'Smart Quickest Ordering';
+                ToolTip = 'Get optimzated Schedule Ordering for the Trip';
+
+                trigger OnAction()
+                begin
+                    Message('Under Development. Coming Soon.');
+                end;
+            }
             action("Complete Trip")
             {
                 AccessByPermission = TableData "Warehouse Shipment Header" = R;
@@ -295,10 +321,12 @@ page 50116 "Trip Card"
                 end;
 
             }
+
         }
     }
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
+        ShowMapLbl: Label 'Show on Map';
 
     local procedure NoWarehouseShipmentLine(TempSchedule: Record Schedule): Boolean
     var

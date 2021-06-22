@@ -68,6 +68,14 @@ table 50107 Trip
     var
         SalesSetup: Record "Sales & Receivables Setup";
         NoSeriesMgt: Codeunit NoSeriesManagement;
+        Text014: Label 'Before you can use Online Map, you must fill in the Online Map Setup window.\See Setting Up Online Map in Help.';
+
+    procedure DisplayMap()
+    var
+        url: Label 'https://www.google.com/maps/dir/';
+    begin
+        HyperLink(url);
+    end;
 
     trigger OnInsert()
     begin

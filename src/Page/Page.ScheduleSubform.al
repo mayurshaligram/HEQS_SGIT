@@ -162,7 +162,7 @@ page 50117 "Schedule Subform"
                 PromotedCategory = Process;
                 PromotedIsBig = true;
                 Image = MoveUp;
-                ShortcutKey = 'Shift+Ctrl+U';
+                ShortcutKey = 'Shift+Ctrl+J';
                 ToolTip = 'Shortcut Shift+Ctrl+U';
                 trigger OnAction()
                 var
@@ -192,7 +192,7 @@ page 50117 "Schedule Subform"
                 PromotedCategory = Process;
                 PromotedIsBig = true;
                 Image = MoveDown;
-                ShortcutKey = 'Shift+Ctrl+D';
+                ShortcutKey = 'Shift+Ctrl+K';
                 ToolTip = 'Shortcut Shift+Ctrl+D';
                 trigger OnAction()
                 var

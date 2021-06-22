@@ -13,6 +13,7 @@ codeunit 50114 "Schedule Mgt"
     // 4. There are no previous Pure Warranty Sales Order
     procedure Initialize()
     begin
+        // Before Initialize First Setup No Series for Schedule and Trip 
         if Database.CompanyName() <> SalesTruthMgt.InventoryCompany() then
             Error('Please Only Initialize the schedule item in the inventory company');
         LoadSalesOrder();
@@ -286,12 +287,13 @@ codeunit 50114 "Schedule Mgt"
         TempText: Text[2000];
     begin
         RetailSalesHeader.ChangeCompany(ICSalesHeader."Sell-to Customer Name");
-        RetailSalesHeader.Get(ICSalesHeader."Document Type", ICSalesHeader.RetailSalesHeader);
-        RetailSalesHeader.CalcFields("Work Description");
-        TempText := GetWorkDescription(RetailSalesHeader);
-        Schedule."Delivery Date" := RetailSalesHeader."Requested Delivery Date";
-        Schedule."Delivery Time" += TempText;
-        Schedule."Subsidiary Name" := RetailSalesHeader.CurrentCompany();
+        if RetailSalesHeader.Get(ICSalesHeader."Document Type", ICSalesHeader.RetailSalesHeader) then begin
+            RetailSalesHeader.CalcFields("Work Description");
+            TempText := GetWorkDescription(RetailSalesHeader);
+            Schedule."Delivery Date" := RetailSalesHeader."Requested Delivery Date";
+            Schedule."Delivery Time" += TempText;
+            Schedule."Subsidiary Name" := RetailSalesHeader.CurrentCompany();
+        end;
     end;
 
     procedure GetWorkDescription(var SalesHeader: Record "Sales Header"): Text
