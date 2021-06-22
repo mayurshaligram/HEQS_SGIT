@@ -167,6 +167,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 PurchaseHeader: Record "Purchase Header";
                 PurchaseLine: Record "Purchase Line";
                 SalesLine: Record "Sales Line";
+                ScheduleMgt: Codeunit "Schedule Mgt";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
                     // Keep Purchase Line unit of measure and code same as the sales line
@@ -189,6 +190,11 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     if ICSalesHeader.Findset() = false then
                         if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
                             ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
+                end
+                else begin
+
+
+                    ScheduleMgt.CreateWarrantyItem(Rec);
                 end;
             end;
         }

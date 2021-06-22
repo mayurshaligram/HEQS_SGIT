@@ -502,13 +502,13 @@ report 50100 "Standard Sales - Inv.Ext"
                 }
                 // column(CrossReferenceNo_Line; "Cross-Reference No.")
                 // {
-                //     ObsoleteState = Pending;
+                //     ObsoleteState = Postponed;
                 //     ObsoleteReason = 'Replaced by Item Reference No.';
                 //     ObsoleteTag = '17.0';
                 // }
                 // column(CrossReferenceNo_Line_Lbl; FieldCaption("Cross-Reference No."))
                 // {
-                //     ObsoleteState = Pending;
+                //     ObsoleteState = Postponed;
                 //     ObsoleteReason = 'Replaced by Item Reference No.';
                 //     ObsoleteTag = '17.0';
                 // }

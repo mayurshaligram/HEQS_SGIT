@@ -15,7 +15,7 @@ codeunit 50109 ZoneUpgrade
     var
         Company: Record Company;
     begin
-        // LoadZoneTable();
+        LoadZoneTable();
         // if Company.Name = SalesTruthMgt.InventoryCompany() then
         //     ClearPayable();
         // LoadPayable();

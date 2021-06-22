@@ -1,4 +1,3 @@
-#pragma implicitwith disable
 page 50104 Schedule
 {
     ApplicationArea = Basic, Suite, Assembly;

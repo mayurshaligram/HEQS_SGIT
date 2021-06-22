@@ -52,7 +52,6 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Visible = false;
             }
         }
-
     }
     actions
     {

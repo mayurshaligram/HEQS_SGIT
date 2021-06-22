@@ -6,6 +6,7 @@ table 50103 Driver
 
     fields
     {
+
         field(1; "No."; Code[20])
         {
             Caption = 'No.';
@@ -23,6 +24,7 @@ table 50103 Driver
             Caption = 'Last Name';
         }
     }
+
     keys
     {
         key(Key1; "No.")
@@ -31,5 +33,11 @@ table 50103 Driver
         }
 
     }
+    fieldgroups
+    {
+        fieldgroup(DropDown; "No.", "First Name", "Middle Name", "Last Name")
+        {
 
+        }
+    }
 }
