@@ -70,6 +70,22 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     RunObject = page Payable;
                     ToolTip = 'Payable';
                 }
+                action("Scheduling(Deprecated)")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Scheduling(Deprecated)';
+                    Image = ServiceHours;
+                    RunObject = page Schedule;
+                    ToolTip = 'Deprecated Section will be deleted in the next update, please use NSW, QLD, VIC';
+                }
+                action("Archive Scheduling(Deprecated")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Archive Scheduling(Deprecated)';
+                    Image = Archive;
+                    RunObject = page "Archive Schedule";
+                    ToolTip = 'Deprecated Section will be deleted in the next update, please use NSW, QLD, VIC';
+                }
             }
         }
     }
