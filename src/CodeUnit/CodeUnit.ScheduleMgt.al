@@ -5,6 +5,85 @@ codeunit 50114 "Schedule Mgt"
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
         NoSeriesMgt: Codeunit NoSeriesManagement;
 
+
+    // Initialize the Schedule Item in Existing Business Central
+    // 1. Sales Order Initialize
+    // 2. Sales Return Initialize
+    // 3. Transfer Order Initalize
+    // 4. There are no previous Pure Warranty Sales Order
+    procedure Initialize()
+    begin
+        if Database.CompanyName() <> SalesTruthMgt.InventoryCompany() then
+            Error('Please Only Initialize the schedule item in the inventory company');
+        LoadSalesOrder();
+        TransferOrder();
+    end;
+
+    // Load Sales [Return] Order in International 
+    // Two Types: 1. IsDeliverd -- Completed
+    //            2. Others -- Norm
+    local procedure LoadSalesOrder()
+    var
+        SalesHeader: Record "Sales Header";
+        Schedule: Record Schedule;
+    begin
+        SalesHeader.Reset();
+        if SalesHeader.FindSet() then
+            repeat
+                CreateScheduleItem(SalesHeader);
+            until SalesHeader.Next() = 0;
+    end;
+
+    local procedure TransferOrder()
+    var
+        TransferHeader: Record "Transfer Header";
+    begin
+        TransferHeader.Reset();
+        if TransferHeader.FindSet() then
+            repeat
+                CreateTransferItem(TransferHeader);
+            until TransferHeader.Next() = 0;
+    end;
+
+    procedure CreateTransferItem(TransferHeader: Record "Transfer Header");
+    var
+        Schedule: Record Schedule;
+        TransferLine: Record "Transfer Line";
+        TempDeliveryItem: Text[2000];
+    begin
+        Clear(Schedule);
+        Schedule."Source Type" := Schedule."Source Type"::"Transfer Order";
+        Schedule."Source No." := TransferHeader."No.";
+        Schedule."Delivery Date" := TransferHeader."Shipment Date";
+        Schedule.Assemble := false;
+        TransferLine.SetRange("Document No.", TransferHeader."No.");
+        if TransferLine.FindSet() then
+            repeat
+                if IsMainItemLineTrans(TransferLine) then
+                    if StrLen(TempDeliveryItem) < 1900 then
+                        TempDeliveryItem := TempDeliveryItem + Format((TransferLine.Quantity)) + '*' + TransferLine.Description + ', ';
+            until TransferLine.Next() = 0;
+        Schedule.Status := Schedule.Status::Norm;
+        Schedule."From Location Code" := TransferHeader."Transfer-from Code";
+        Schedule."Delivery Items" := TempDeliveryItem;
+        Schedule."To Location Code" := TransferHeader."Transfer-to Code";
+        Schedule."Subsidiary Source No." := TransferHeader."No.";
+        Schedule.Insert(true);
+    end;
+
+    local procedure IsMainItemLineTrans(Transfer: Record "Transfer Line"): Boolean;
+    var
+        TempItem: Record Item;
+    begin
+        TempItem.Reset();
+        if TempItem.Get(Transfer."Item No.") = false then
+            exit(false);
+        TempItem.CalcFields("Assembly BOM");
+        if TempItem."Assembly BOM" then
+            exit(true);
+    end;
+
+
     procedure CreateWarrantyItem(var SalesHeader: Record "Sales Header");
     var
         SalesLine: Record "Sales Line";
@@ -144,6 +223,10 @@ codeunit 50114 "Schedule Mgt"
         Schedule.Customer := SalesHeader."Ship-to Contact";
         Schedule."Phone No." := SalesHeader."Ship-to Phone No.";
         Schedule.Remote := false;
+        if SalesHeader.IsDeliveried = true then
+            Schedule.Status := Schedule.Status::Completed
+        else
+            Schedule.Status := Schedule.Status::Norm;
         Schedule.Status := Schedule.Status::Norm;
         Schedule."From Location Code" := SalesHeader."Location Code";
         Schedule."Subsidiary Source No." := SalesHeader.RetailSalesHeader;

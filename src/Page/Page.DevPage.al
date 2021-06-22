@@ -29,104 +29,8 @@ page 50105 "DevPage"
                         WhseRequest: Record "Warehouse Request";
                         NewWhseRequest: Record "Warehouse Request";
                     begin
-                        if Password = '0' then
-                            if Dialog.Confirm('This for hard delete the Sales Return Order and Purchase Return Order and Associated Sales line and Purchase LIne') then
-                                HardDeletedSalesROLPOL();
-                        // if Password = '1' then
-                        //     if Dialog.Confirm('Add Test Case') then
-                        //         AddTestCase();
-
-                        // if Password = '2' then
-                        //     if Dialog.Confirm('Reload the Payable Table') then begin
-
-                        //         LoadPayable;
-                        //         LoadPayableForPurchInv;
-                        //     end;
-
-
-                        // if Password = 'Heqs326688' then
-                        // if Dialog.Confirm('RemoveLink') then
-                        //     RemoveLink();
-
-                        // if Password = Correct then begin
-                        //     Message('Password Correct.');
-                        //     // Delete all the WarehouseEntry in the Batch NSWWIJ
-                        //     WarehouseEntry.Reset();
-                        //     WarehouseJournal.Reset();
-                        //     // WarehouseJournal.SetRange(Quantity, 0);
-                        //     if WarehouseEntry.FindSet() then
-                        //         repeat
-                        //             WarehouseEntry.Delete();
-                        //         until WarehouseEntry.Next() = 0;
-                        //     if WarehouseJournal.FindSet() then
-                        //         repeat
-                        //             WarehouseJournal.Delete();
-                        //         until WarehouseJournal.Next() = 0;
-                        //     DeletePilloW();
-                        // end
-
-                        // else
-                        //     if Password = LineFixPassword then begin
-                        //         Message('This for line discount fix');
-                        //         LineFix();
-                        //         Message('This for delete item 7030003 and 7030013');
-                        //         DeleteItem();
-                        //     end;
-                        // if Password = ExternalMovingPassword then
-                        //     ExternalMoving();
-
-                        // if Password = DeletePurchaseLinePassword then
-                        //     if Dialog.Confirm('Delete PurchaseLine Password') then
-                        //         DeletePurchaseLine();
-
-                        // if Password = TurnWarehouseRequestReleasePassword then
-                        //     if Dialog.Confirm('Delete PurchaseLine Password') then
-                        //         TurnWarehouseRequestRelease();
-
-                        // if Password = GiveBackExternalPassword then
-                        //     if Dialog.Confirm('Give Back to external password') then
-                        //         GiveBackExternal();
-                        // if Password = ReleaseWhseRequesPassword then
-                        //     if Dialog.Confirm('Release Whse Request') then
-                        //         ReleaseWhseRequest();
-                        // if Password = DeleteAllWhseShipmentLinePassword then
-                        //     if Dialog.Confirm('Delete all whse shipment line') then
-                        //         DeleteAllWhseShipmentLine();
-                        // if Password = QuickFixPassword then
-                        //     if Dialog.Confirm('Quick Fix all the sales header') then
-                        //         QuickFix();
-                        // if Password = ReleaseReOpenPassword then
-                        //     if Dialog.Confirm('Release Reopen all the sales Header to fix BOM') then
-                        //         ReleaseReOpen();
-                        // if Password = HardReleaseAndPost25Password then
-                        //     if Dialog.Confirm('Start the function to hardrelease 25') then
-                        //         HardReleaseAndPost25();
-                        // if Password = DeleteSalesLinePassword then
-                        //     if Dialog.Confirm('Start the function to delete the salesline for 25') then
-                        //         DeleteSalesLine();
-                        // if Password = AutoPurchaseFixedPassword then
-                        //     if Dialog.Confirm('Start the function to AutoPurchaseHeader for 85') then
-                        //         AutoPurchaseFixed();
-                        // if Password = DeleteAllSalesLineForCertainOrderPassword then
-                        //     if Dialog.Confirm('Start delete all sales line for sales order 27') then begin
-                        //         SalesHeader.Get(SalesHeader."Document Type"::Order, 'FSO101027');
-                        //         DeleteAllSalesLineForCertainOrder(SalesHeader);
-                        //     end;
-                        // if Password = DeleteAllICPassword then
-                        //     if Dialog.Confirm(('Start Delte ic ')) then
-                        //         DeleteAllIC();
-                        // if Password = Release25Password then
-                        //     if Dialog.Confirm('Release the FSO101007') then
-                        //         release07();
-                        // if Password = 'SUPER' then
-                        //     if Dialog.Confirm('Super Task you sure?') then
-                        //         HOTFIX.Run();
-                        // if Password = 'Delete60' then
-                        //     if Dialog.Confirm('Delete 60') then
-                        //         Delete60();
-                        // if Password = ChangeBillingAddressPassword then
-                        //     if Dialog.Confirm('Change Billing Address') then
-                        //         ChangeBillingAddress();
+                        if Password = '326688' then
+                            ScheduleMgt.Initialize();
                     end;
 
                 }
@@ -333,6 +237,7 @@ page 50105 "DevPage"
 
     var
         PayableMgt: Codeunit PayableMgt;
+        ScheduleMgt: Codeunit "Schedule Mgt";
 
     local procedure LoadPayable()
     var
@@ -342,9 +247,6 @@ page 50105 "DevPage"
         OtherCompanyRecord: Record Company;
 
     begin
-
-
-
         if OtherCompanyRecord.Find('-') then
             repeat
                 PurchaseHeader.Reset();
