@@ -2,6 +2,7 @@ codeunit 50111 RetailBatchPostShipment
 {
     trigger OnRun();
     var
+        ICSalesHeader: Record "Sales Header";
         SalesHeader: Record "Sales Header";
     begin
         if SalesHeader.CurrentCompany <> SalesTruthMgt.InventoryCompany() then begin

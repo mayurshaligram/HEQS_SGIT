@@ -5,10 +5,15 @@ pageextension 50105 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
         modify("P&ost Shipment")
         {
             trigger OnAfterAction()
+            var
+                ICSalesHeader: Record "Sales Header";
+                SalesHeader: Record "Sales Header";
+                WarehouseShipmentLine: Record "Warehouse Shipment Line";
             begin
                 WhseShipPExtMgt.PostShipmentInInventory(Rec);
             end;
         }
+        // Partial Pick Option Choise stop auto fill Handle qty
         modify("Create Pick")
         {
             trigger OnAfterAction()
@@ -30,7 +35,6 @@ pageextension 50105 "Warehouse Shipment_Ext" extends "Warehouse Shipment"
                 AssignPickOriginalSO();
             end;
         }
-
     }
 
     var

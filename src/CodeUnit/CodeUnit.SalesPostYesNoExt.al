@@ -22,7 +22,10 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         RetailSalesLine: Record "Sales Line";
         InventorySalesHeader: Record "Sales Header";
         InventorySalesLine: Record "Sales Line";
+
+        ICSalesHeader: Record "Sales Header";
     begin
+
         // OnBeforeOnRun(Rec);
 
         // if not Find then
@@ -31,8 +34,11 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         TempType := Rec."Document Type";
         Rec."External Document No." := '';
         Rec.Status := Rec.Status::Open;
+
+
+
         Rec.Modify();
-        // Rec.RecreateSalesLinesExt('Sell-to Customer');
+
         TempInteger := 37;
         // message('OnBeforeActionCreating');
         // ReleaseSalesDoc.PerformManualRelease(Rec);
@@ -54,7 +60,9 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         // end;
         Rec.Status := Rec.Status::Released;
 
-
+        ICSalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        ICSalesHeader.Get(TempType, Temp);
+        ChangeQuantityToShipment(ICSalesHeader, Rec);
         Rec.Modify();
 
         SalesHeader.Copy(Rec);
@@ -63,6 +71,7 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
         InventorySaleOrder.Get(TempType, Temp);
         InventorySaleOrder."External Document No." := Rec."Automate Purch.Doc No.";
         InventorySaleOrder.Modify();
+
 
         // InventorySalesHeader.Reset();
         // InventorySalesHeader.ChangeCompany(SalesTruthMgt.InventoryCompany());
@@ -204,6 +213,27 @@ codeunit 50106 "Sales-Post (Yes/No) Ext"
     begin
         BindSubscription(SalesPostYesNo);
         GenJnlPostPreview.Preview(SalesPostYesNo, SalesHeader);
+    end;
+
+    local procedure ChangeQuantityToShipment(var ICSalesHeader: Record "Sales Header"; var RetailSalesHeader: Record "Sales Header");
+    var
+        ICSalesLine: Record "Sales Line";
+        RetailSalesLine: Record "Sales Line";
+        SalesTruthMgt: Codeunit "Sales Truth Mgt";
+    begin
+        // Need to consider the occasion for both sales order and sales return order
+        ICSalesLine.ChangeCompany(SalesTruthMgt.InventoryCompany());
+        ICSalesLine.SetRange("Document Type", ICSalesHeader."Document Type");
+        ICSalesLine.SetRange("Document No.", ICSalesHeader."No.");
+        // Currently Only Concern about the IC Sales Order
+        if (ICSalesHeader."Document Type" = ICSalesHeader."Document Type"::"Order") and (ICSalesLine.FindSet() = true) then
+            repeat
+                RetailSalesLine.Reset();
+                RetailSalesLine.Get(RetailSalesHeader."Document Type"::Order, RetailSalesHeader."No.", ICSalesLine."Line No.");
+                RetailSalesLine."Qty. to Ship" := ICSalesLine."Quantity Shipped" - RetailSalesLine."Quantity Shipped";
+                RetailSalesLine."Qty. to Ship (Base)" := RetailSalesLine."Qty. to Ship";
+                RetailSalesLine.Modify();
+            until ICSalesLine.Next() = 0;
     end;
 
     [IntegrationEvent(false, false)]

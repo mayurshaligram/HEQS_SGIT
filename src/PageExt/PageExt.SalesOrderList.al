@@ -1,5 +1,6 @@
 pageextension 50101 "Sales Order List" extends "Sales Order List"
 {
+    Editable = true;
 
     layout
     {
@@ -55,6 +56,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
     }
     actions
     {
+
         modify(Post)
         {
             Visible = false;
@@ -77,6 +79,21 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         }
         addbefore(Post)
         {
+            action("TESTING FOR SalesPostYESNOEXT")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Testing for sales Post yes no ext';
+                Image = PostOrder;
+                Visible = true;
+                Promoted = true;
+                PromotedCategory = Category7;
+                trigger OnAction();
+                var
+                    SalesPostYesNoExt: Codeunit "Sales-Post (Yes/No) Ext";
+                begin
+                    SalesPostYesNoExt.Run(Rec);
+                end;
+            }
             action("Auto Post Invoice")
             {
                 ApplicationArea = Basic, Suite;
@@ -221,13 +238,12 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
             if SalesHeader.FindSet() then
                 repeat
                     if SalesHeader."External Document No." <> '' then begin
-
                         OK := STARTSESSION(SessionId, CODEUNIT::RetailBatchPostShipment);
+                        // SalesPostExt.Run(SalesHeader);
                         if OK = false then
                             ERROR('The session was not started successfully.');
                         // SalesHeader."External Document No." := '';
                         // SalesHeader.Modify();
-
                     end;
                 until SalesHeader.Next() = 0;
         end;
