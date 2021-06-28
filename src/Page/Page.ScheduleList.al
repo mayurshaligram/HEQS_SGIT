@@ -218,6 +218,7 @@ page 50113 "Schedule List"
                             TempRecordNo.Add(Schedule1."No.");
                         until Schedule1.Next() = 0;
                         Trip.Init();
+                        Trip."Location Code" := Schedule1."From Location Code";
                         Trip.Insert(true);
                         TempInt := 0;
                     end;

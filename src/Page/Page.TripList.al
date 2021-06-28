@@ -18,6 +18,11 @@ page 50115 "Trip List"
                     ApplicationArea = All;
                     StyleExpr = ColorStr;
                 }
+                field("Location Code"; Rec."Location Code")
+                {
+                    ApplicationArea = All;
+                    StyleExpr = ColorStr;
+                }
                 field("Delivery Date"; Rec."Delivery Date")
                 {
                     ApplicationArea = All;

@@ -6,7 +6,7 @@
 			"request": "launch",
 			"type": "al",
 			"environmentType": "Sandbox",
-			"environmentName": "DEBUG",
+			"environmentName": "Debug",
 			"server": "https://businesscentral.dynamics.com/",
 			"startupObjectId": 9022,
 			"startupObjectType": "Page",

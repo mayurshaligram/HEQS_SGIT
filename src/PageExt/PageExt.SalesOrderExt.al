@@ -492,6 +492,8 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         TempStatus: Enum "Sales Document Status";
     begin
         IsInventoryCompany := false;
+        if Rec.Delivery = Rec.Delivery::" " then
+            Rec.Delivery := Rec.Delivery::Delivery;
         If Rec.CurrentCompany = SalesTruthMgt.InventoryCompany() then
             IsInventoryCompany := true;
         IsICSalesHeader := SalesTruthMgt.IsICSalesHeader(Rec);

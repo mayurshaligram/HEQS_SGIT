@@ -15,6 +15,10 @@ page 50116 "Trip Card"
                 {
                     ApplicationArea = All;
                 }
+                field("Location Code"; Rec."Location Code")
+                {
+                    ApplicationArea = All;
+                }
                 field("Status"; Rec.Status)
                 {
                     ApplicationArea = All;

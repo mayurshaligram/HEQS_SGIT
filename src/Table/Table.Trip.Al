@@ -55,6 +55,10 @@ table 50107 Trip
             FieldClass = FlowField;
             CalcFormula = count(Schedule where("Trip No." = field("No."), Status = const(Completed)));
         }
+        field(10; "Location Code"; Code[20])
+        {
+            Caption = 'Location Code';
+        }
     }
 
     keys

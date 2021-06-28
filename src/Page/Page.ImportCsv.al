@@ -189,59 +189,65 @@ page 50111 "SO Import Worksheet"
 
         // Sales Header
         SOImportBuffer.Init();
-        Evaluate(SOImportBuffer."Batch Name", BatchName);
-        Show := GetValueAtCell(1, 4);
-        if Show = '' then
-            Show := 'blank';
-        SOImportBuffer.Validate("Sell-to Customer Name", ExamSamePrefixName(Show));
+        // Read Company ID First
+        TempHeaderText := GetValueAtCell(1, 7);
+        if TempHeaderText <> '' then begin
+            SOImportBuffer.Validate("Sell-to Customer No.", TempHeaderText);
+            SOImportBuffer."Sell-to Customer No." := TempHeaderText;
+        end
+        else begin
+            Evaluate(SOImportBuffer."Batch Name", BatchName);
+            Show := GetValueAtCell(1, 4);
+            if Show = '' then
+                Show := 'blank';
+            SOImportBuffer.Validate("Sell-to Customer Name", ExamSamePrefixName(Show));
+        end;
         SOImportBuffer."Document Type" := SOImportBuffer."Document Type"::Order;
         // PO number to Your reference
-        TempHeaderText := GetValueAtCell(1, 7);
+        TempHeaderText := GetValueAtCell(2, 3);
         if TempHeaderText <> '' then
             SOImportBuffer."Your Reference" := TempHeaderText;
         // Person Orderding to Ship-to Contact
-        TempHeaderText := GetValueAtCell(2, 4);
+        TempHeaderText := GetValueAtCell(2, 7);
         if TempHeaderText <> '' then
             SOImportBuffer."Sell-to Contact" := TempHeaderText;
         // Client's Name to Ship-to Contact
-        TempHeaderText := GetValueAtCell(3, 4);
+        TempHeaderText := GetValueAtCell(3, 3);
         if TempHeaderText <> '' then
             SOImportBuffer."Ship-to Name" := TempHeaderText;
         // Client's Contact Name
         TempHeaderText := GetValueAtCell(3, 7);
         if TempHeaderText <> '' then
-            SOImportBuffer."Ship-to Contact" := TempHeaderText;
+            SOImportBuffer."Ship-to Phone No." := TempHeaderText;
         // Caseworker's Name and CaseWorker Contact Name
-        TempText := GetValueAtCell(4, 4);
+        TempText := GetValueAtCell(4, 3);
         if TempText <> '' then
             TempWorkDescription += 'CaseWorker: ' + TempText + '  ';
         TempText := GetValueAtCell(4, 7);
         if TempText <> '' then
             TempWorkDescription += 'CaseWorker No: ' + TempText + '  ';
-        TempText := GetValueAtCell(5, 7);
-        if TempText <> '' then
-            TempWorkDescription += 'CaseWorker No 2: ' + TempText + '  ';
         // Date Ordered to Order Date
-        if GetValueAtCell(5, 4) <> '' then begin
-            if Evaluate(TempDate, GetValueAtCell(5, 4)) then
+        if GetValueAtCell(5, 3) <> '' then begin
+            if Evaluate(TempDate, GetValueAtCell(5, 3)) then
                 SOImportBuffer."Order Date" := TempDate
         end;
         // Delivery Address
-        TempHeaderText := GetValueAtCell(6, 4);
+        TempHeaderText := GetValueAtCell(6, 3);
         if TempHeaderText <> '' then begin
             SOImportBuffer."Ship-to Address" := TempHeaderText;
+            AssignCity(SOImportBuffer, TempHeaderText);
         end;
         // Floor
-        TempHeaderText := GetValueAtCell(7, 4);
+        TempHeaderText := GetValueAtCell(6, 8);
         if TempHeaderText <> '' then
             TempWorkDescription += '  Floor' + TempHeaderText;
         // Prefered Delivery date to Promised Delivery date
-        if GetValueAtCell(7, 7) <> '' then begin
+        if GetValueAtCell(5, 7) <> '' then begin
             if Evaluate(TempDate, GetValueAtCell(5, 7)) then
                 SOImportBuffer."Requested Delivery Date" := TempDate
         end;
         // Special 
-        TempHeaderText := GetValueAtCell(8, 5);
+        TempHeaderText := GetValueAtCell(7, 5);
         if TempHeaderText <> '' then
             TempWorkDescription += '  Other' + TempHeaderText;
         // City 
@@ -318,6 +324,13 @@ page 50111 "SO Import Worksheet"
             SLImportBuffer.Validate("Unit Price", 50);
             SLImportBuffer."Location Code" := SOImportBuffer."Location Code";
             SLImportBuffer.Insert(true);
+            if GetValueAtCell(5, 3) <> '' then begin
+                if Evaluate(TempDate, GetValueAtCell(5, 3)) then begin
+                    SOImportBuffer."Order Date" := TempDate;
+                    SOImportBuffer.Modify();
+                end;
+
+            end;
         end;
     end;
 
@@ -361,6 +374,46 @@ page 50111 "SO Import Worksheet"
             exit(TempExcelBuffer."Cell Value as Text")
         else
             exit('');
+    end;
+
+    local procedure AssignCity(var SalesHeader: Record "Sales Header"; RawAddress: Text);
+    var
+        PostCode: Record "Post Code";
+        Separators: List of [Text];
+        TempListOfText: List of [Text];
+        TempText: Text;
+        NewAddress: Text;
+        CommonState: List of [Text];
+    begin
+        CommonState.Add('NSW');
+        CommonState.Add('VIC');
+        CommonState.Add('QLD');
+        Separators.Add(' ');
+        Separators.Add(',');
+        TempListOfText := RawAddress.Split(Separators);
+        foreach TempText in TempListOfText do begin
+            PostCode.Reset();
+            PostCode.SetRange("Search City", TempText);
+            if SalesHeader."Location Code" <> '' then
+                PostCode.SetRange(County, SalesHeader."Location Code");
+            if PostCode.FindSet() then begin
+                SalesHeader.Validate("Ship-to City", PostCode.City);
+                SalesHeader."Ship-to City" := PostCode.City;
+                SalesHeader."Ship-to Post Code" := PostCode.Code;
+                SalesHeader."Ship-to Country/Region Code" := PostCode."Country/Region Code";
+                SalesHeader."Ship-to County" := SalesHeader."Location Code";
+            end
+            else
+                if CommonState.Contains(TempText) = false then
+                    NewAddress += TempText + ' ';
+        end;
+        NewAddress := NewAddress.TrimEnd(' ');
+        SalesHeader."Ship-to Address" := NewAddress;
+        // PostCode.Reset();
+        // PostCode.SetRange("Search City", 'Smithfield');
+        // PostCode.SetRange("Country/Region Code", SalesHeader."Location Code");
+        // if PostCode.FindSet() then
+        //     Message('Yes');
     end;
 
     local procedure LSetWorkDescription(var SalesHeader: Record "Sales Header"; NewWorkDescription: Text)

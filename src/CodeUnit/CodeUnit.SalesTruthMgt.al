@@ -473,6 +473,15 @@ codeunit 50101 "Sales Truth Mgt"
         end;
     end;
 
+    [EventSubscriber(ObjectType::Codeunit, 63, 'OnBeforeToSalesLineModify', '', false, false)]
+    local procedure BeforeToSalesLineModify(var ToSalesLine: Record "Sales Line"; FromSalesLine: Record "Sales Line")
+    var
+        TempText: Text;
+    begin
+        TempText := format(FromSalesLine."Unit Price") + FromSalesLine.Description;
+        ToSalesLine.Description := TempText;
+    end;
+
     // OnBeforeCreateShptHeader(WhseShptHeader, "Warehouse Request", "Sales Line", IsHandled, Location, WhseShptLine, ActivitiesCreated, WhseHeaderCreated, RequestType);
     [EventSubscriber(ObjectType::Table, 37, 'OnBeforeValidateShipmentDate', '', false, false)]
     local procedure BeforeValidateShipmentDate(var IsHandled: boolean);
