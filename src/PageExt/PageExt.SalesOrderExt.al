@@ -41,25 +41,27 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 Importance = Promoted;
                 Editable = false;
             }
-            field("Ship-to Phone No."; Rec."Ship-to Phone No.")
-            {
-                ApplicationArea = Basic, Suite;
-
-                Caption = 'Ship-to Phone No.';
-                ToolTip = 'Specifies the Phone No.';
-                Importance = Promoted;
-                Editable = true;
-            }
-
-
         }
+        modify("Ship-to Contact")
+        {
+            Caption = 'Contact Phone';
+        }
+
         addafter("Ship-to Contact")
         {
             field("Ship-to Contact 2"; Rec."Ship-to Contact 2")
             {
                 ApplicationArea = Basic, Suite;
-                Caption = 'Contact';
+                Caption = 'Contact Name';
                 ToolTip = 'Specifies the name of the contact person at the address that products on the sales document will be shipped to.';
+            }
+            field("Ship-to Phone No."; Rec."Ship-to Phone No.")
+            {
+                ApplicationArea = Basic, Suite;
+                Visible = false;
+                ToolTip = 'Specifies the Phone No.';
+                Importance = Promoted;
+                Editable = true;
             }
         }
 

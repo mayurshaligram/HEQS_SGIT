@@ -66,7 +66,7 @@ table 50100 "Schedule"
         {
             Caption = 'Customer';
         }
-        field(13; "Phone No."; Text[30])
+        field(13; "Phone No."; Text[100])
         {
             Caption = 'Phone No.';
         }
@@ -119,7 +119,26 @@ table 50100 "Schedule"
             Caption = 'Subsidiary Name';
             Description = 'Subsidiary Name';
         }
-
+        field(25; "Delivery Option"; Enum "Delivery Option")
+        {
+            Caption = 'Delivery Option';
+            Description = 'Delivery Option';
+        }
+        field(26; "Shipping Agent"; Code[10])
+        {
+            Caption = 'Agent';
+            Description = 'Agent';
+        }
+        field(27; "QC Requirement"; Boolean)
+        {
+            Caption = 'QC Requirement';
+            Description = 'QC Requirement';
+        }
+        field(28; "Name"; Text[100])
+        {
+            Caption = 'Name';
+            Description = 'Name';
+        }
     }
 
     keys

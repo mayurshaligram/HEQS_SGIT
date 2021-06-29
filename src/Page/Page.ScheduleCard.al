@@ -277,6 +277,26 @@ page 50114 "Schedule Card"
                     Caption = 'To Location Code';
                     ApplicationArea = All;
                 }
+                field("Delivery Option"; Rec."Delivery Option")
+                {
+                    Caption = 'Delivery Option';
+                    ApplicationArea = All;
+                }
+                field("Shipping Agent"; Rec."Shipping Agent")
+                {
+                    Caption = 'Shipping Agent';
+                    ApplicationArea = All;
+                }
+                field("QC Requirement"; Rec."QC Requirement")
+                {
+                    Caption = 'QC Requirement';
+                    ApplicationArea = All;
+                }
+                field(Name; Rec.Name)
+                {
+                    Caption = 'Name';
+                    ApplicationArea = All;
+                }
             }
 
         }

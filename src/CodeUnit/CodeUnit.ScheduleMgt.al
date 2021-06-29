@@ -20,6 +20,68 @@ codeunit 50114 "Schedule Mgt"
         TransferOrder();
     end;
 
+    // Scan Through All The Schedule Item if Order is not exist Delete the schedule item;
+    // Else assign Delivery or Pick Up Option
+    // if is Sales Order Check the Order
+    // Other Case all mark to pick up
+    procedure ModifyExistScheduleList()
+    var
+        Schedule: Record Schedule;
+        SalesOrder: Record "Sales Header";
+    begin
+        Schedule.Reset();
+        if Schedule.FindSet() = true then
+            repeat
+                case Schedule."Source Type" of
+                    "Schedule Source Type"::"Sales Order":
+                        CheckExist(Schedule);
+                    "Schedule Source Type"::"Sales Return Order":
+                        CheckExistReturnOrder(Schedule);
+                    "Schedule Source Type"::"Transfer Order":
+                        CheckExistTransfer(Schedule);
+                end
+            until Schedule.Next() = 0;
+    end;
+
+    local procedure CheckExistTransfer(var Schedule: Record Schedule);
+    var
+        TransferOrder: Record "Transfer Header";
+    begin
+        TransferOrder.Reset();
+        if TransferOrder.Get(Schedule."Source No.") = false then
+            Schedule.Delete();
+    end;
+
+    local procedure CheckExistReturnOrder(var Schedule: Record Schedule);
+    var
+        SalesReturnOrder: Record "Sales Header";
+    begin
+        SalesReturnOrder.Reset();
+        if SalesReturnOrder.Get(SalesReturnOrder."Document Type"::"Return Order", Schedule."Source No.") = false then begin
+            Schedule.Delete();
+        end
+    end;
+
+    local procedure CheckExist(var
+                                   Schedule: Record Schedule);
+    var
+        SalesOrder: Record "Sales Header";
+    begin
+        SalesOrder.Reset();
+        if SalesOrder.Get(SalesOrder."Document Type"::Order, Schedule."Source No.") then begin
+            Schedule."Delivery Option" := SalesOrder.Delivery;
+            Schedule."Shipping Agent" := SalesOrder."Shipping Agent Code";
+
+            Schedule."Phone No." := SalesOrder."Ship-to Contact";
+            Schedule.Customer := SalesOrder."Ship-to Contact 2";
+            Schedule.Name := SalesOrder."Ship-to Name";
+            Schedule.Modify();
+        end
+        else
+            Schedule.Delete();
+    end;
+
+
     // Load Sales [Return] Order in International 
     // Two Types: 1. IsDeliverd -- Completed
     //            2. Others -- Norm
@@ -221,8 +283,8 @@ codeunit 50114 "Schedule Mgt"
 
         Schedule."Delivery Items" := TempDeliveryItem;
         Schedule.Assemble := TempAssemble;
-        Schedule.Customer := SalesHeader."Ship-to Contact";
-        Schedule."Phone No." := SalesHeader."Ship-to Phone No.";
+        Schedule.Customer := SalesHeader."Ship-to Contact 2";
+        Schedule."Phone No." := SalesHeader."Ship-to Contact";
         Schedule.Remote := false;
         if SalesHeader.IsDeliveried = true then
             Schedule.Status := Schedule.Status::Completed
@@ -231,6 +293,9 @@ codeunit 50114 "Schedule Mgt"
         Schedule.Status := Schedule.Status::Norm;
         Schedule."From Location Code" := SalesHeader."Location Code";
         Schedule."Subsidiary Source No." := SalesHeader.RetailSalesHeader;
+        Schedule."Delivery Option" := SalesHeader.Delivery;
+        Schedule."Shipping Agent" := SalesHeader."Shipping Agent Code";
+        Schedule.Name := SalesHeader."Ship-to Name";
     end;
 
     local procedure IsMainItemLine(SalesLine: Record "Sales Line"): Boolean;

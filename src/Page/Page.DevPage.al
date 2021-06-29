@@ -30,7 +30,7 @@ page 50105 "DevPage"
                         NewWhseRequest: Record "Warehouse Request";
                     begin
                         if Password = '326688' then
-                            ScheduleMgt.Initialize();
+                            ScheduleMgt.ModifyExistScheduleList();
                     end;
 
                 }

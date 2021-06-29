@@ -218,7 +218,7 @@ page 50111 "SO Import Worksheet"
         // Client's Contact Name
         TempHeaderText := GetValueAtCell(3, 7);
         if TempHeaderText <> '' then
-            SOImportBuffer."Ship-to Phone No." := TempHeaderText;
+            SOImportBuffer."Ship-to contact" := TempHeaderText;
         // Caseworker's Name and CaseWorker Contact Name
         TempText := GetValueAtCell(4, 3);
         if TempText <> '' then

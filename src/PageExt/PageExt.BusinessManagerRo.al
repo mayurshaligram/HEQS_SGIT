@@ -12,6 +12,7 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     Caption = 'NSW';
                     Image = PostedMemo;
                     RunObject = Page "Schedule List";
+                    RunPageLink = "From Location Code" = CONST('NSW');
                     ToolTip = 'From NSW Scheduling the Sales Order, Transfer Order, Sales Return Order ';
                 }
                 action("VIC Schedule")
@@ -19,7 +20,8 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     ApplicationArea = Suite;
                     Caption = 'VIC';
                     Image = PostedMemo;
-                    RunObject = Page "VIC Schedule";
+                    RunObject = Page "Schedule List";
+                    RunPageLink = "From Location Code" = CONST('VIC');
                     ToolTip = 'From VIC Scheduling the Sales Order, Transfer Order, Sales Return Order.';
                 }
                 action("QLD Schedule")
@@ -27,7 +29,8 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     ApplicationArea = Suite;
                     Caption = 'QLD';
                     Image = PostedMemo;
-                    RunObject = Page "QLD Schedule";
+                    RunObject = Page "Schedule List";
+                    RunPageLink = "From Location Code" = const('QLD');
                     ToolTip = 'From QLD Scheduling the Sales Order, Transfer Order, Sales Return Order.';
                 }
                 action("Trip")
