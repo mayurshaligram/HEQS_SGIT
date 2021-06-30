@@ -146,7 +146,7 @@ tableextension 50102 "Item_Ext" extends "Item"
         user: Record User;
     begin
         user.Get(Database.UserSecurityId());
-        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') then begin
+        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') and (User."Full Name" <> 'Stephen Lu') then begin
             IsValid := false;
             if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then begin
                 if (Rec.Type = Rec.Type::Inventory) and (Rec."Unit Cost" <> xRec."Unit Cost") then
@@ -181,7 +181,7 @@ tableextension 50102 "Item_Ext" extends "Item"
         User: Record User;
     begin
         User.Get(Database.UserSecurityId());
-        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') then begin
+        if (User."Full Name" <> 'Karen Huang') and (User."Full Name" <> 'Pei Xu') and (User."Full Name" <> 'Stephen Lu') then begin
             if Rec.CurrentCompany <> 'HEQS International Pty Ltd' then
                 Error('Please only edit items in HEQS International Pty Ltd');
         end;
