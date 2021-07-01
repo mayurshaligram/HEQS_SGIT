@@ -2,7 +2,7 @@ enum 50104 "Schedule Status"
 {
     Extensible = true;
 
-    value(0; Completed)
+    value(0; Norm)
     {
     }
     value(1; Rescheduled)
@@ -11,7 +11,7 @@ enum 50104 "Schedule Status"
     value(2; Postponed)
     {
     }
-    value(3; Norm)
+    value(3; Completed)
     {
     }
     value(4; Released)

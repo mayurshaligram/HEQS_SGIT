@@ -4,6 +4,7 @@ page 50116 "Trip Card"
     ApplicationArea = All;
     UsageCategory = Administration;
     SourceTable = Trip;
+    PromotedActionCategories = 'New caption,Process caption,Report caption,Print';
 
     layout
     {
@@ -146,7 +147,46 @@ page 50116 "Trip Card"
     {
         area(Processing)
         {
+            action("&PickNote")
+            {
+                ApplicationArea = Warehouse;
+                Caption = '&Pick Note';
+                Ellipsis = true;
+                Image = Print;
+                Promoted = true;
+                PromotedCategory = Category4;
+                ToolTip = 'Print the Pick Paperwork.';
 
+                trigger OnAction()
+                var
+                    TempReport: Report TripReport;
+                    Trip: Record Trip;
+                begin
+                    Trip.SetRange("No.", Rec."No.");
+                    TempReport.SetTableView(Trip);
+                    TempReport.Run();
+                end;
+            }
+            action("&DeliveryNote")
+            {
+                ApplicationArea = Warehouse;
+                Caption = '&Delivery Note';
+                Ellipsis = true;
+                Image = Print;
+                Promoted = true;
+                PromotedCategory = Category4;
+                ToolTip = 'Print the Delivery Paperwork.';
+
+                trigger OnAction()
+                var
+                    TempReport: Report DeliveryReport;
+                    Trip: Record Trip;
+                begin
+                    Trip.SetRange("No.", Rec."No.");
+                    TempReport.SetTableView(Trip);
+                    TempReport.Run();
+                end;
+            }
             action("Create &Warehouse Shipment")
             {
                 AccessByPermission = TableData "Warehouse Shipment Header" = R;
@@ -327,6 +367,7 @@ page 50116 "Trip Card"
             }
 
         }
+
     }
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";

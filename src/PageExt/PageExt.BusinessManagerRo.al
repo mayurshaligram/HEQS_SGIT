@@ -33,10 +33,19 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
                     RunPageLink = "From Location Code" = const('QLD');
                     ToolTip = 'From QLD Scheduling the Sales Order, Transfer Order, Sales Return Order.';
                 }
+                action("Total Schedule")
+                {
+                    ApplicationArea = Suite;
+                    Caption = 'Total';
+                    Image = PostedMemo;
+                    RunObject = Page "Total Schedule List";
+                    ToolTip = 'Total Scheduling the Sales Order, Transfer Order, Sales Return Order.';
+                }
+
                 action("Trip")
                 {
                     ApplicationArea = Suite;
-                    Caption = 'Trip Scheduling';
+                    Caption = 'Trip';
                     Image = PostedMemo;
                     RunObject = Page "Trip List";
                     ToolTip = 'Scheduled Trip.';

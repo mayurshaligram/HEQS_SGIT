@@ -1,6 +1,6 @@
-page 50118 "VIC Schedule"
+page 50120 "Total Schedule List"
 {
-    Caption = 'Schedule';
+    Caption = 'Total Schedule';
     DataCaptionExpression = DataCaption;
     PageType = List;
     SourceTable = Schedule;
@@ -9,9 +9,6 @@ page 50118 "VIC Schedule"
     Editable = true;
     CardPageId = 50114;
     UsageCategory = Lists;
-    SourceTableView = where("Delivery Option" = const(Delivery),
-                            Status = filter(Norm | Postponed | Released),
-                            "From Location Code" = const('VIC'));
     RefreshOnActivate = true;
     // sorting(descending"Trip No.", Ascending"Trip Sequece")
     layout
@@ -194,6 +191,8 @@ page 50118 "VIC Schedule"
         }
 
     }
+
+
 
     actions
     {
@@ -448,344 +447,344 @@ page 50118 "VIC Schedule"
 
         }
     }
-    views
-    {
-        view("Current Delivery Schedule")
-        {
+    // views
+    // {
+    //     view("Current Delivery Schedule")
+    //     {
 
-            Caption = 'Current Delivery Schedule';
-            SharedLayout = true;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Delivery),
-                            Status = filter(Norm | Postponed | Released),
-                            "From Location Code" = field("From Location Code"));
-        }
-        view("Online Platform Pickup Schedule")
-        {
-            Caption = 'Online Platform Pickup Schedule';
-            SharedLayout = false;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Pickup),
-                            Status = filter(Norm | Postponed | Released), "Subsidiary Source No." = filter('IFSO*'),
-                            "From Location Code" = field("From Location Code"));
-            layout
-            {
-                modify(Suburb)
-                {
-                    Visible = false;
-                }
-                modify(Zone)
-                {
-                    Visible = false;
-                }
-                modify(Assemble)
-                {
-                    Visible = false;
-                }
-                modify(Extra)
-                {
-                    Visible = false;
-                }
-                modify("Phone No.")
-                {
-                    Visible = false;
-                }
-                modify(Driver)
-                {
-                    Visible = false;
-                }
-                modify(Vehicle)
-                {
-                    Visible = false;
-                }
-                modify("Trip No.")
-                {
-                    Visible = false;
-                }
-                modify("Trip Sequece")
-                {
-                    Visible = false;
-                }
-                modify(Status)
-                {
-                    Visible = false;
-                }
-                modify("Shipping Agent")
-                {
-                    Visible = true;
-                }
-                modify(Name)
-                {
-                    Visible = true;
-                }
-                modify(Customer)
-                {
-                    Visible = false;
-                }
-                movebefore("Shipping Agent"; Name)
-                moveafter("Shipping Agent"; "Delivery Time")
-                moveafter("Delivery Items"; "Delivery Date")
+    //         Caption = 'Current Delivery Schedule';
+    //         SharedLayout = true;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Delivery),
+    //                         Status = filter(Norm | Postponed | Released),
+    //                         "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("Online Platform Pickup Schedule")
+    //     {
+    //         Caption = 'Online Platform Pickup Schedule';
+    //         SharedLayout = false;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Pickup),
+    //                         Status = filter(Norm | Postponed | Released), "Subsidiary Source No." = filter('IFSO*'),
+    //                         "From Location Code" = field("From Location Code"));
+    //         layout
+    //         {
+    //             modify(Suburb)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Zone)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Assemble)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Extra)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Phone No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Driver)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Vehicle)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip Sequece")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Status)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Shipping Agent")
+    //             {
+    //                 Visible = true;
+    //             }
+    //             modify(Name)
+    //             {
+    //                 Visible = true;
+    //             }
+    //             modify(Customer)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             movebefore("Shipping Agent"; Name)
+    //             moveafter("Shipping Agent"; "Delivery Time")
+    //             moveafter("Delivery Items"; "Delivery Date")
 
-                modify("QC Requirement")
-                {
-                    Visible = true;
-                }
-            }
-        }
-        view("Pickup Schedule")
-        {
-            Caption = 'Pick Up Order';
-            SharedLayout = false;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Pickup),
-                            Status = filter(Norm | Postponed | Released),
-                            "Subsidiary Source No." = filter('<>IFSO*'),
-                            "From Location Code" = field("From Location Code"));
-            layout
-            {
-                modify(Suburb)
-                {
-                    Visible = false;
-                }
-                modify(Zone)
-                {
-                    Visible = false;
-                }
-                modify(Assemble)
-                {
-                    Visible = false;
-                }
-                modify(Extra)
-                {
-                    Visible = false;
-                }
-                modify(Driver)
-                {
-                    Visible = false;
-                }
-                modify(Vehicle)
-                {
-                    Visible = false;
-                }
-                modify("Trip No.")
-                {
-                    Visible = false;
-                }
-                modify("Trip Sequece")
-                {
-                    Visible = false;
-                }
-                modify(Status)
-                {
-                    Visible = false;
-                }
-                modify("Shipping Agent")
-                {
-                    Visible = true;
-                }
-                movebefore("Shipping Agent"; Name)
-                moveafter("Shipping Agent"; "Delivery Time")
-                moveafter("Delivery Items"; "Delivery Date")
-            }
-        }
-        view("Archived Delivery Schedule")
-        {
-            Caption = 'Archived Delivery Schedule';
-            SharedLayout = true;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Delivery),
-                            Status = filter(Completed),
-                            "From Location Code" = field("From Location Code"));
-        }
-        view("Archived Online Pickup")
-        {
-            Caption = 'Archived Online Pickup';
-            SharedLayout = false;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Pickup),
-                            Status = filter(Completed),
-                            "Subsidiary Source No." = filter('IFSO*'),
-                            "From Location Code" = field("From Location Code"));
-            layout
-            {
-                modify(Suburb)
-                {
-                    Visible = false;
-                }
-                modify(Zone)
-                {
-                    Visible = false;
-                }
-                modify(Assemble)
-                {
-                    Visible = false;
-                }
-                modify(Extra)
-                {
-                    Visible = false;
-                }
-                modify("Phone No.")
-                {
-                    Visible = false;
-                }
-                modify(Driver)
-                {
-                    Visible = false;
-                }
-                modify(Vehicle)
-                {
-                    Visible = false;
-                }
-                modify("Trip No.")
-                {
-                    Visible = false;
-                }
-                modify("Trip Sequece")
-                {
-                    Visible = false;
-                }
-                modify(Status)
-                {
-                    Visible = false;
-                }
-                modify("Shipping Agent")
-                {
-                    Visible = true;
-                }
-                modify(Name)
-                {
-                    Visible = true;
-                }
-                modify(Customer)
-                {
-                    Visible = false;
-                }
-                movebefore("Shipping Agent"; Name)
-                moveafter("Shipping Agent"; "Delivery Time")
-                moveafter("Delivery Items"; "Delivery Date")
+    //             modify("QC Requirement")
+    //             {
+    //                 Visible = true;
+    //             }
+    //         }
+    //     }
+    //     view("Pickup Schedule")
+    //     {
+    //         Caption = 'Pick Up Order';
+    //         SharedLayout = false;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Pickup),
+    //                         Status = filter(Norm | Postponed | Released),
+    //                         "Subsidiary Source No." = filter('<>IFSO*'),
+    //                         "From Location Code" = field("From Location Code"));
+    //         layout
+    //         {
+    //             modify(Suburb)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Zone)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Assemble)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Extra)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Driver)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Vehicle)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip Sequece")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Status)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Shipping Agent")
+    //             {
+    //                 Visible = true;
+    //             }
+    //             movebefore("Shipping Agent"; Name)
+    //             moveafter("Shipping Agent"; "Delivery Time")
+    //             moveafter("Delivery Items"; "Delivery Date")
+    //         }
+    //     }
+    //     view("Archived Delivery Schedule")
+    //     {
+    //         Caption = 'Archived Delivery Schedule';
+    //         SharedLayout = true;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Delivery),
+    //                         Status = filter(Completed),
+    //                         "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("Archived Online Pickup")
+    //     {
+    //         Caption = 'Archived Online Pickup';
+    //         SharedLayout = false;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Pickup),
+    //                         Status = filter(Completed),
+    //                         "Subsidiary Source No." = filter('IFSO*'),
+    //                         "From Location Code" = field("From Location Code"));
+    //         layout
+    //         {
+    //             modify(Suburb)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Zone)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Assemble)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Extra)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Phone No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Driver)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Vehicle)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip Sequece")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Status)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Shipping Agent")
+    //             {
+    //                 Visible = true;
+    //             }
+    //             modify(Name)
+    //             {
+    //                 Visible = true;
+    //             }
+    //             modify(Customer)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             movebefore("Shipping Agent"; Name)
+    //             moveafter("Shipping Agent"; "Delivery Time")
+    //             moveafter("Delivery Items"; "Delivery Date")
 
-                modify("QC Requirement")
-                {
-                    Visible = true;
-                }
-            }
-        }
-        view("Archived Pickup")
-        {
-            Caption = 'Archived Pickup';
-            SharedLayout = false;
-            OrderBy = ascending("Trip No.", "Trip Sequece");
-            Filters = where("Delivery Option" = const(Pickup),
-                            Status = filter(Completed),
-                            "Subsidiary Source No." = filter('<>IFSO*'),
-                            "From Location Code" = field("From Location Code"));
-            layout
-            {
-                modify(Suburb)
-                {
-                    Visible = false;
-                }
-                modify(Zone)
-                {
-                    Visible = false;
-                }
-                modify(Assemble)
-                {
-                    Visible = false;
-                }
-                modify(Extra)
-                {
-                    Visible = false;
-                }
-                modify(Driver)
-                {
-                    Visible = false;
-                }
-                modify(Vehicle)
-                {
-                    Visible = false;
-                }
-                modify("Trip No.")
-                {
-                    Visible = false;
-                }
-                modify("Trip Sequece")
-                {
-                    Visible = false;
-                }
-                modify(Status)
-                {
-                    Visible = false;
-                }
-                modify("Shipping Agent")
-                {
-                    Visible = true;
-                }
-                movebefore("Shipping Agent"; Name)
-                moveafter("Shipping Agent"; "Delivery Time")
-                moveafter("Delivery Items"; "Delivery Date")
-            }
-        }
-        view(NeedSchedule)
-        {
-            Caption = 'Need Schedule (Norm and PostPoned)';
-            SharedLayout = true;
-            OrderBy = Ascending("Trip No.", "Trip Sequece");
-            Filters = where("Status" = filter(Norm | Postponed),
-            "From Location Code" = field("From Location Code"));
-        }
-        view(Postponed)
-        {
-            Caption = 'Postponed (Yellow)';
-            SharedLayout = true;
-            Filters = where("Status" = filter(Postponed),
-            "From Location Code" = field("From Location Code"));
-        }
-        view(Complete)
-        {
-            Caption = 'Complete (Green)';
-            SharedLayout = true;
-            Filters = where("Status" = filter(Completed),
-            "From Location Code" = field("From Location Code"));
-        }
-        view(RemoteView)
-        {
-            Caption = 'Remote (Woollongong)';
-            SharedLayout = true;
-            Filters = where("Remote" = const(true), "From Location Code" = field("From Location Code"));
-        }
+    //             modify("QC Requirement")
+    //             {
+    //                 Visible = true;
+    //             }
+    //         }
+    //     }
+    //     view("Archived Pickup")
+    //     {
+    //         Caption = 'Archived Pickup';
+    //         SharedLayout = false;
+    //         OrderBy = ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Delivery Option" = const(Pickup),
+    //                         Status = filter(Completed),
+    //                         "Subsidiary Source No." = filter('<>IFSO*'),
+    //                         "From Location Code" = field("From Location Code"));
+    //         layout
+    //         {
+    //             modify(Suburb)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Zone)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Assemble)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Extra)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Driver)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Vehicle)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip No.")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Trip Sequece")
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify(Status)
+    //             {
+    //                 Visible = false;
+    //             }
+    //             modify("Shipping Agent")
+    //             {
+    //                 Visible = true;
+    //             }
+    //             movebefore("Shipping Agent"; Name)
+    //             moveafter("Shipping Agent"; "Delivery Time")
+    //             moveafter("Delivery Items"; "Delivery Date")
+    //         }
+    //     }
+    //     view(NeedSchedule)
+    //     {
+    //         Caption = 'Need Schedule (Norm and PostPoned)';
+    //         SharedLayout = true;
+    //         OrderBy = Ascending("Trip No.", "Trip Sequece");
+    //         Filters = where("Status" = filter(Norm | Postponed),
+    //         "From Location Code" = field("From Location Code"));
+    //     }
+    //     view(Postponed)
+    //     {
+    //         Caption = 'Postponed (Yellow)';
+    //         SharedLayout = true;
+    //         Filters = where("Status" = filter(Postponed),
+    //         "From Location Code" = field("From Location Code"));
+    //     }
+    //     view(Complete)
+    //     {
+    //         Caption = 'Complete (Green)';
+    //         SharedLayout = true;
+    //         Filters = where("Status" = filter(Completed),
+    //         "From Location Code" = field("From Location Code"));
+    //     }
+    //     view(RemoteView)
+    //     {
+    //         Caption = 'Remote (Woollongong)';
+    //         SharedLayout = true;
+    //         Filters = where("Remote" = const(true), "From Location Code" = field("From Location Code"));
+    //     }
 
-        view("TO - QLD")
-        {
-            Caption = 'TO - QLD';
-            SharedLayout = true;
-            Filters = where("To Location Code" = const('QLD'), "From Location Code" = field("From Location Code"));
-        }
-        view("TO - VIC")
-        {
-            Caption = 'TO - VIC';
-            SharedLayout = true;
-            Filters = where("To Location Code" = const('VIC'), "From Location Code" = field("From Location Code"));
-        }
-        view("TO - NSW")
-        {
-            Caption = 'TO - NSW';
-            SharedLayout = true;
-            Filters = where("To Location Code" = const('NSW'), "From Location Code" = field("From Location Code"));
-        }
-        view("Property Management")
-        {
-            Caption = 'Property Management';
-            SharedLayout = true;
-            Filters = where("Source Type" = filter("Property Management"), "From Location Code" = field("From Location Code"));
-        }
-        view("Second Lease Pick Up")
-        {
-            Caption = 'Second Lease Pick Up';
-            SharedLayout = true;
-            Filters = where(Status = filter(Rescheduled), "From Location Code" = field("From Location Code"));
-        }
-    }
+    //     view("TO - QLD")
+    //     {
+    //         Caption = 'TO - QLD';
+    //         SharedLayout = true;
+    //         Filters = where("To Location Code" = const('QLD'), "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("TO - VIC")
+    //     {
+    //         Caption = 'TO - VIC';
+    //         SharedLayout = true;
+    //         Filters = where("To Location Code" = const('VIC'), "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("TO - NSW")
+    //     {
+    //         Caption = 'TO - NSW';
+    //         SharedLayout = true;
+    //         Filters = where("To Location Code" = const('NSW'), "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("Property Management")
+    //     {
+    //         Caption = 'Property Management';
+    //         SharedLayout = true;
+    //         Filters = where("Source Type" = filter("Property Management"), "From Location Code" = field("From Location Code"));
+    //     }
+    //     view("Second Lease Pick Up")
+    //     {
+    //         Caption = 'Second Lease Pick Up';
+    //         SharedLayout = true;
+    //         Filters = where(Status = filter(Rescheduled), "From Location Code" = field("From Location Code"));
+    //     }
+    // }
 
     var
         ScheduleColorMgt: Codeunit "Schedule Color Mgt1";
@@ -869,5 +868,10 @@ page 50118 "VIC Schedule"
                 xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
                 xSchedule.Modify();
             until xSchedule.Next() = 0;
+
+
     end;
+
+
+
 }

@@ -6,8 +6,13 @@
 			"request": "launch",
 			"type": "al",
 			"environmentType": "Sandbox",
-			"environmentName": "UAT",
-			"server": "https://businesscentral.dynamics.com/",
+			"environmentName": "DEV",
+
+			// "server": "https://csevm.australiasoutheast.cloudapp.azure.com",
+			// "serverInstance": "BC",
+			// "tenant": "default",
+			// "authentication": "UserPassword",
+			
 			"startupObjectId": 9022,
 			"startupObjectType": "Page",
 			"breakOnError": true,
@@ -19,3 +24,4 @@
 		}
 	]
 }
+

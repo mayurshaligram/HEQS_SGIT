@@ -271,6 +271,7 @@ page 50114 "Schedule Card"
                 {
                     Caption = 'From Location Code';
                     ApplicationArea = All;
+                    TableRelation = Location;
                 }
                 field("To Location Code"; Rec."To Location Code")
                 {
@@ -352,5 +353,21 @@ page 50114 "Schedule Card"
         // SalesHeader.Get(SalesHeader."Document Type"::Order, Rec."Source No.");
         // ScheduleMgt.LoadWarrantyLine(SalesHeader, Rec, TempText);
         // Rec.Modify();
+    end;
+
+    trigger OnQueryClosePage(CloseAction: Action): Boolean;
+
+    var
+        Temp: Boolean;
+
+    begin
+        if (Rec."No." <> '') and (Rec."From Location Code" = '') then begin
+            Message('Please give a from location code.');
+            exit(false);
+        end;
+        if (Rec."No." <> '') and (Rec."Delivery Option" = Rec."Delivery Option"::" ") then begin
+            Message('Please give a Delivery Option.');
+            exit(false);
+        end;
     end;
 }

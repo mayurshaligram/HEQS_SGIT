@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Report xmlns="http://schemas.microsoft.com/sqlserver/reporting/2016/01/reportdefinition" xmlns:rd="http://schemas.microsoft.com/SQLServer/reporting/reportdesigner">
+  <AutoRefresh>0</AutoRefresh>
+  <DataSources>
+    <DataSource Name="DataSource">
+      <ConnectionProperties>
+        <DataProvider>SQL</DataProvider>
+        <ConnectString />
+      </ConnectionProperties>
+      <rd:SecurityType>None</rd:SecurityType>
+    </DataSource>
+  </DataSources>
+  <ReportSections>
+    <ReportSection>
+      <Body>
+        <Height>2in</Height>
+        <Style />
+      </Body>
+      <Width>6.5in</Width>
+      <Page>
+        <Style />
+      </Page>
+    </ReportSection>
+  </ReportSections>
+  <Code>Public Function BlankZero(ByVal Value As Decimal)
+    if Value = 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankPos(ByVal Value As Decimal)
+    if Value &gt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankZeroAndPos(ByVal Value As Decimal)
+    if Value &gt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNeg(ByVal Value As Decimal)
+    if Value &lt; 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+
+Public Function BlankNegAndZero(ByVal Value As Decimal)
+    if Value &lt;= 0 then
+        Return ""
+    end if
+    Return Value
+End Function
+</Code>
+  <Language>=User!Language</Language>
+  <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
+  <rd:ReportUnitType>Inch</rd:ReportUnitType>
+  <rd:ReportID>0eeb6585-38ae-40f1-885b-8d50088d51b4</rd:ReportID>
+  <DataSets>
+    <DataSet Name="DataSet_Result">
+      <Fields>
+        <Field Name="No_WhseActivHeader">
+          <DataField>No_WhseActivHeader</DataField>
+        </Field>
+        <Field Name="CompanyName">
+          <DataField>CompanyName</DataField>
+        </Field>
+        <Field Name="TodayFormatted">
+          <DataField>TodayFormatted</DataField>
+        </Field>
+        <Field Name="Time">
+          <DataField>Time</DataField>
+        </Field>
+        <Field Name="PickFilter">
+          <DataField>PickFilter</DataField>
+        </Field>
+        <Field Name="DirectedPutAwayAndPick">
+          <DataField>DirectedPutAwayAndPick</DataField>
+        </Field>
+        <Field Name="BinMandatory">
+          <DataField>BinMandatory</DataField>
+        </Field>
+        <Field Name="InvtPick">
+          <DataField>InvtPick</DataField>
+        </Field>
+        <Field Name="ShowLotSN">
+          <DataField>ShowLotSN</DataField>
+        </Field>
+        <Field Name="SumUpLines">
+          <DataField>SumUpLines</DataField>
+        </Field>
+        <Field Name="No_WhseActivHeaderCaption">
+          <DataField>No_WhseActivHeaderCaption</DataField>
+        </Field>
+        <Field Name="WhseActivHeaderCaption">
+          <DataField>WhseActivHeaderCaption</DataField>
+        </Field>
+        <Field Name="LoctnCode_WhseActivHeader">
+          <DataField>LoctnCode_WhseActivHeader</DataField>
+        </Field>
+        <Field Name="SortingMtd_WhseActivHeader">
+          <DataField>SortingMtd_WhseActivHeader</DataField>
+        </Field>
+        <Field Name="AssgUserID_WhseActivHeader">
+          <DataField>AssgUserID_WhseActivHeader</DataField>
+        </Field>
+        <Field Name="SourcDocument_WhseActLine">
+          <DataField>SourcDocument_WhseActLine</DataField>
+        </Field>
+        <Field Name="LoctnCode_WhseActivHeaderCaption">
+          <DataField>LoctnCode_WhseActivHeaderCaption</DataField>
+        </Field>
+        <Field Name="SortingMtd_WhseActivHeaderCaption">
+          <DataField>SortingMtd_WhseActivHeaderCaption</DataField>
+        </Field>
+        <Field Name="AssgUserID_WhseActivHeaderCaption">
+          <DataField>AssgUserID_WhseActivHeaderCaption</DataField>
+        </Field>
+        <Field Name="SourcDocument_WhseActLineCaption">
+          <DataField>SourcDocument_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="SourceNo_WhseActLineCaption">
+          <DataField>SourceNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="ShelfNo_WhseActLineCaption">
+          <DataField>ShelfNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="VariantCode_WhseActLineCaption">
+          <DataField>VariantCode_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="Description_WhseActLineCaption">
+          <DataField>Description_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="ItemNo_WhseActLineCaption">
+          <DataField>ItemNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="UOMCode_WhseActLineCaption">
+          <DataField>UOMCode_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="QtytoHandle_WhseActLineCaption">
+          <DataField>QtytoHandle_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="QtyBase_WhseActLineCaption">
+          <DataField>QtyBase_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="DestinatnType_WhseActLineCaption">
+          <DataField>DestinatnType_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="DestinationNo_WhseActLineCaption">
+          <DataField>DestinationNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="ZoneCode_WhseActLineCaption">
+          <DataField>ZoneCode_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="BinCode_WhseActLineCaption">
+          <DataField>BinCode_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="ActionType_WhseActLineCaption">
+          <DataField>ActionType_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="CurrReportPageNoCaption">
+          <DataField>CurrReportPageNoCaption</DataField>
+        </Field>
+        <Field Name="PickingListCaption">
+          <DataField>PickingListCaption</DataField>
+        </Field>
+        <Field Name="WhseActLineDueDateCaption">
+          <DataField>WhseActLineDueDateCaption</DataField>
+        </Field>
+        <Field Name="QtyHandledCaption">
+          <DataField>QtyHandledCaption</DataField>
+        </Field>
+        <Field Name="SourceNo_WhseActLine">
+          <DataField>SourceNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="FormatSourcDocument_WhseActLine">
+          <DataField>FormatSourcDocument_WhseActLine</DataField>
+        </Field>
+        <Field Name="ShelfNo_WhseActLine">
+          <DataField>ShelfNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="ItemNo_WhseActLine">
+          <DataField>ItemNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="Description_WhseActLine">
+          <DataField>Description_WhseActLine</DataField>
+        </Field>
+        <Field Name="VariantCode_WhseActLine">
+          <DataField>VariantCode_WhseActLine</DataField>
+        </Field>
+        <Field Name="UOMCode_WhseActLine">
+          <DataField>UOMCode_WhseActLine</DataField>
+        </Field>
+        <Field Name="DueDate_WhseActLine">
+          <DataField>DueDate_WhseActLine</DataField>
+        </Field>
+        <Field Name="QtytoHandle_WhseActLine">
+          <DataField>QtytoHandle_WhseActLine</DataField>
+        </Field>
+        <Field Name="QtytoHandle_WhseActLineFormat">
+          <DataField>QtytoHandle_WhseActLineFormat</DataField>
+        </Field>
+        <Field Name="QtyBase_WhseActLine">
+          <DataField>QtyBase_WhseActLine</DataField>
+        </Field>
+        <Field Name="QtyBase_WhseActLineFormat">
+          <DataField>QtyBase_WhseActLineFormat</DataField>
+        </Field>
+        <Field Name="DestinatnType_WhseActLine">
+          <DataField>DestinatnType_WhseActLine</DataField>
+        </Field>
+        <Field Name="DestinationNo_WhseActLine">
+          <DataField>DestinationNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="ZoneCode_WhseActLine">
+          <DataField>ZoneCode_WhseActLine</DataField>
+        </Field>
+        <Field Name="BinCode_WhseActLine">
+          <DataField>BinCode_WhseActLine</DataField>
+        </Field>
+        <Field Name="ActionType_WhseActLine">
+          <DataField>ActionType_WhseActLine</DataField>
+        </Field>
+        <Field Name="LotNo_WhseActLine">
+          <DataField>LotNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="SerialNo_WhseActLine">
+          <DataField>SerialNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="LotNo_WhseActLineCaption">
+          <DataField>LotNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="SerialNo_WhseActLineCaption">
+          <DataField>SerialNo_WhseActLineCaption</DataField>
+        </Field>
+        <Field Name="LineNo_WhseActLine">
+          <DataField>LineNo_WhseActLine</DataField>
+        </Field>
+        <Field Name="BinRanking_WhseActLine">
+          <DataField>BinRanking_WhseActLine</DataField>
+        </Field>
+        <Field Name="EmptyStringCaption">
+          <DataField>EmptyStringCaption</DataField>
+        </Field>
+        <Field Name="LotNo_WhseActLine2">
+          <DataField>LotNo_WhseActLine2</DataField>
+        </Field>
+        <Field Name="SerialNo_WhseActLine2">
+          <DataField>SerialNo_WhseActLine2</DataField>
+        </Field>
+        <Field Name="QtyBase_WhseActLine2">
+          <DataField>QtyBase_WhseActLine2</DataField>
+        </Field>
+        <Field Name="QtyBase_WhseActLine2Format">
+          <DataField>QtyBase_WhseActLine2Format</DataField>
+        </Field>
+        <Field Name="QtytoHandle_WhseActLine2">
+          <DataField>QtytoHandle_WhseActLine2</DataField>
+        </Field>
+        <Field Name="QtytoHandle_WhseActLine2Format">
+          <DataField>QtytoHandle_WhseActLine2Format</DataField>
+        </Field>
+        <Field Name="LineNo_WhseActLine2">
+          <DataField>LineNo_WhseActLine2</DataField>
+        </Field>
+      </Fields>
+      <Query>
+        <DataSourceName>DataSource</DataSourceName>
+        <CommandText />
+      </Query>
+    </DataSet>
+  </DataSets>
+</Report>

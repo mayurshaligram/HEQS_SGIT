@@ -28,6 +28,7 @@ page 50105 "DevPage"
                         PayableMgt: Record Payable;
                         WhseRequest: Record "Warehouse Request";
                         NewWhseRequest: Record "Warehouse Request";
+                        PostInvoice: Record "Sales Invoice Header";
                     begin
                         if Password = '326688' then
                             ScheduleMgt.ModifyExistScheduleList();

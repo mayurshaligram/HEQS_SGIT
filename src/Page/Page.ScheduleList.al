@@ -9,7 +9,6 @@ page 50113 "Schedule List"
     Editable = true;
     CardPageId = 50114;
     UsageCategory = Lists;
-    // SourceTableView = WHERE("From Location Code" = CONST('NSW'));
     RefreshOnActivate = true;
     // sorting(descending"Trip No.", Ascending"Trip Sequece")
     layout
@@ -192,8 +191,6 @@ page 50113 "Schedule List"
         }
 
     }
-
-
 
     actions
     {
@@ -452,6 +449,7 @@ page 50113 "Schedule List"
     {
         view("Current Delivery Schedule")
         {
+
             Caption = 'Current Delivery Schedule';
             SharedLayout = true;
             OrderBy = ascending("Trip No.", "Trip Sequece");
@@ -868,10 +866,5 @@ page 50113 "Schedule List"
                 xSchedule."Global Sequence" := Format(xSchedule."Trip No.") + Format(xSchedule."Trip Sequece");
                 xSchedule.Modify();
             until xSchedule.Next() = 0;
-
-
     end;
-
-
-
 }

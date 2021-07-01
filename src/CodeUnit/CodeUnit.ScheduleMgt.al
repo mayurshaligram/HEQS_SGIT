@@ -48,8 +48,10 @@ codeunit 50114 "Schedule Mgt"
         TransferOrder: Record "Transfer Header";
     begin
         TransferOrder.Reset();
-        if TransferOrder.Get(Schedule."Source No.") = false then
-            Schedule.Delete();
+        if TransferOrder.Get(Schedule."Source No.") = false then begin
+            Schedule.Status := Schedule.Status::Completed;
+            Schedule.Modify();
+        end;
     end;
 
     local procedure CheckExistReturnOrder(var Schedule: Record Schedule);
@@ -58,7 +60,8 @@ codeunit 50114 "Schedule Mgt"
     begin
         SalesReturnOrder.Reset();
         if SalesReturnOrder.Get(SalesReturnOrder."Document Type"::"Return Order", Schedule."Source No.") = false then begin
-            Schedule.Delete();
+            Schedule.Status := Schedule.Status::Completed;
+            Schedule.Modify();
         end
     end;
 
@@ -75,10 +78,14 @@ codeunit 50114 "Schedule Mgt"
             Schedule."Phone No." := SalesOrder."Ship-to Contact";
             Schedule.Customer := SalesOrder."Ship-to Contact 2";
             Schedule.Name := SalesOrder."Ship-to Name";
+            if SalesOrder.IsDeliveried = true then
+                Schedule.Status := Schedule.Status::Completed;
             Schedule.Modify();
         end
-        else
-            Schedule.Delete();
+        else begin
+            Schedule.Status := Schedule.Status::Completed;
+            Schedule.Modify();
+        end;
     end;
 
 
