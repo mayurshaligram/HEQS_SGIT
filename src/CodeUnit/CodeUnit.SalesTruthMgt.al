@@ -489,6 +489,50 @@ codeunit 50101 "Sales Truth Mgt"
         IsHandled := true;
     end;
 
+    [EventSubscriber(ObjectType::Page, 46, 'OnAfterQuantityOnAfterValidate', '', false, false)]
+    local procedure AfterQuantityOnAfterValidate(var SalesLine: Record "Sales Line"; xSalesLine: Record "Sales Line")
+    var
+        item: Record Item;
+        onhand: Decimal;
+        TempText: Text;
+    begin
+        if SalesLine.CurrentCompany() <> InventoryCompany() then begin
+            if (SalesLine.Type = SalesLine.Type::Item) then begin
+                item.ChangeCompany(InventoryCompany());
+                item.Get(SalesLine."No.");
+                if item.Type = item.Type::Inventory then begin
+                    if SalesLine."Location Code" = '' then
+                        Error('Please give the location to the Sales line');
+                    case SalesLine."Location Code" of
+                        'NSW':
+                            begin
+                                item.CalcFields(NSW);
+                                onhand := item.NSW;
+                            end;
+                        'VIC':
+                            begin
+                                item.CalcFields(VIC);
+                                onhand := item.VIC;
+                            end;
+
+                        'QLD':
+                            begin
+                                item.CalcFields(QLD);
+                                onhand := item.QLD;
+                            end;
+                    end;
+                    if onhand < SalesLine.Quantity then begin
+                        TempText := 'The item ' + SalesLine."No." + ' onhand in ' + SalesLine."Location Code" +
+                                ' is ' + format(onhand) + ' which is not enough for this order, do you still want to place the order?';
+                        if Confirm(TempText) = false then
+                            Error('Not Enough Warehouse Stock!');
+                    end;
+                end;
+            end;
+        end;
+
+    end;
+
 
 
     //     [IntegrationEvent(false, false)]
