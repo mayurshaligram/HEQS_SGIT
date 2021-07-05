@@ -39,10 +39,6 @@ page 50105 "DevPage"
         }
 
     }
-    // trigger OnAfterGetCurrRecord();
-    // begin
-    //     ChangeWarehouseRequest();
-    // end;
     local procedure HardDeletedSalesROLPOL();
     var
         SalesHeader: Record "Sales Header";

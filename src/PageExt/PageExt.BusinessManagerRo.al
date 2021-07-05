@@ -2,7 +2,7 @@ pageextension 50120 "Bus.Manager Role Center_Ext" extends "Business Manager Role
 {
     actions
     {
-        addBefore(SetupAndExtensions)
+        addafter(Action41)
         {
             group("Schedule")
             {

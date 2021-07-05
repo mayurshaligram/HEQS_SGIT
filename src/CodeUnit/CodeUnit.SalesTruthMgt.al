@@ -1529,18 +1529,18 @@ codeunit 50101 "Sales Truth Mgt"
         Item: Record Item;
         BOMComponent: Record "BOM Component";
         IsMainItem: Boolean;
-        PurchasePrice: Record "Purchase Price";
+        // PurchasePrice: Record "Purchase Price";
         PurchaseHeader: Record "Purchase Header";
         User: Record User;
     begin
         if IsValideICSalesLine(SalesLine) = false then exit;
 
         Item.Get(SalesLine."No.");
-        PurchasePrice.Reset();
-        PurchasePrice.SetRange("Item No.", Item."No.");
+        // PurchasePrice.Reset();
+        // PurchasePrice.SetRange("Item No.", Item."No.");
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
         Vendor.FindSet();
-        PurchasePrice.SetRange("Vendor No.", Vendor."No.");
+        // PurchasePrice.SetRange("Vendor No.", Vendor."No.");
 
         SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
         PurchaseLine.Reset();
@@ -1567,7 +1567,7 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseLine.Insert();
             User.Get(Database.UserSecurityId());
             if User."Full Name" <> 'Pei Xu' then
-                if (PurchasePrice.FindSet() = false) and (PurchaseLine."BOM Item" = false) then
+                if (PurchaseLine."Unit Cost (LCY)" = 0) and (PurchaseLine."BOM Item" = false) then
                     Error('Please Set Purchase Price Entry for item %1', Item."No.");
         end;
     end;
@@ -1580,16 +1580,16 @@ codeunit 50101 "Sales Truth Mgt"
         Item: Record Item;
         BOMComponent: Record "BOM Component";
         IsMainItem: Boolean;
-        PurchasePrice: Record "Purchase Price";
+    // PurchasePrice: Record "Purchase Price";
     begin
         if IsValideICSalesLine(SalesLine) = false then exit;
 
         Item.Get(SalesLine."No.");
-        PurchasePrice.Reset();
-        PurchasePrice.SetRange("Item No.", Item."No.");
+        // PurchasePrice.Reset();
+        // PurchasePrice.SetRange("Item No.", Item."No.");
         Vendor."Search Name" := 'HEQS INTERNATIONAL PTY LTD';
         Vendor.FindSet();
-        PurchasePrice.SetRange("Vendor No.", Vendor."No.");
+        // PurchasePrice.SetRange("Vendor No.", Vendor."No.");
 
         SalesHeader.Get(SalesLine."Document Type", SalesLIne."Document No.");
         PurchaseLine.Reset();

@@ -10,7 +10,6 @@ report 50104 DeliveryReport
         dataitem(Trip; Trip)
         {
             RequestFilterFields = "No.";
-
             column(Driver; Driver)
             {
 
@@ -100,7 +99,6 @@ report 50104 DeliveryReport
         //         action(ActionName)
         //         {
         //             ApplicationArea = All;
-
         //         }
         //     }
         // }

@@ -79,7 +79,9 @@ codeunit 50114 "Schedule Mgt"
             Schedule.Customer := SalesOrder."Ship-to Contact 2";
             Schedule.Name := SalesOrder."Ship-to Name";
             if SalesOrder.IsDeliveried = true then
-                Schedule.Status := Schedule.Status::Completed;
+                Schedule.Status := Schedule.Status::Completed
+            else
+                Schedule.Status := Schedule.Status::Norm;
             Schedule.Modify();
         end
         else begin

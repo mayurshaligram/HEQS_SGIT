@@ -52,7 +52,6 @@ tableextension 50104 "Purchase Line_Ext" extends "Purchase Line"
         temp: text[20];
         // BOM related var
         FromBOMComp: Record "BOM Component";
-        Plprice: Record "Purchase price";
     begin
         if (rec.CurrentCompany = 'HEQS International Pty Ltd') and (rec.Type = rec.Type::Item) then begin
             // need to check the associated line
