@@ -1123,6 +1123,7 @@ codeunit 50101 "Sales Truth Mgt"
     var
         BOMComponent: Record "BOM Component";
         BOMTransferLine: Record "Transfer Line";
+        TempText: Text;
     begin
         BOMComponent.Reset();
         BOMComponent.SetRange("Parent Item No.", TransferLine."Item No.");
@@ -1136,6 +1137,10 @@ codeunit 50101 "Sales Truth Mgt"
                 if BOMTransferLine.FindSet() then
                     repeat
                         BOMTransferLine.Validate(Quantity, TransferLine.Quantity * BOMComponent."Quantity per");
+                        if BOMTransferLine.Quantity = 0 then begin
+                            TempText := BOMTransferLine."Item No." + ' can not be 0, please check BOM setting.';
+                            Error(TempText);
+                        end;
                         BOMTransferLine.Modify();
                     until BOMTransferLine.Next() = 0;
             until BOMComponent.Next() = 0;

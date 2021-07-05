@@ -101,15 +101,23 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 CorrectMainSalesLine: Record "Sales Line";
                 ZoneCode: Record ZoneTable;
                 DeleteSalesLine: Record "Sales Line";
+                TempText: Text;
             begin
                 SalesLine.Reset();
                 SalesLine.SetRange("Document No.", Rec."No.");
                 SalesLine.SetRange("Document Type", Rec."Document Type");
-                SalesLine.SetRange("BOM Item", false);
+                // SalesLine.SetRange("BOM Item", false);
                 if SalesLine.FindSet() then
                     repeat
-                        if SalesTruthMgt.IsValideICSalesLine(SalesLine) and (SalesLine."Location Code" = '') then
-                            Error(Text2);
+                        if SalesLine."BOM Item" = false then
+                            if SalesTruthMgt.IsValideICSalesLine(SalesLine) and (SalesLine."Location Code" = '') then
+                                Error(Text2);
+                        if SalesLine."BOM Item" = true then
+                            if SalesLine.Quantity = 0 then begin
+                                TempText := SalesLine."No." + ' need set BOM quantity.';
+                                Error(TempText);
+                            end;
+
                     until Salesline.Next() = 0;
                 if Rec."Location Code" = '' then begin
                     SalesLine.Reset();

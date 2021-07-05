@@ -139,6 +139,24 @@ tableextension 50102 "Item_Ext" extends "Item"
                 Rec.Modify();
             end;
         }
+        field(50100; NSW; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("Warehouse Entry".Quantity where("Location Code" = const('NSW'), "Item No." = field("No.")));
+            DecimalPlaces = 0 : 5;
+        }
+        field(50103; VIC; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("Warehouse Entry".Quantity where("Location Code" = const('VIC'), "Item No." = field("No.")));
+            DecimalPlaces = 0 : 5;
+        }
+        field(50104; QLD; Decimal)
+        {
+            FieldClass = FlowField;
+            CalcFormula = sum("Warehouse Entry".quantity where("Location Code" = const('QLD'), "Item No." = field("No.")));
+            DecimalPlaces = 0 : 5;
+        }
     }
     trigger OnBeforeModify()
     var

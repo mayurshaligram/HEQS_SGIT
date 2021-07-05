@@ -7,7 +7,20 @@ pageextension 50107 "Sales Return Order_Ext" extends "Sales Return Order"
             trigger OnBeforeAction();
             var
                 Text1: Label 'Please release the current Sales Order in at "%1"';
+                SalesLine: Record "Sales Line";
+                TempText: Text;
             begin
+                SalesLine.Reset();
+                SalesLine.SetRange("Document No.", Rec."No.");
+                SalesLine.SetRange("Document Type", Rec."Document Type");
+                SalesLine.SetRange("BOM Item", true);
+                if SalesLine.FindSet() then
+                    repeat
+                        if SalesLine.Quantity = 0 then begin
+                            TempText := SalesLine."No." + ' need set BOM quantity.';
+                            Error(TempText);
+                        end;
+                    until Salesline.Next() = 0;
                 // if SalesTruthMgt.IsICSalesHeader(Rec) then Error(Text1, Rec."Sell-to Customer Name")
             end;
 

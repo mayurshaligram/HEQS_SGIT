@@ -26,9 +26,10 @@ pageextension 50127 TransferOrderExt extends "Transfer Order"
         SalesLine.SetRange("Document No.", Rec."No.");
         if SalesLine.FindSet() then
             repeat
-                if IsMainItemLine(SalesLine) then
+                if IsMainItemLine(SalesLine) then begin
                     if StrLen(TempDeliveryItem) < 1900 then
                         TempDeliveryItem := TempDeliveryItem + Format(SalesLine.Quantity) + '*' + SalesLine.Description + ', ';
+                end;
             until SalesLine.Next() = 0;
 
 
