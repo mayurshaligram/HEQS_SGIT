@@ -40,6 +40,13 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 ToolTip = 'Specifies whether the Sales Order has been deliveried.';
                 Visible = true;
             }
+            field("Complete Delivery Status"; ComplShipped.Status)
+            {
+                Caption = 'Complete Delivery Status';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies whether the Sales Order has been Completely Shipped.';
+                Visible = true;
+            }
         }
         addafter("Location Code")
         {
@@ -200,6 +207,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         IsPei: Boolean;
         IsFurniture: Boolean;
+        ComplShipped: Record Schedule;
 
     trigger OnOpenPage();
     var
@@ -254,5 +262,9 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         Rec.SetRange("No.");
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
+
+        // ComplShipped.SetRange("No.",Rec."No.");
+        // if ComplShipped.Find then
+
     end;
 }
