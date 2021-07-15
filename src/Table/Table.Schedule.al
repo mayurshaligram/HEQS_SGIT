@@ -5,6 +5,7 @@ table 50100 "Schedule"
     LookupPageId = 50113;
     DataClassification = CustomerContent;
 
+
     fields
     {
         field(1; "Source Type"; Enum "Schedule Source Type")

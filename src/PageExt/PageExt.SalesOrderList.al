@@ -40,7 +40,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 ToolTip = 'Specifies whether the Sales Order has been deliveried.';
                 Visible = true;
             }
-            field("Complete Delivery Status"; ComplShipped.Status)
+            field("Complete Delivery Status"; Rec."Complete Delivery Status1")
             {
                 Caption = 'Complete Delivery Status';
                 ApplicationArea = Basic, Suite;
@@ -207,9 +207,10 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         IsPei: Boolean;
         IsFurniture: Boolean;
-        ComplShipped: Record Schedule;
+        ComplShipped: Record 50100;
+        IsScheduleComplete: Enum "Schedule Status";
 
-    trigger OnOpenPage();
+    trigger OnOpenPage()
     var
         SalesHeader: Record "Sales Header";
         SalesPostExt: Codeunit "Sales-Post (Yes/No) Ext";
@@ -258,13 +259,29 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 SalesHeader.Modify();
             until SalesHeader.Next = 0;
 
+        SalesHeader.Reset();
+        if SalesHeader.CurrentCompany = 'HEQS Furniture Pty Ltd' then
+            SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        IF SalesHeader.FindSet() then
+            REPEAT
+                ComplShipped.Reset();
+                ComplShipped.SetRange("Subsidiary Source No.", SalesHeader.RetailSalesHeader);
+                IF ComplShipped.FindSet() then
+                    SalesHeader."Complete Delivery Status1" := ComplShipped.Status;
+                SalesHeader.Modify();
+            UNTIL SalesHeader.Next() = 0;
+
+
+
         Rec.SetView('sorting (Rec."No.") order(descending)');
         Rec.SetRange("No.");
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
 
-        // ComplShipped.SetRange("No.",Rec."No.");
-        // if ComplShipped.Find then
+
 
     end;
+
+
+
 }
