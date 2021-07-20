@@ -45,7 +45,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Caption = 'Complete Delivery Status';
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies whether the Sales Order has been Completely Shipped.';
-                Visible = true;
+                Visible = IsInventoryCompany;
             }
         }
         addafter("Location Code")
@@ -120,6 +120,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     Shipped: Boolean;
                     SalesHeader: Record "Sales Header";
                 begin
+                    //Page.Run(50140);
                     CurrPage.SetSelectionFilter(SalesHeader);
                     if SalesHeader.FindSet() then
                         repeat
@@ -202,13 +203,17 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         }
     }
     var
+        IsNull: Text;
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         IsPei: Boolean;
         IsFurniture: Boolean;
         ComplShipped: Record 50100;
+        XYZ: PAGE 1350;
         IsScheduleComplete: Enum "Schedule Status";
+    //IsPostingDate: Page PostingDateChange;
+
 
     trigger OnOpenPage()
     var
@@ -260,7 +265,7 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
             until SalesHeader.Next = 0;
 
         SalesHeader.Reset();
-        if SalesHeader.CurrentCompany = 'HEQS Furniture Pty Ltd' then
+        if SalesHeader.CurrentCompany = 'HEQS International Pty Ltd' then
             SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
         IF SalesHeader.FindSet() then
             REPEAT
@@ -272,13 +277,10 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
             UNTIL SalesHeader.Next() = 0;
 
 
-
         Rec.SetView('sorting (Rec."No.") order(descending)');
         Rec.SetRange("No.");
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
-
-
 
     end;
 

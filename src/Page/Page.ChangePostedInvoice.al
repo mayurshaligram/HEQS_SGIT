@@ -30,6 +30,11 @@ page 50112 ChangePostedSalesInvoice
                     ApplicationArea = All;
                     Editable = true;
                 }
+                field("External Document No."; Rec."External Document No.")
+                {
+                    ApplicationArea = All;
+                    Editable = true;
+                }
             }
         }
     }

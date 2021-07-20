@@ -181,22 +181,25 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         {
             Caption = 'Ship-to Contact 2';
         }
-        // field(50149; "Complete Delivery Status"; Text[100])
-        // {
-        //     Caption = 'Complete Delivery OLD';
-        //     ObsoleteState = Pending;
-        // }
+        field(50149; "Complete Delivery Status"; Text[100])
+        {
+            Caption = 'Complete Delivery OLD';
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Created for testing purpose now not in use';
+        }
         field(50104; "Complete Delivery Status1"; Enum "Schedule Status")
         {
             Caption = 'Complete Delivery Status New';
             DataClassification = CustomerContent;
 
         }
-        // field(50102; "Complete Delivery Status2"; Enum "Schedule Status")
-        // {
-        //     Caption = 'Complete Delivery Status New2';
-        //     DataClassification = CustomerContent;
-        // }
+        field(50102; "Complete Delivery Status2"; Enum "Schedule Status")
+        {
+            Caption = 'Complete Delivery Status New2';
+            //DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Created for testing purpose now not in use';
+        }
     }
     keys
     {

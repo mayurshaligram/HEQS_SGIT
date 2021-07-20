@@ -76,7 +76,6 @@ pageextension 50108 "ItemChargeAssign(Purch)_Ext" extends "Item Charge Assignmen
                 end;
             }
         }
-
     }
     // trigger OnClosePage()
     // var
