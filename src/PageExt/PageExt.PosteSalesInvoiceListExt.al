@@ -18,6 +18,11 @@ pageextension 50123 PostedSalesInvoiceListExt extends "Posted Sales Invoices"
             {
                 ApplicationArea = Basic, Suite;
             }
+            field("Sell-to E-Mail"; Rec."Sell-to E-Mail")
+            {
+                Caption = 'Email';
+                ApplicationArea = Basic, Suite;
+            }
         }
         addafter("Currency Code")
         {
