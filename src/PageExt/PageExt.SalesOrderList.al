@@ -58,7 +58,9 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Visible = false;
             }
         }
+
     }
+
     actions
     {
 
@@ -119,15 +121,20 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     // Only the Sales Header associated with more then one inventory item sale line could be pass
                     Shipped: Boolean;
                     SalesHeader: Record "Sales Header";
+                    PostingdateChange: Page PostingDateChange;
+                    Postingdate: Date;
                 begin
-                    //Page.Run(50140);
                     CurrPage.SetSelectionFilter(SalesHeader);
+                    Clear(PostingdateChange);
+                    PostingdateChange.LookupMode := true;
+                    PostingdateChange.Editable := true;
                     if SalesHeader.FindSet() then
                         repeat
+                            if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then
+                                Postingdate := SalesHeader."Posting Date";
                             SalesTruthMgt.AutoPost(SalesHeader);
                         until SalesHeader.Next() = 0;
                 end;
-
             }
         }
         addfirst(processing)
@@ -210,8 +217,11 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         IsPei: Boolean;
         IsFurniture: Boolean;
         ComplShipped: Record 50100;
-        XYZ: PAGE 1350;
+        XYZ: record 7320;
         IsScheduleComplete: Enum "Schedule Status";
+        PostingDateChange: Date;
+
+
     //IsPostingDate: Page PostingDateChange;
 
 
@@ -282,6 +292,11 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
 
+    end;
+
+    procedure GetPostingDate(var Postingdate: Date)
+    begin
+        PostingDateChange := Postingdate;
     end;
 
 
