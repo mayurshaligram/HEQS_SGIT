@@ -125,14 +125,15 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     Postingdate: Date;
                 begin
                     CurrPage.SetSelectionFilter(SalesHeader);
-                    Clear(PostingdateChange);
-                    PostingdateChange.LookupMode := true;
-                    PostingdateChange.Editable := true;
+                    // Clear(PostingdateChange);
+                    // PostingdateChange.LookupMode := true;
+                    // PostingdateChange.Editable := true;
                     if SalesHeader.FindSet() then
                         repeat
-                            if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then
-                                Postingdate := SalesHeader."Posting Date";
+                            //if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then begin
+                            //  Postingdate := SalesHeader."Posting Date";
                             SalesTruthMgt.AutoPost(SalesHeader);
+                        //end
                         until SalesHeader.Next() = 0;
                 end;
             }
