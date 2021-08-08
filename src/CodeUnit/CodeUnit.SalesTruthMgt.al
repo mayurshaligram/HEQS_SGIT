@@ -150,8 +150,13 @@ codeunit 50101 "Sales Truth Mgt"
         TempItem: Record Item;
         IsValideIC: Boolean;
         Text1: Label 'Please only post invoice in the retail company %1';
-
+        Currentcompany: Text;
+        ExternalSalesNo: Record "Sales Header";
+        PostedSaleInv: Record "Sales Invoice Header";
+        PostedPIINV: Record "Purch. Inv. Header";
         PostedPurchaseInvoice: Record "Purch. Inv. Header";
+        IcPostedSaleInv: Record "Sales Invoice Header";
+        PostedPurchaseInv: Record "Purch. Inv. Header";
         // Only the Sales Header associated with more then one inventory item sale line could be pass
         Shipped: Boolean;
     begin
@@ -180,7 +185,9 @@ codeunit 50101 "Sales Truth Mgt"
         if IsValideIC = false then Error('Please Only use the normal Posting');
         if Shipped = false then Error('This Order has nothing to post');
 
+
         PostedSalesInvoiceHeader.ChangeCompany('HEQS International Pty Ltd');
+        Sleep(10000);
         if PostedSalesInvoiceHeader.FindLast() then begin
             VendorInvoiceNo := PostedSalesInvoiceHeader."No.";
 
@@ -222,20 +229,77 @@ codeunit 50101 "Sales Truth Mgt"
             PurchaseHeader.Modify();
             Codeunit.Run(Codeunit::"Purch.-Post (Yes/No)", PurchaseHeader);
         end;
+        if (PurchaseHeader.Receive = true) and (PurchaseHeader.Invoice = true) then begin
+            If SalesHeader.CurrentCompany <> InventoryCompanyName then begin
+                ExternalSalesNo.ChangeCompany(InventoryCompanyName);
+                ExternalSalesNo.SetRange(RetailSalesHeader, SalesHeader."No.");
+                if ExternalSalesNo.FindFirst() then
+                    SalesHeader."External Document No." := ExternalSalesNo."No.";
+                SalesHeader.Modify();
+            end;
+            Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", SalesHeader);
+
+            SessionId := 51;
+            InventorySalesOrder.Reset();
+            InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
+            InventorySalesOrder.SetRange("Document Type", SalesHeader."Document Type");
+            InventorySalesOrder.SetRange(RetailSalesHeader, SalesHeader."No.");
+
+            if InventorySalesOrder.FindLast() then
+                StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
+                                           'HEQS International Pty Ltd', InventorySalesOrder);
+            sleep(3000);
+            if PostedSaleInv.CurrentCompany <> InventoryCompanyName then begin
+                sleep(3000);
+                if PostedSaleInv.FindLast() then begin
+                    //sleep(3000);
+                    IcPostedSaleInv.ChangeCompany(InventoryCompanyName);
+                    IcPostedSaleInv.SetRange("Order No.", PostedSaleInv."External Document No.");
+                    if IcPostedSaleInv.FindFirst() then begin
+                        PostedSaleInv."Posted SI No (Inventory CO.)" := IcPostedSaleInv."No.";
+                        //PostedSaleInv.Modify();
+
+                        PostedPIINV.SetRange("Order No.", IcPostedSaleInv."External Document No.");
+                        if PostedPIINV.FindFirst() then
+                            PostedSaleInv."Posted PI No" := PostedPIINV."No.";
+                        PostedSaleInv.Modify();
+                    end;
+                end;
+            end;
+            if PostedPurchaseInv.CurrentCompany <> InventoryCompanyName then begin
+                sleep(3000);
+                if PostedPurchaseInv.FindLast() then begin
+                    IcPostedSaleInv.ChangeCompany(InventoryCompanyName);
+                    IcPostedSaleInv.SetRange("External Document No.", PostedPurchaseInv."Order No.");
+                    if IcPostedSaleInv.FindFirst() then begin
+                        PostedPurchaseInv."Posted SI No.(Inventory Co.)" := IcPostedSaleInv."No.";
+                        IcPostedSaleInv."Posted PI No(Original Co.)" := PostedPurchaseInv."No.";
+
+                        PostedSaleInv.Reset();
+                        PostedSaleInv.SetRange("External Document No.", IcPostedSaleInv."Order No.");
+                        if PostedSaleInv.FindFirst() then begin
+                            PostedPurchaseInv."Posted SI No." := PostedSaleInv."No.";
+                            IcPostedSaleInv."Posted SI No (Original CO.)" := PostedSaleInv."No.";
+
+                            PostedPurchaseInv.Modify();
+                            sleep(3000);
+                            IcPostedSaleInv.Modify();
+                        end;
+                    end;
+                end;
+            end;
+            // if PostedPurchaseInv.CurrentCompany <> InventoryCompanyName then begin
+            //     IcPostedSaleInv.ChangeCompany(InventoryCompanyName);
+            //     IcPostedSaleInv.SetRange("No.", PostedPurchaseInv."Vendor Invoice No.");
+            //     if IcPostedSaleInv.FindFirst() then begin
+            //         IcPostedSaleInv."Posted PI No(Original Co.)" := PostedPurchaseInv."No.";
+
+            //         PostedSaleInv.SetRange("External Document No.", IcPostedSaleInv."Order No.");
+            //         if PostedSaleInv.FindFirst() then
 
 
-        Codeunit.Run(Codeunit::"Sales-Post (Yes/No) Ext Inv", SalesHeader);
-
-        SessionId := 51;
-        InventorySalesOrder.Reset();
-        InventorySalesOrder.ChangeCompany('HEQS International Pty Ltd');
-        InventorySalesOrder.SetRange("Document Type", SalesHeader."Document Type");
-        InventorySalesOrder.SetRange(RetailSalesHeader, SalesHeader."No.");
-
-        if InventorySalesOrder.FindLast() then
-            StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext Inv",
-                                       'HEQS International Pty Ltd', InventorySalesOrder);
-
+            //     end;
+        end;
 
 
     end;
@@ -641,46 +705,46 @@ codeunit 50101 "Sales Truth Mgt"
         If WhseShipment.CurrentCompany = SalesTruthMgt.InventoryCompany() then begin
             WhseShipmentLineLocal.Reset();
             WhseShipmentLineLocal.SetRange("No.", WhseShipment."No.");
-            if (WhseShipmentLineLocal.FindSet()) and (TempCode <> WhseShipmentLineLocal."Source No.") then begin
+            if WhseShipmentLineLocal.FindSet() then begin
                 repeat
                     InventorySalesHeader.SetRange("No.", WhseShipmentLineLocal."Source No.");
                     if InventorySalesHeader.FindSet() then begin
                         RetailSalesOrder.Reset();
                         RetailSalesOrder.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
                         RetailSalesOrder.SetRange("Automate Purch.Doc No.", InventorySalesHeader."External Document No.");
-                        if RetailSalesOrder.FindSet() then begin
-                            RetailPurchaseHeader.Reset();
-                            RetailPurchaseHeader.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
-                            RetailPurchaseHeader.SetRange("No.", InventorySalesHeader."External Document No.");
-                            if RetailPurchaseHeader.FindSet() then begin
-                                InventorySalesLine.SetRange("Document Type", InventorySalesHeader."Document Type");
-                                InventorySalesLine.SetRange("Document No.", InventorySalesHeader."No.");
-                                // if InventorySalesLine.FindSet() then
-                                //     repeat
-                                //         RetailPurchaseLine.Reset();
-                                //         RetailPurchaseLine.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
-                                //         RetailPurchaseLine.Get(InventorySalesHeader."Document Type", RetailPurchaseHeader."No.", InventorySalesLine."Line No.");
-                                //         RetailPurchaseLine."Quantity Received" := InventorySalesLine."Quantity Shipped";
-                                //         RetailPurchaseLine."Qty. to Receive" := RetailPurchaseLine."Qty. to Receive" - RetailPurchaseLine."Quantity Received";
-                                //         RetailPurchaseLine."Qty. to Invoice" := InventorySalesLine."Qty. to Invoice";
-                                //         RetailPurchaseLine.Modify();
+                        if RetailSalesOrder.FindFirst() then begin
+                            //         RetailPurchaseHeader.Reset();
+                            //         RetailPurchaseHeader.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+                            //         RetailPurchaseHeader.SetRange("No.", InventorySalesHeader."External Document No.");
+                            //         if RetailPurchaseHeader.FindSet() then begin
+                            //             InventorySalesLine.SetRange("Document Type", InventorySalesHeader."Document Type");
+                            //             InventorySalesLine.SetRange("Document No.", InventorySalesHeader."No.");
+                            // if InventorySalesLine.FindSet() then
+                            //     repeat
+                            //         RetailPurchaseLine.Reset();
+                            //         RetailPurchaseLine.ChangeCompany(InventorySalesHeader."Sell-to Customer Name");
+                            //         RetailPurchaseLine.Get(InventorySalesHeader."Document Type", RetailPurchaseHeader."No.", InventorySalesLine."Line No.");
+                            //         RetailPurchaseLine."Quantity Received" := InventorySalesLine."Quantity Shipped";
+                            //         RetailPurchaseLine."Qty. to Receive" := RetailPurchaseLine."Qty. to Receive" - RetailPurchaseLine."Quantity Received";
+                            //         RetailPurchaseLine."Qty. to Invoice" := InventorySalesLine."Qty. to Invoice";
+                            //         RetailPurchaseLine.Modify();
 
-                                //     until InventorySalesLine.Next() = 0;
+                            //     until InventorySalesLine.Next() = 0;
 
 
-                                InventorySalesHeader."External Document No." := '';
-                                InventorySalesHeader.Modify();
+                            //InventorySalesHeader."External Document No." := '';
+                            //InventorySalesHeader.Modify();
 
-                                RetailSalesOrder."External Document No." := InventorySalesHeader."No.";
-                                RetailSalesOrder.Modify();
+                            RetailSalesOrder."External Document No." := InventorySalesHeader."No.";
+                            RetailSalesOrder.Modify();
 
-                                // SessionID := 50 + Counter;
-                                // StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
-                            end;
+                            // SessionID := 50 + Counter;
+                            // StartSession(SessionId, CodeUnit::"Sales-Post (Yes/No) Ext", InventorySalesHeader."Sell-to Customer Name", RetailSalesOrder);
                         end;
                     end;
-                    TempCode := WhseShipmentLineLocal."Source No.";
-                    Counter := Counter + 1;
+                //end;
+                //TempCode := WhseShipmentLineLocal."Source No.";
+                //Counter := Counter + 1;
                 until WhseShipmentLineLocal.Next() = 0;
             end;
         end;
@@ -1246,6 +1310,8 @@ codeunit 50101 "Sales Truth Mgt"
                     PurchaseLine."VAT Bus. Posting Group" := TempSalesLine."VAT Bus. Posting Group";
                     PurchaseLine."VAT Prod. Posting Group" := TempSalesLine."VAT Prod. Posting Group";
 
+                    PurchaseLine."VAT %" := TempSalesLine."VAT %";
+                    PurchaseLine.UpdateVATAmounts();
                     Item.Get(TempSalesLine."No.");
                     if PurchaseLine."Document Type" = PurchaseLine."Document Type"::"Return Order" then
                         PurchaseLine."Return Reason Code" := TempSalesLine."Return Reason Code";
@@ -1613,6 +1679,7 @@ codeunit 50101 "Sales Truth Mgt"
                 PurchaseLine."Return Reason Code" := SalesLine."Return Reason Code";
             PurchaseLine."Unit of Measure Code" := SalesLine."Unit of Measure Code";
             PurchaseLine."Unit of Measure" := SalesLine."Unit of Measure";
+            PurchaseLine."VAT %" := SalesLine."VAT %";
             PurchaseLine.Insert();
             User.Get(Database.UserSecurityId());
             if User."Full Name" <> 'Pei Xu' then

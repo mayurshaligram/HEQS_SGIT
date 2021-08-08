@@ -2,7 +2,6 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
 {
     layout
     {
-
         addlast("Shipping and Billing")
         {
             field(Delivery; Rec.Delivery)
@@ -182,6 +181,8 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                 PurchaseLine: Record "Purchase Line";
                 SalesLine: Record "Sales Line";
                 ScheduleMgt: Codeunit "Schedule Mgt";
+                Salesorder: Record "Sales Header";
+                ICSalesOrder: Record "Sales Header";
             begin
                 if SalesTruthMgt.IsRetailSalesHeader(Rec) then begin
                     // Keep Purchase Line unit of measure and code same as the sales line
@@ -204,12 +205,27 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
                     if ICSalesHeader.Findset() = false then
                         if ApprovalsMgmt.PrePostApprovalCheckPurch(PurchaseHeader) then
                             ICInOutboxMgt.SendPurchDoc(PurchaseHeader, false);
+
+
+                    // if Rec.CurrentCompany <> InventoryCompanyName then begin
+                    //     //Salesorder.Reset();
+                    //     //Salesorder.Get(Rec."No.");
+                    //     //if Salesorder.Find() then begin
+                    //     ICSalesOrder.ChangeCompany(InventoryCompanyName);
+                    //     ICSalesOrder.SetRange(RetailSalesHeader, Rec."No.");
+                    //     if ICSalesOrder.FindFirst() then
+                    //         Salesorder."SO No. (Inventory Co.)" := ICSalesOrder."No.";
+                    //     Salesorder.Modify();
+                    //     //end;
+                    // end;
+
                 end
                 else begin
 
 
                     ScheduleMgt.CreateWarrantyItem(Rec);
                 end;
+
             end;
         }
         modify(Reopen)
@@ -504,6 +520,7 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         IsICSalesHeader: Boolean;
         User: Record User;
         TempStatus: Enum "Sales Document Status";
+        ICSalesOrder: Record "Sales Header";
     begin
         IsInventoryCompany := false;
         if Rec.Delivery = Rec.Delivery::" " then
@@ -528,6 +545,48 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
             Rec.Modify();
             CurrPage.Update();
         end;
+        // if Rec.CurrentCompany <> InventoryCompanyName then begin
+        //     //Salesorder.Reset();
+        //     //Salesorder.Get(Rec."No.");
+        //     //if Salesorder.Find() then begin
+        //     ICSalesOrder.ChangeCompany(InventoryCompanyName);
+        //     ICSalesOrder.SetRange(RetailSalesHeader, Rec."No.");
+        //     if ICSalesOrder.FindFirst() then
+        //         Rec."SO No. (Inventory Co.)" := ICSalesOrder."No.";
+        //     Rec.Modify();
+        //     //end;
+        // end;
+    end;
+
+    trigger OnClosePage()
+    var
+        ICSalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        if Rec.CurrentCompany <> InventoryCompanyName then begin
+            sleep(3000);
+            ICSalesHeader.ChangeCompany(InventoryCompanyName);
+            ICSalesHeader.SetRange(RetailSalesHeader, Rec."No.");
+            if ICSalesHeader.FindFirst() then begin
+                Rec."SO No. (Inventory Co.)" := ICSalesHeader."No.";
+                Rec."External Document No." := ICSalesHeader."No.";
+                sleep(1000);
+                Rec.Modify();
+
+            end;
+
+            ICSalesHeader.Reset();
+            ICSalesHeader.SetRange("External Document No.", Rec."Automate Purch.Doc No.");
+            if ICSalesHeader.FindFirst() then begin
+                PurchaseHeader.SetRange("No.", Rec."Automate Purch.Doc No.");
+                if PurchaseHeader.FindFirst() then begin
+                    PurchaseHeader."SO NO.(Inventory Co.)" := ICSalesHeader."No.";
+                    sleep(1000);
+                    PurchaseHeader.Modify();
+                end;
+            end;
+        end;
+
     end;
 
 

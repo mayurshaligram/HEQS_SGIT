@@ -13,6 +13,19 @@ pageextension 50112 "Purchase Order List_Ext" extends "Purchase Order List"
             {
                 ApplicationArea = Basic, Suite;
             }
+            field("Sales Order Ref"; Rec."Sales Order Ref")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Sale Order No.';
+                Editable = false;
+
+            }
+            field("SO NO.(Inventory Co.)"; Rec."SO NO.(Inventory Co.)")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'SO NO.(Inventory Co.)';
+                Editable = false;
+            }
         }
     }
     trigger OnOpenPage();

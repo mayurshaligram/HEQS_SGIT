@@ -22,6 +22,7 @@ page 50140 PostingDateChange
                 {
                     ApplicationArea = All;
                     Caption = 'Posting Date';
+                    Editable = true;
                 }
             }
         }

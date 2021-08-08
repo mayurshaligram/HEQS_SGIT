@@ -30,6 +30,34 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 ToolTip = 'Specifies the number of the automated generated purchorder No';
                 Visible = Not IsInventoryCompany;
             }
+            field("PO NO"; Rec."Automate Purch.Doc No.")
+            {
+                Caption = 'PO No.';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated purchorder No';
+                Visible = Not IsInventoryCompany;
+            }
+            field("SO No. (Inventory Co.)"; Rec."SO No. (Inventory Co.)")
+            {
+                Caption = 'SO No. (Inventory Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated SO No. (Inventory Co.)"';
+                Visible = Not IsInventoryCompany;
+            }
+            field("SO No. (Original Co.)"; Rec."RetailSalesHeader")
+            {
+                Caption = 'SO No. (Original Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated SO No. (Original Co.)';
+                Visible = IsInventoryCompany;
+            }
+            field("PO No. (Original Co.)"; Rec."External Document No.")
+            {
+                Caption = 'PO No. (Original Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated PO No. (Original Co.)';
+                Visible = IsInventoryCompany;
+            }
         }
         addafter(Status)
         {
@@ -125,16 +153,19 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     Postingdate: Date;
                 begin
                     CurrPage.SetSelectionFilter(SalesHeader);
-                    // Clear(PostingdateChange);
-                    // PostingdateChange.LookupMode := true;
-                    // PostingdateChange.Editable := true;
+                    Clear(PostingdateChange);
+                    PostingdateChange.LookupMode := true;
+                    PostingdateChange.Editable := true;
+                    if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then
+                        Postingdate := SalesHeader."Posting Date";
                     if SalesHeader.FindSet() then
                         repeat
-                            //if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then begin
-                            //  Postingdate := SalesHeader."Posting Date";
+                            SalesHeader."Posting Date" := Postingdate;
+                            SalesHeader.Modify();
+                            Sleep(1000);
                             SalesTruthMgt.AutoPost(SalesHeader);
-                        //end
                         until SalesHeader.Next() = 0;
+                    //end;
                 end;
             }
         }
@@ -221,6 +252,8 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         XYZ: record 7320;
         IsScheduleComplete: Enum "Schedule Status";
         PostingDateChange: Date;
+        syz: page 50111;
+
 
 
     //IsPostingDate: Page PostingDateChange;

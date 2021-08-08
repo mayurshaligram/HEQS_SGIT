@@ -139,6 +139,31 @@ tableextension 50120 PostedSalesInvoiceExt extends "Sales Invoice Header"
             Description = 'TripSequence';
             Editable = true;
         }
+        field(50108; "Posted PI No"; Code[40])
+        {
+            Caption = 'Posted PI NO.';
+            Description = 'Posted PI NO.';
+            Editable = true;
+        }
+        field(50107; "Posted SI No (Inventory CO.)"; Code[40])
+        {
+            Caption = 'Posted SI No (Inventory CO.)';
+            Description = 'Posted SI No (Inventory CO.)';
+            Editable = true;
+        }
+        field(50106; "Posted PI No(Original Co.)"; Code[40])
+        {
+            Caption = 'Posted PI NO.';
+            Description = 'Posted PI NO.';
+            Editable = true;
+        }
+        field(50105; "Posted SI No (Original CO.)"; Code[40])
+        {
+            Caption = 'Posted SI No (Inventory CO.)';
+            Description = 'Posted SI No (Inventory CO.)';
+            Editable = true;
+        }
+
     }
 
     var

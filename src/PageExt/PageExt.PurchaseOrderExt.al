@@ -15,6 +15,14 @@ pageextension 50102 "Purchase Order_Ext" extends "Purchase Order"
                     MultiLine = true;
                     ShowCaption = false;
                 }
+                field("Gen. Bus. Posting Group"; Rec."Gen. Bus. Posting Group")
+                {
+                    Editable = true;
+                    ApplicationArea = Basic, Suite;
+                    Importance = Additional;
+                    MultiLine = true;
+                    ShowCaption = false;
+                }
             }
         }
     }

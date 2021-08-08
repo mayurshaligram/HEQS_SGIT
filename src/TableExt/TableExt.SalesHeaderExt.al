@@ -200,6 +200,14 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
             ObsoleteState = Removed;
             ObsoleteReason = 'Created for testing purpose now not in use';
         }
+        field(50103; "SO No. (Inventory Co.)"; Code[20])
+        {
+            Caption = 'SO No. (Inventory Co.)';
+            Description = 'Indicate the No. of IC Sales Order No';
+            Editable = false;
+            //DataClassification = CustomerContent;
+        }
+
     }
     keys
     {
@@ -209,12 +217,12 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
     }
 
     trigger OnAfterInsert();
+    var
+        ICSalesOrder: Record "Sales Header";
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then
                 OnInsertPurchaseHeader(Rec);
-
-
     end;
 
     [IntegrationEvent(false, false)]
@@ -304,6 +312,8 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                         SLrec.SetCurrentKey("Document No.");
                         SLrec.SetRange("Document No.", rec."No.");
                         ISLrec.ChangeCompany(InventoryCompanyName);
+                    // Rec."SO No. (Inventory Co.)" := ICREC."No.";
+                    // Rec.Modify();
                     until (SORecord.next() = 0);
             end;
         end;
