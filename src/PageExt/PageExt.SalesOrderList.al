@@ -30,6 +30,34 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 ToolTip = 'Specifies the number of the automated generated purchorder No';
                 Visible = Not IsInventoryCompany;
             }
+            field("PO NO"; Rec."Automate Purch.Doc No.")
+            {
+                Caption = 'PO No.';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated purchorder No';
+                Visible = Not IsInventoryCompany;
+            }
+            field("SO No. (Inventory Co.)"; Rec."SO No. (Inventory Co.)")
+            {
+                Caption = 'SO No. (Inventory Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated SO No. (Inventory Co.)"';
+                Visible = Not IsInventoryCompany;
+            }
+            field("SO No. (Original Co.)"; Rec."RetailSalesHeader")
+            {
+                Caption = 'SO No. (Original Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated SO No. (Original Co.)';
+                Visible = IsInventoryCompany;
+            }
+            field("PO No. (Original Co.)"; Rec."External Document No.")
+            {
+                Caption = 'PO No. (Original Co.)';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies the number of the automated generated PO No. (Original Co.)';
+                Visible = IsInventoryCompany;
+            }
         }
         addafter(Status)
         {
@@ -39,6 +67,13 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 ApplicationArea = Basic, Suite;
                 ToolTip = 'Specifies whether the Sales Order has been deliveried.';
                 Visible = true;
+            }
+            field("Complete Delivery Status"; Rec."Complete Delivery Status1")
+            {
+                Caption = 'Complete Delivery Status';
+                ApplicationArea = Basic, Suite;
+                ToolTip = 'Specifies whether the Sales Order has been Completely Shipped.';
+                Visible = IsInventoryCompany;
             }
         }
         addafter("Location Code")
@@ -51,7 +86,9 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 Visible = false;
             }
         }
+
     }
+
     actions
     {
 
@@ -112,14 +149,24 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                     // Only the Sales Header associated with more then one inventory item sale line could be pass
                     Shipped: Boolean;
                     SalesHeader: Record "Sales Header";
+                    PostingdateChange: Page PostingDateChange;
+                    Postingdate: Date;
                 begin
                     CurrPage.SetSelectionFilter(SalesHeader);
+                    Clear(PostingdateChange);
+                    PostingdateChange.LookupMode := true;
+                    PostingdateChange.Editable := true;
+                    if Page.RunModal(Page::PostingdateChange, SalesHeader) = Action::LookupOK then
+                        Postingdate := SalesHeader."Posting Date";
                     if SalesHeader.FindSet() then
                         repeat
+                            SalesHeader."Posting Date" := Postingdate;
+                            SalesHeader.Modify();
+                            Sleep(1000);
                             SalesTruthMgt.AutoPost(SalesHeader);
                         until SalesHeader.Next() = 0;
+                    //end;
                 end;
-
             }
         }
         addfirst(processing)
@@ -195,13 +242,24 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
         }
     }
     var
+        IsNull: Text;
         SalesTruthMgt: Codeunit "Sales Truth Mgt";
         IsInventoryCompany: Boolean;
         InventoryCompanyName: Label 'HEQS International Pty Ltd';
         IsPei: Boolean;
         IsFurniture: Boolean;
+        ComplShipped: Record 50100;
+        XYZ: record 7320;
+        IsScheduleComplete: Enum "Schedule Status";
+        PostingDateChange: Date;
+        syz: page 50111;
 
-    trigger OnOpenPage();
+
+
+    //IsPostingDate: Page PostingDateChange;
+
+
+    trigger OnOpenPage()
     var
         SalesHeader: Record "Sales Header";
         SalesPostExt: Codeunit "Sales-Post (Yes/No) Ext";
@@ -250,9 +308,31 @@ pageextension 50101 "Sales Order List" extends "Sales Order List"
                 SalesHeader.Modify();
             until SalesHeader.Next = 0;
 
+        SalesHeader.Reset();
+        if SalesHeader.CurrentCompany = 'HEQS International Pty Ltd' then
+            SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
+        IF SalesHeader.FindSet() then
+            REPEAT
+                ComplShipped.Reset();
+                ComplShipped.SetRange("Subsidiary Source No.", SalesHeader.RetailSalesHeader);
+                IF ComplShipped.FindSet() then
+                    SalesHeader."Complete Delivery Status1" := ComplShipped.Status;
+                SalesHeader.Modify();
+            UNTIL SalesHeader.Next() = 0;
+
+
         Rec.SetView('sorting (Rec."No.") order(descending)');
         Rec.SetRange("No.");
         if Rec.FindFirst() then
             CurrPage.SetRecord(Rec);
+
     end;
+
+    procedure GetPostingDate(var Postingdate: Date)
+    begin
+        PostingDateChange := Postingdate;
+    end;
+
+
+
 }

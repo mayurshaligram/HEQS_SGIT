@@ -12,7 +12,14 @@ tableextension 50101 "Purchase Header_Ext" extends "Purchase Header"
             Caption = 'Automate Sales.Doc No.';
             Editable = false;
         }
+        field(50103; "SO NO.(Inventory Co.)"; Text[20])
+        {
+            Caption = 'SO NO.(Inventory Co.)';
+            Editable = false;
+        }
+
     }
+
 
     var
         SalesTruthMgt: Codeunit "Sales Truth Mgt";

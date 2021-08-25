@@ -18,6 +18,36 @@ pageextension 50123 PostedSalesInvoiceListExt extends "Posted Sales Invoices"
             {
                 ApplicationArea = Basic, Suite;
             }
+            field("Sell-to E-Mail"; Rec."Sell-to E-Mail")
+            {
+                Caption = 'Email';
+                ApplicationArea = Basic, Suite;
+            }
+            field("Posted PI No"; Rec."Posted PI No")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Posted PI No.';
+                Visible = Not IsInventoryCompany;
+            }
+            field("Posted SI No (Inventory CO.)"; Rec."Posted SI No (Inventory CO.)")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Posted SI No (Inventory CO.)';
+                Visible = Not IsInventoryCompany;
+            }
+            field("Posted PI No(Original Co.)"; Rec."Posted PI No(Original Co.)")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Posted PI No(Original Co.)';
+                Visible = IsInventoryCompany;
+            }
+            field("Posted SI No (Original CO.)"; Rec."Posted SI No (Original CO.)")
+            {
+                ApplicationArea = Basic, Suite;
+                Caption = 'Posted SI No (Original CO.)';
+                Visible = IsInventoryCompany;
+            }
+
         }
         addafter("Currency Code")
         {
@@ -30,5 +60,16 @@ pageextension 50123 PostedSalesInvoiceListExt extends "Posted Sales Invoices"
             }
         }
     }
+    var
+        IsInventoryCompany: Boolean;
+        InventoryCompanyName: Label 'HEQS International Pty Ltd';
+
+    trigger OnOpenPage()
+    begin
+        IsInventoryCompany := false;
+        if Rec.CurrentCompany = InventoryCompanyName then begin
+            IsInventoryCompany := true;
+        end;
+    end;
 
 }

@@ -32,16 +32,16 @@ codeunit 50104 "Purch.-Post (Yes/No) Ext"
         HideDialog := false;
         IsHandled := false;
         DefaultOption := 3;
-        OnBeforeConfirmPost(PurchaseHeader, HideDialog, IsHandled, DefaultOption);
-        if IsHandled then
-            exit;
+        // OnBeforeConfirmPost(PurchaseHeader, HideDialog, IsHandled, DefaultOption);
+        // if IsHandled then
+        //     exit;
 
-        if not HideDialog then
-            if not ConfirmPost(PurchaseHeader, DefaultOption) then
-                exit;
+        // if not HideDialog then
+        //     if not ConfirmPost(PurchaseHeader, DefaultOption) then
+        //         exit;
 
-        OnAfterConfirmPost(PurchaseHeader);
-
+        //OnAfterConfirmPost(PurchaseHeader);
+        ConfirmPost(PurchaseHeader, DefaultOption);
         PurchSetup.Get();
         if PurchSetup."Post with Job Queue" then
             PurchPostViaJobQueue.EnqueuePurchDoc(PurchaseHeader)
@@ -50,7 +50,7 @@ codeunit 50104 "Purch.-Post (Yes/No) Ext"
             CODEUNIT.Run(CODEUNIT::"Purch.-Post", PurchaseHeader);
         end;
 
-        OnAfterPost(PurchaseHeader);
+        //OnAfterPost(PurchaseHeader);
     end;
 
     local procedure ConfirmPost(var PurchaseHeader: Record "Purchase Header"; DefaultOption: Integer): Boolean
@@ -58,27 +58,31 @@ codeunit 50104 "Purch.-Post (Yes/No) Ext"
         ConfirmManagement: Codeunit "Confirm Management";
         Selection: Integer;
     begin
-        if DefaultOption > 3 then
-            DefaultOption := 3;
-        if DefaultOption <= 0 then
-            DefaultOption := 1;
+        // if DefaultOption > 3 then
+        //     DefaultOption := 3;
+        // if DefaultOption <= 0 then
+        //     DefaultOption := 1;
 
         case PurchaseHeader."Document Type" of
             PurchaseHeader."Document Type"::Order:
                 begin
-                    Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
+                    PurchaseHeader.Receive := true;
+                    PurchaseHeader.Invoice := true;
+                    //Selection := StrMenu(ReceiveInvoiceQst, DefaultOption);
                     if Selection = 0 then
                         exit(false);
-                    PurchaseHeader.Receive := Selection in [1, 3];
-                    PurchaseHeader.Invoice := Selection in [2, 3];
+                    //PurchaseHeader.Receive := Selection in [1, 3];
+                    //PurchaseHeader.Invoice := Selection in [2, 3];
                 end;
             PurchaseHeader."Document Type"::"Return Order":
                 begin
-                    Selection := StrMenu(ShipInvoiceQst, DefaultOption);
+                    //Selection := StrMenu(ShipInvoiceQst, DefaultOption);
                     if Selection = 0 then
                         exit(false);
-                    PurchaseHeader.Ship := Selection in [1, 3];
-                    PurchaseHeader.Invoice := Selection in [2, 3];
+                    PurchaseHeader.Receive := true;
+                    PurchaseHeader.Invoice := true;
+                    //PurchaseHeader.Ship := Selection in [1, 3];
+                    //PurchaseHeader.Invoice := Selection in [2, 3];
                 end
             else
                 if not ConfirmManagement.GetResponseOrDefault(

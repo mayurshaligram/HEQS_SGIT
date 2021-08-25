@@ -2,6 +2,16 @@ pageextension 50109 "Purchase Lines Subform_Ext" extends "Purchase Order Subform
 {
     layout
     {
+        addafter(Quantity)
+        {
+            field("VAT %"; Rec."VAT %")
+            {
+                ApplicationArea = Basic, Suite;
+                //Caption='Vat %';
+                Visible = true;
+                Editable = true;
+            }
+        }
         modify("No.")
         {
             trigger OnAfterValidate()

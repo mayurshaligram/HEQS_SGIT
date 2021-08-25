@@ -8,6 +8,14 @@ pageextension 50125 "Posted Purchase Invoices_Ext" extends "Posted Purchase Invo
             {
                 ApplicationArea = Basic, Suite;
             }
+            field("Posted SI No."; Rec."Posted SI No.")
+            {
+                ApplicationArea = Basic, Suite;
+            }
+            field("Posted SI No.(Inventory Co.)"; Rec."Posted SI No.(Inventory Co.)")
+            {
+                ApplicationArea = Basic, Suite;
+            }
         }
     }
 }

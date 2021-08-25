@@ -77,7 +77,7 @@ codeunit 50103 "Sales-Post (Yes/No) Ext Inv"
         //     if not ConfirmPost(SalesHeader, DefaultOption) then
         //         exit;
 
-        // OnAfterConfirmPost(SalesHeader);
+        //OnAfterConfirmPost(SalesHeader);
         ConfirmPost(SalesHeader, DefaultOption);
         SalesSetup.Get();
         CheckTaxNoSeries(SalesHeader, SalesSetup);

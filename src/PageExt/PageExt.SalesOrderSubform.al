@@ -62,6 +62,36 @@ pageextension 50118 "Sales Order Subform_Ext" extends "Sales Order Subform"
                 Visible = true;
                 Editable = false;
             }
+            field("Gen. Bus. Posting Group"; Rec."Gen. Bus. Posting Group")
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Gen. Bus. Posting Group';
+                //ToolTip = 'Specifies the Delivery Option';
+                //Importance = Promoted;
+                Visible = true;
+                Editable = true;
+            }
+            field("Sell-to Customer No."; Rec."Sell-to Customer No.")
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Sell-to Customer No.';
+                //ToolTip = 'Specifies the Delivery Option';
+                //Importance = Promoted;
+                Visible = true;
+                Editable = true;
+            }
+            field("Gen. Prod. Posting Group"; Rec."Gen. Prod. Posting Group")
+            {
+                ApplicationArea = Basic, Suite;
+
+                Caption = 'Gen. Prod. Posting Group';
+                //ToolTip = 'Specifies the Delivery Option';
+                //Importance = Promoted;
+                Visible = true;
+                Editable = true;
+            }
 
         }
         modify(Quantity)
