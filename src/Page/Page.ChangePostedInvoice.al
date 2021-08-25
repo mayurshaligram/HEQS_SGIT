@@ -30,6 +30,18 @@ page 50112 ChangePostedSalesInvoice
                     ApplicationArea = All;
                     Editable = true;
                 }
+                field("External Document No."; Rec."External Document No.")
+                {
+                    ApplicationArea = All;
+                    Editable = true;
+                }
+                field("Retail SalesHeader"; Rec."RetailSalesHeader")
+                {
+                    Caption = 'Original SO';
+                    ApplicationArea = All;
+                    Editable = true;
+                }
+
             }
         }
     }

@@ -6,7 +6,7 @@
 			"request": "launch",
 			"type": "al",
 			"environmentType": "Sandbox",
-			"environmentName": "DEV",
+			"environmentName": "UAT",
 
 			// "server": "https://csevm.australiasoutheast.cloudapp.azure.com",
 			// "serverInstance": "BC",

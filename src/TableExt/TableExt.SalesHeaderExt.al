@@ -24,7 +24,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
                 TokenValidate();
             end;
         }
-
         field(50144; TempDate; Date)
         {
             Caption = 'Promised Delivery Date';
@@ -182,6 +181,25 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         {
             Caption = 'Ship-to Contact 2';
         }
+        field(50149; "Complete Delivery Status"; Text[100])
+        {
+            Caption = 'Complete Delivery OLD';
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Created for testing purpose now not in use';
+        }
+        field(50104; "Complete Delivery Status1"; Enum "Schedule Status")
+        {
+            Caption = 'Complete Delivery Status New';
+            DataClassification = CustomerContent;
+
+        }
+        field(50102; "Complete Delivery Status2"; Enum "Schedule Status")
+        {
+            Caption = 'Complete Delivery Status New2';
+            //DataClassification = CustomerContent;
+            ObsoleteState = Removed;
+            ObsoleteReason = 'Created for testing purpose now not in use';
+        }
     }
     keys
     {
@@ -189,11 +207,14 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         {
         }
     }
+
     trigger OnAfterInsert();
     begin
         if Rec.CurrentCompany <> InventoryCompanyName then
             if (Rec."Document Type" = Rec."Document Type"::Order) or (Rec."Document Type" = Rec."Document Type"::"Return Order") then
-                OnInsertPurchaseHeader(Rec)
+                OnInsertPurchaseHeader(Rec);
+
+
     end;
 
     [IntegrationEvent(false, false)]
@@ -947,5 +968,6 @@ tableextension 50100 "Sales Header_Ext" extends "Sales Header"
         SalesLine.Insert();
         // OnAfterCreateSalesLine(SalesLine, TempSalesLine);
     end;
+
 
 }

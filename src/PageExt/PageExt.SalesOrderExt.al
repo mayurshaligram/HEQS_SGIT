@@ -80,6 +80,10 @@ pageextension 50103 "Sales Order_Ext" extends "Sales Order"
         {
             Editable = false;
         }
+        modify(Status)
+        {
+            Editable = false;
+        }
     }
 
     actions
